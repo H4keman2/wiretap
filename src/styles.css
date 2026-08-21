@@ -161,3 +161,17 @@
     color: var(--color-foreground);
   }
 }
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer base {
+  .font-display {
+    font-style: italic;
+    letter-spacing: -0.01em;
+  }
+}
