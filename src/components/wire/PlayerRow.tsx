@@ -1,6 +1,7 @@
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 
 import type { RankedPlayer } from "@/lib/ranking";
+import { teamColor } from "@/lib/team-colors";
 import { cn } from "@/lib/utils";
 
 const TREND_ICON = {
