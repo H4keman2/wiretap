@@ -331,7 +331,7 @@ function Paywall({ format }: { format: "std" | "half" | "ppr" }) {
         </p>
         <Link
           to="/settings"
-          className="mt-4 block w-full rounded bg-action py-2 text-center text-sm font-bold uppercase tracking-tighter text-action-foreground"
+          className="mt-4 block w-full rounded bg-action py-2 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
         >
           Enter license key
         </Link>

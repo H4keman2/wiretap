@@ -59,7 +59,7 @@ function WaiverBrowser() {
           </p>
           <Link
             to="/analyzer"
-            className="block w-full rounded bg-card py-2 text-center text-sm font-bold uppercase tracking-tighter text-foreground"
+            className="block w-full rounded bg-card py-2 text-center text-sm font-bold uppercase tracking-tight text-foreground"
           >
             Analyze my roster
           </Link>
