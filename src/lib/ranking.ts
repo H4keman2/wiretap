@@ -169,7 +169,8 @@ export function scorePlayer(p: PlayerStat, format: ScoringFormat): RankedPlayer 
     projection,
     trendDelta: delta,
     trendLabel: label,
-    score: Math.round(Math.min(10, raw * 10.5) * 10) / 10,
+    // Curve so realistic waiver-tier scores spread across a readable 3-9 band.
+    score: Math.round(Math.min(10, Math.pow(raw, 0.75) * 13) * 10) / 10,
     reason: buildReason(p, format, projection),
   };
 }
