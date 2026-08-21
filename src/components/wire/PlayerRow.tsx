@@ -18,22 +18,30 @@ const TREND_CLASS = {
 
 export function PlayerRow({ player, rank }: { player: RankedPlayer; rank: number }) {
   const TrendIcon = TREND_ICON[player.trendLabel];
-
+  const color = teamColor(player.team);
   const isTopPick = rank === 1;
 
   return (
     <article
       className={cn(
-        "rounded-xl border bg-card shadow-sm",
-        isTopPick ? "border-action shadow-md" : "border-border",
+        "rounded-xl border bg-card shadow-sm transition-shadow",
+        isTopPick ? "shadow-md" : "",
       )}
+      style={{
+        borderColor: color,
+        boxShadow: `0 0 0 1px ${color}40, 0 4px 18px -6px ${color}aa`,
+      }}
     >
       <div className="flex items-stretch">
         <div
           className={cn(
-            "flex w-11 shrink-0 flex-col items-center justify-center border-r border-border py-3",
-            isTopPick ? "bg-action/15" : "bg-secondary/60",
+            "flex w-11 shrink-0 flex-col items-center justify-center border-r py-3",
+            isTopPick ? "" : "",
           )}
+          style={{
+            backgroundColor: `${color}22`,
+            borderRightColor: `${color}55`,
+          }}
         >
           <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
             #{rank}
