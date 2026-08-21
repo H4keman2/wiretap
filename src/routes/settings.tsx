@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Page, SectionLabel } from "@/components/wire/Shell";
 import { useLeagueProfile, usePro } from "@/lib/league-store";
 import type { SlotPosition } from "@/lib/ranking";
+import { cn } from "@/lib/utils";
+import { useTheme } from "@/lib/use-theme";
 import type { LeagueConfig } from "@/lib/weakness";
 
 export const Route = createFileRoute("/settings")({
@@ -34,6 +36,7 @@ const SLOTS: SlotPosition[] = ["QB", "RB", "WR", "TE", "FLEX", "DST", "K"];
 function SettingsPage() {
   const { profile, update } = useLeagueProfile();
   const { isPro, activate, deactivate, checking } = usePro();
+  const { theme, setTheme } = useTheme();
   const [license, setLicense] = useState("");
 
   const setSlot = (slot: keyof LeagueConfig, value: number) =>
@@ -41,6 +44,30 @@ function SettingsPage() {
 
   return (
     <Page format={profile.format}>
+      <section className="space-y-3">
+        <SectionLabel>Appearance</SectionLabel>
+        <div className="flex gap-2 rounded-xl border border-border bg-card p-3">
+          {[
+            { value: "light" as const, label: "Light" },
+            { value: "dark" as const, label: "Dark" },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setTheme(opt.value)}
+              className={cn(
+                "flex-1 rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-tight transition-colors",
+                theme === opt.value
+                  ? "border-action bg-action text-action-foreground"
+                  : "border-border bg-card text-muted-foreground",
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="space-y-3">
         <SectionLabel>League profile</SectionLabel>
         <div className="rounded-xl border border-border bg-card p-4">

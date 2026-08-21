@@ -18,15 +18,33 @@ const TREND_CLASS = {
 export function PlayerRow({ player, rank }: { player: RankedPlayer; rank: number }) {
   const TrendIcon = TREND_ICON[player.trendLabel];
 
+  const isTopPick = rank === 1;
+
   return (
-    <article className="rounded-xl border border-border bg-card shadow-sm">
+    <article
+      className={cn(
+        "rounded-xl border bg-card shadow-sm",
+        isTopPick ? "border-action shadow-md" : "border-border",
+      )}
+    >
       <div className="flex items-stretch">
-        <div className="flex w-11 shrink-0 flex-col items-center justify-center border-r border-border bg-secondary/60 py-3">
+        <div
+          className={cn(
+            "flex w-11 shrink-0 flex-col items-center justify-center border-r border-border py-3",
+            isTopPick ? "bg-action/15" : "bg-secondary/60",
+          )}
+        >
           <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
             #{rank}
           </span>
-          <span className="font-display text-xl leading-none text-turf tabular-nums">
+          <span
+            className="font-display text-xl leading-none text-turf tabular-nums"
+            title="Recommendation strength, scored 0 to 10"
+          >
             {player.score.toFixed(1)}
+            <span className="text-[9px] font-sans font-normal not-italic text-muted-foreground">
+              /10
+            </span>
           </span>
         </div>
 
@@ -40,7 +58,7 @@ export function PlayerRow({ player, rank }: { player: RankedPlayer; rank: number
 
           <dl className="mt-1 grid grid-cols-3 gap-1 border-y border-border/70 py-1 text-[10px] font-bold uppercase tracking-tight">
             <Cell label="Owned" value={`${Math.round(player.ownership)}%`} />
-            <Cell label="Proj" value={`${player.projection.toFixed(1)}`} />
+            <Cell label="Proj" value={`${player.projection.toFixed(1)} pts`} />
             <div>
               <dt className="text-[9px] text-muted-foreground">Trend</dt>
               <dd
@@ -48,11 +66,12 @@ export function PlayerRow({ player, rank }: { player: RankedPlayer; rank: number
                   "mt-0.5 inline-flex items-center gap-1 rounded px-1 py-px",
                   TREND_CLASS[player.trendLabel],
                 )}
+                title="Net roster adds vs. drops across Sleeper leagues in the last 24 hours"
               >
                 <TrendIcon className="size-3" strokeWidth={3} />
                 {player.trendLabel === "stable"
                   ? "Flat"
-                  : `${player.trendDelta > 0 ? "+" : ""}${compact(player.trendDelta)}`}
+                  : `${player.trendDelta > 0 ? "+" : ""}${compact(player.trendDelta)} adds`}
               </dd>
             </div>
           </dl>

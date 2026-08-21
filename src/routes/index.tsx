@@ -53,19 +53,19 @@ function WaiverBrowser() {
           <p className="mb-2 font-display text-2xl uppercase leading-none">
             Want to know which position YOUR team needs?
           </p>
-          <p className="mb-4 max-w-[240px] text-xs text-depth-foreground/60">
+          <p className="mb-4 max-w-[240px] text-xs text-depth-foreground/75">
             Enter your roster once and Wire Tap flags your weakest spots every week, with the math
             shown.
           </p>
           <Link
             to="/analyzer"
-            className="block w-full rounded bg-card py-2 text-center text-sm font-bold uppercase tracking-tight text-foreground"
+            className="block w-full rounded bg-action py-2 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
           >
             Analyze my roster
           </Link>
         </div>
-        <div className="absolute -bottom-5 -right-5 size-32 rounded-full border border-depth-foreground/5" />
-        <div className="absolute -bottom-10 -right-10 size-48 rounded-full border border-depth-foreground/5" />
+        <div className="absolute -bottom-5 -right-5 size-32 rounded-full border border-depth-foreground/15" />
+        <div className="absolute -bottom-10 -right-10 size-48 rounded-full border border-depth-foreground/15" />
       </section>
 
       <section className="space-y-4">
@@ -97,7 +97,11 @@ function WaiverBrowser() {
           </p>
         )}
 
-        {data?.map((player, i) => <PlayerRow key={player.id} player={player} rank={i + 1} />)}
+        <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
+          {data?.map((player, i) => (
+            <PlayerRow key={player.id} player={player} rank={i + 1} />
+          ))}
+        </div>
 
         <ProxyNote />
       </section>

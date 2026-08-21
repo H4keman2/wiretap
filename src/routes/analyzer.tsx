@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Lock, Plus, Trash2 } from "lucide-react";
+import { ChevronRight, Lock, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -119,7 +119,7 @@ function Analyzer() {
                 .join(", then ")}{" "}
               ({result.verdicts[0]?.score})
             </p>
-            <p className="text-xs text-depth-foreground/60">{result.verdicts[0]?.reasons[0]}</p>
+            <p className="text-xs text-depth-foreground/75">{result.verdicts[0]?.reasons[0]}</p>
           </section>
 
           <section className="space-y-2">
@@ -127,7 +127,7 @@ function Analyzer() {
             <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
               {result.verdicts.map((v) => (
                 <details key={v.slot} className="group px-3 py-2.5">
-                  <summary className="flex cursor-pointer items-center justify-between gap-3 list-none">
+                  <summary className="flex cursor-pointer items-center gap-3 list-none">
                     <span className="w-12 font-display text-lg uppercase">{v.slot}</span>
                     <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
                       <span
@@ -142,9 +142,17 @@ function Analyzer() {
                         style={{ width: `${Math.min(100, v.score)}%` }}
                       />
                     </span>
-                    <span className="w-8 text-right text-sm font-black tabular-nums">
+                    <span
+                      className="w-14 text-right text-sm font-black tabular-nums"
+                      title="Positional strength, scored 0 to 100 against replacement level"
+                    >
                       {v.score}
+                      <span className="text-[9px] font-normal text-muted-foreground">/100</span>
                     </span>
+                    <ChevronRight
+                      className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+                      aria-hidden="true"
+                    />
                   </summary>
                   <ul className="mt-2 space-y-1 pl-1 text-[11px] leading-snug text-muted-foreground">
                     {v.reasons.map((r) => (
@@ -172,7 +180,11 @@ function Analyzer() {
                 Nothing under {maxOwnership}% rostered at {result.targetSlot}. Raise the threshold.
               </p>
             ) : (
-              result.recommendations.map((p, i) => <PlayerRow key={p.id} player={p} rank={i + 1} />)
+              <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
+                {result.recommendations.map((p, i) => (
+                  <PlayerRow key={p.id} player={p} rank={i + 1} />
+                ))}
+              </div>
             )}
             <ProxyNote />
           </section>
@@ -341,7 +353,7 @@ function Paywall({ format }: { format: "std" | "half" | "ppr" }) {
       <section className="relative overflow-hidden rounded-xl border-b-4 border-action bg-depth p-5 text-depth-foreground">
         <Lock className="mb-3 size-6 text-action" />
         <p className="font-display text-3xl uppercase leading-none">Team Analyzer is Pro</p>
-        <p className="mt-2 text-xs text-depth-foreground/60">
+        <p className="mt-2 text-xs text-depth-foreground/75">
           Roster entry, positional weakness scoring, and auto-flagged weak spots. Season pass or
           weekly, cancel whenever.
         </p>

@@ -13,7 +13,6 @@ import { Toaster } from "../components/ui/sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
-
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -93,6 +92,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#0f172b" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Wire Tap" },
     ],
     links: [
       {
@@ -106,6 +109,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Barlow+Condensed:ital,wght@1,700&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/icon-192.png" },
+      { rel: "manifest", href: "/manifest.json" },
     ],
   }),
 
@@ -119,6 +124,15 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        {/* Applies the saved theme before first paint so there's no light/dark flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('wiretap.theme.v1');" +
+              "var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;" +
+              "if(d)document.documentElement.classList.add('dark');}catch(e){}",
+          }}
+        />
         <HeadContent />
       </head>
       <body>
@@ -140,4 +154,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-

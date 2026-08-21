@@ -39,8 +39,8 @@ export function BottomNav() {
           key={to}
           to={to}
           activeOptions={{ exact: to === "/" }}
-          className="flex flex-col items-center gap-1 text-muted-foreground"
-          activeProps={{ className: "text-action" }}
+          className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-muted-foreground transition-colors"
+          activeProps={{ className: "bg-action/15 text-action" }}
         >
           <Icon className="size-5" strokeWidth={2.5} />
           <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
@@ -54,7 +54,7 @@ export function Page({ format, children }: { format: ScoringFormat; children: Re
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <AppHeader format={format} />
-      <main className="mx-auto max-w-lg space-y-6 p-4 pb-28">{children}</main>
+      <main className="mx-auto max-w-lg space-y-6 p-4 pb-28 md:max-w-3xl">{children}</main>
       <BottomNav />
     </div>
   );
