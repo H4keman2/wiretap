@@ -39,7 +39,7 @@ const POSITIONS: RealPosition[] = ["QB", "RB", "WR", "TE", "DEF", "K"];
 
 function Analyzer() {
   const { profile, update, loaded } = useLeagueProfile();
-  const { isPro, loaded: proLoaded } = usePro();
+  const { isPro, key, loaded: proLoaded } = usePro();
   const [maxOwnership, setMaxOwnership] = useState(40);
   const [override, setOverride] = useState<SlotPosition | null>(null);
 
@@ -49,7 +49,7 @@ function Analyzer() {
   const starters = useMemo(() => roster.filter((r) => r.starter), [roster]);
 
   useEffect(() => {
-    if (!loaded || !isPro || roster.length === 0) return;
+    if (!loaded || !isPro || !key || roster.length === 0) return;
     analysis.mutate({
       data: {
         format: profile.format,
@@ -57,10 +57,13 @@ function Analyzer() {
         roster,
         maxOwnership,
         overrideSlot: override,
+        licenseKey: key,
       },
     });
+    // Server re-verifies the license on every call regardless of client state,
+    // so a stale or revoked key here simply results in a PRO_REQUIRED error.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loaded, isPro, roster, profile.format, profile.config, maxOwnership, override]);
+  }, [loaded, isPro, key, roster, profile.format, profile.config, maxOwnership, override]);
 
   if (!proLoaded || !loaded) {
     return (
@@ -89,10 +92,7 @@ function Analyzer() {
         </p>
       </section>
 
-      <RosterEditor
-        roster={roster}
-        onChange={(next) => update({ roster: next })}
-      />
+      <RosterEditor roster={roster} onChange={(next) => update({ roster: next })} />
 
       {roster.length === 0 && (
         <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
@@ -112,12 +112,14 @@ function Analyzer() {
               </h2>
             </div>
             <p className="mb-2 font-display text-2xl uppercase leading-none">
-              Weakest: {result.verdicts.slice(0, 2).map((v) => v.slot).join(", then ")} (
-              {result.verdicts[0]?.score})
+              Weakest:{" "}
+              {result.verdicts
+                .slice(0, 2)
+                .map((v) => v.slot)
+                .join(", then ")}{" "}
+              ({result.verdicts[0]?.score})
             </p>
-            <p className="text-xs text-depth-foreground/60">
-              {result.verdicts[0]?.reasons[0]}
-            </p>
+            <p className="text-xs text-depth-foreground/60">{result.verdicts[0]?.reasons[0]}</p>
           </section>
 
           <section className="space-y-2">
@@ -131,12 +133,18 @@ function Analyzer() {
                       <span
                         className={cn(
                           "block h-full rounded-full",
-                          v.score < 45 ? "bg-destructive" : v.score < 70 ? "bg-chart-4" : "bg-action",
+                          v.score < 45
+                            ? "bg-destructive"
+                            : v.score < 70
+                              ? "bg-chart-4"
+                              : "bg-action",
                         )}
                         style={{ width: `${Math.min(100, v.score)}%` }}
                       />
                     </span>
-                    <span className="w-8 text-right text-sm font-black tabular-nums">{v.score}</span>
+                    <span className="w-8 text-right text-sm font-black tabular-nums">
+                      {v.score}
+                    </span>
                   </summary>
                   <ul className="mt-2 space-y-1 pl-1 text-[11px] leading-snug text-muted-foreground">
                     {v.reasons.map((r) => (
@@ -172,6 +180,14 @@ function Analyzer() {
       )}
 
       {analysis.isPending && <Skeleton className="h-28 rounded-xl" />}
+
+      {analysis.isError && (
+        <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-xs text-destructive">
+          {String(analysis.error).includes("PRO_REQUIRED")
+            ? "Your license couldn't be verified. Check your key in League settings."
+            : "Something went wrong running the analysis. Try again in a moment."}
+        </p>
+      )}
     </Page>
   );
 }

@@ -1,12 +1,18 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { requireValidLicense } from "./license.server";
 import {
   rankWaiverPool,
   type RankedPlayer,
   type ScoringFormat,
   type SlotPosition,
 } from "./ranking";
-import { analyzeRoster, type LeagueConfig, type PositionVerdict, type RosterEntry } from "./weakness";
+import {
+  analyzeRoster,
+  type LeagueConfig,
+  type PositionVerdict,
+  type RosterEntry,
+} from "./weakness";
 
 export interface RecommendationInput {
   format: ScoringFormat;
@@ -51,6 +57,8 @@ export interface AnalyzeInput {
   roster: RosterEntry[];
   maxOwnership: number;
   overrideSlot?: SlotPosition | null;
+  /** Required. Verified server-side on every call — this is the real paywall. */
+  licenseKey: string;
 }
 
 export interface AnalyzeOutput {
@@ -62,6 +70,10 @@ export interface AnalyzeOutput {
 export const analyzeTeam = createServerFn({ method: "POST" })
   .inputValidator((data: AnalyzeInput) => data)
   .handler(async ({ data }): Promise<AnalyzeOutput> => {
+    // Gate here, not just in the UI. A direct call to this function with no
+    // or bad license bypassed the paywall entirely before this check existed.
+    await requireValidLicense(data.licenseKey);
+
     const { getPlayerPool } = await import("./sleeper.server");
     const pool = await getPlayerPool();
     const stats = new Map(pool.map((p) => [p.id, p]));

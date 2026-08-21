@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { verifyLicense } from "./license.server";
 import type { ScoringFormat } from "./ranking";
 import { DEFAULT_LEAGUE, type LeagueConfig, type RosterEntry } from "./weakness";
 
@@ -12,6 +13,9 @@ export interface LeagueProfile {
 
 const KEY = "wiretap.league.v1";
 const LICENSE_KEY = "wiretap.license.v1";
+/** How long a verified-Pro result is trusted client-side before re-checking. */
+const PRO_CACHE_MS = 1000 * 60 * 60 * 12;
+const PRO_CACHE_KEY = "wiretap.license.verified-at.v1";
 
 export const EMPTY_PROFILE: LeagueProfile = {
   name: "My League",
@@ -57,33 +61,78 @@ export function useLeagueProfile() {
 }
 
 /**
- * Client-side license gate for the paid Team Analyzer.
- * Placeholder for a Gumroad product-ID verification call.
+ * Pro gate for the Team Analyzer.
+ *
+ * The client only ever caches whether a key has *already been verified* by
+ * the server, and re-checks periodically. The real authority lives in
+ * license.server.ts / requireValidLicense, which `analyzeTeam` calls on
+ * every request — the client state below is UI convenience only and is
+ * never trusted by the server function itself.
  */
-export function isValidLicense(key: string): boolean {
-  return /^WT-[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(key.trim());
-}
-
 export function usePro() {
   const [key, setKey] = useState<string | null>(null);
+  const [isPro, setIsPro] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const recheck = useCallback(async (candidate: string) => {
+    setChecking(true);
+    setError(null);
+    try {
+      const result = await verifyLicense({ data: { licenseKey: candidate } });
+      if (result.valid) {
+        window.localStorage.setItem(LICENSE_KEY, candidate.trim());
+        window.localStorage.setItem(PRO_CACHE_KEY, String(Date.now()));
+        setKey(candidate.trim());
+        setIsPro(true);
+      } else {
+        window.localStorage.removeItem(LICENSE_KEY);
+        window.localStorage.removeItem(PRO_CACHE_KEY);
+        setKey(null);
+        setIsPro(false);
+        setError(result.reason ?? "That key doesn't look right.");
+      }
+      return result.valid;
+    } catch {
+      setError("Could not reach the license server, try again shortly.");
+      return false;
+    } finally {
+      setChecking(false);
+    }
+  }, []);
 
   useEffect(() => {
-    setKey(window.localStorage.getItem(LICENSE_KEY));
-    setLoaded(true);
+    const stored = window.localStorage.getItem(LICENSE_KEY);
+    const verifiedAt = Number(window.localStorage.getItem(PRO_CACHE_KEY) ?? 0);
+    const fresh = Date.now() - verifiedAt < PRO_CACHE_MS;
+
+    if (!stored) {
+      setLoaded(true);
+      return;
+    }
+
+    setKey(stored);
+    if (fresh) {
+      // Trust the cache short-term so we're not hitting Gumroad on every
+      // page load, but every real analyzeTeam call is still re-verified
+      // server-side regardless of this flag.
+      setIsPro(true);
+      setLoaded(true);
+    } else {
+      recheck(stored).finally(() => setLoaded(true));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const activate = useCallback((candidate: string) => {
-    if (!isValidLicense(candidate)) return false;
-    window.localStorage.setItem(LICENSE_KEY, candidate.trim().toUpperCase());
-    setKey(candidate.trim().toUpperCase());
-    return true;
-  }, []);
+  const activate = useCallback((candidate: string) => recheck(candidate), [recheck]);
 
   const deactivate = useCallback(() => {
     window.localStorage.removeItem(LICENSE_KEY);
+    window.localStorage.removeItem(PRO_CACHE_KEY);
     setKey(null);
+    setIsPro(false);
   }, []);
 
-  return { isPro: Boolean(key && isValidLicense(key)), key, activate, deactivate, loaded };
+  return { isPro, key, activate, deactivate, loaded, checking, error };
 }

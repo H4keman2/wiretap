@@ -33,7 +33,7 @@ const SLOTS: SlotPosition[] = ["QB", "RB", "WR", "TE", "FLEX", "DST", "K"];
 
 function SettingsPage() {
   const { profile, update } = useLeagueProfile();
-  const { isPro, activate, deactivate } = usePro();
+  const { isPro, activate, deactivate, checking } = usePro();
   const [license, setLicense] = useState("");
 
   const setSlot = (slot: keyof LeagueConfig, value: number) =>
@@ -44,7 +44,10 @@ function SettingsPage() {
       <section className="space-y-3">
         <SectionLabel>League profile</SectionLabel>
         <div className="rounded-xl border border-border bg-card p-4">
-          <label className="text-xs font-bold uppercase text-muted-foreground" htmlFor="league-name">
+          <label
+            className="text-xs font-bold uppercase text-muted-foreground"
+            htmlFor="league-name"
+          >
             League name
           </label>
           <Input
@@ -87,7 +90,10 @@ function SettingsPage() {
             </div>
           ) : (
             <>
-              <label className="text-xs font-bold uppercase text-muted-foreground" htmlFor="license">
+              <label
+                className="text-xs font-bold uppercase text-muted-foreground"
+                htmlFor="license"
+              >
                 License key
               </label>
               <div className="mt-2 flex gap-2">
@@ -101,16 +107,18 @@ function SettingsPage() {
                 <Button
                   size="sm"
                   className="h-9"
-                  onClick={() => {
-                    if (activate(license)) toast.success("Team Analyzer unlocked");
+                  disabled={checking || !license.trim()}
+                  onClick={async () => {
+                    const ok = await activate(license);
+                    if (ok) toast.success("Team Analyzer unlocked");
                     else toast.error("That key doesn't look right");
                   }}
                 >
-                  Activate
+                  {checking ? "Checking…" : "Activate"}
                 </Button>
               </div>
               <p className="mt-2 text-[11px] text-muted-foreground">
-                Keys look like WT-A1B2-C3D4 and are checked on this device.
+                Your key is verified against your purchase, not just checked for the right shape.
               </p>
             </>
           )}
