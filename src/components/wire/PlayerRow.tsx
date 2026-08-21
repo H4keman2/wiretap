@@ -23,25 +23,16 @@ export function PlayerRow({ player, rank }: { player: RankedPlayer; rank: number
 
   return (
     <article
-      className={cn(
-        "rounded-xl border bg-card shadow-sm transition-shadow",
-        isTopPick ? "shadow-md" : "",
-      )}
+      className="rounded-xl border bg-card shadow-sm transition-shadow"
       style={{
         borderColor: color,
-        boxShadow: `0 0 0 1px ${color}40, 0 4px 18px -6px ${color}aa`,
+        boxShadow: `0 0 0 1px ${color}40, 0 4px 18px -6px ${color}${isTopPick ? "cc" : "aa"}`,
       }}
     >
       <div className="flex items-stretch">
         <div
-          className={cn(
-            "flex w-11 shrink-0 flex-col items-center justify-center border-r py-3",
-            isTopPick ? "" : "",
-          )}
-          style={{
-            backgroundColor: `${color}22`,
-            borderRightColor: `${color}55`,
-          }}
+          className="flex w-11 shrink-0 flex-col items-center justify-center border-r py-3"
+          style={{ backgroundColor: `${color}22`, borderRightColor: `${color}55` }}
         >
           <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
             #{rank}
