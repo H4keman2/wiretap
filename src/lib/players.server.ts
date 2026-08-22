@@ -11,7 +11,7 @@
  * the Sleeper-derived estimate and is flagged as such.
  */
 
-import { fetchEspnPlayers } from "./espn.server";
+import { fetchEspnPlayers, type EspnPlayer } from "./espn.server";
 import type { PlayerStat } from "./ranking";
 import { getSleeperPool } from "./sleeper.server";
 
@@ -35,7 +35,7 @@ function key(name: string, position: string): string {
 async function build(): Promise<PlayerStat[]> {
   const [sleeper, espn] = await Promise.all([
     getSleeperPool(),
-    fetchEspnPlayers().catch(() => []),
+    fetchEspnPlayers().catch((): EspnPlayer[] => []),
   ]);
 
   const espnByKey = new Map(espn.map((p) => [key(p.name, p.position), p]));

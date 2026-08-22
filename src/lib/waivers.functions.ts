@@ -23,7 +23,7 @@ export interface RecommendationInput {
 export const getRecommendations = createServerFn({ method: "GET" })
   .inputValidator((data: RecommendationInput) => data)
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
-    const { getPlayerPool } = await import("./sleeper.server");
+    const { getPlayerPool } = await import("./players.server");
     const pool = await getPlayerPool();
     return rankWaiverPool(pool, {
       format: data.format,
@@ -41,7 +41,7 @@ export const searchPlayers = createServerFn({ method: "GET" })
     }): Promise<Array<{ id: string; name: string; team: string | null; position: string }>> => {
       const q = data.query.trim().toLowerCase();
       if (q.length < 2) return [];
-      const { getPlayerPool } = await import("./sleeper.server");
+      const { getPlayerPool } = await import("./players.server");
       const pool = await getPlayerPool();
       return pool
         .filter((p) => p.name.toLowerCase().includes(q))
@@ -74,7 +74,7 @@ export const analyzeTeam = createServerFn({ method: "POST" })
     // or bad license bypassed the paywall entirely before this check existed.
     await requireValidLicense(data.licenseKey);
 
-    const { getPlayerPool } = await import("./sleeper.server");
+    const { getPlayerPool } = await import("./players.server");
     const pool = await getPlayerPool();
     const stats = new Map(pool.map((p) => [p.id, p]));
 
