@@ -57,7 +57,10 @@ export function PlayerRow({ player, rank }: { player: RankedPlayer; rank: number
           </div>
 
           <dl className="mt-1 grid grid-cols-3 gap-1 border-y border-border/70 py-1 text-[10px] font-bold uppercase tracking-tight">
-            <Cell label="Owned" value={`${Math.round(player.ownership)}%`} />
+            <Cell
+              label={player.ownershipSource === "espn" ? "Owned · ESPN" : "Owned · est"}
+              value={`${Math.round(player.ownership)}%`}
+            />
             <Cell label="Proj" value={`${player.projection.toFixed(1)} pts`} />
             <div>
               <dt className="text-[9px] text-muted-foreground">Trend</dt>

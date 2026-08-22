@@ -34,6 +34,14 @@ export interface PlayerStat {
   /** Rank within the player's own position by overall interest. */
   posRank: number;
   injury: string | null;
+  /** Real % of leagues starting the player (ESPN), when available. */
+  startedPct?: number | null;
+  /** Week-over-week change in rostered % (ESPN). */
+  ownershipChange?: number | null;
+  /** Average draft position (ESPN), when available. */
+  adp?: number | null;
+  /** Where the rostered % came from. */
+  ownershipSource?: "espn" | "estimate";
 }
 
 export interface RankedPlayer extends PlayerStat {

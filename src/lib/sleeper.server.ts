@@ -102,7 +102,7 @@ async function build(): Promise<PlayerStat[]> {
   return pool;
 }
 
-export async function getPlayerPool(): Promise<PlayerStat[]> {
+export async function getSleeperPool(): Promise<PlayerStat[]> {
   if (cache && Date.now() - cache.at < TTL_MS) return cache.pool;
   if (!inflight) {
     inflight = build()
