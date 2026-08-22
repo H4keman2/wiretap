@@ -71,8 +71,9 @@ export function SectionLabel({ children }: { children: ReactNode }) {
 export function ProxyNote() {
   return (
     <p className="px-1 text-[10px] leading-relaxed text-muted-foreground">
-      Rostered % is estimated from league-wide Sleeper interest and add/drop volume. It is a proxy
-      for availability, not a guarantee — your league's actual wire may differ.
+      Rostered % comes from ESPN Fantasy's league-wide ownership data; trending adds/drops, depth
+      chart and injury tags come from Sleeper. Players ESPN doesn't list fall back to an estimate.
+      Your league's actual wire may differ.
     </p>
   );
 }
