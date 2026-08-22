@@ -38,8 +38,14 @@ export const TEAM_COLORS: Record<string, string> = {
   WAS: "#5A1414",
 };
 
-/** Returns a usable brand color or a neutral fallback for FA / unknown teams. */
+/**
+ * Returns a usable brand color for known teams, or a clear on-theme
+ * fallback (the app's `action` accent green) for free agents and unknown
+ * abbreviations — so the glow stays visible instead of dropping to mud.
+ */
+export const FALLBACK_TEAM_COLOR = "#00d2a1"; // matches --action (oklch(0.723 0.192 149.58))
+
 export function teamColor(team: string | null | undefined): string {
-  if (!team) return "#64748b";
-  return TEAM_COLORS[team] ?? "#64748b";
+  if (!team) return FALLBACK_TEAM_COLOR;
+  return TEAM_COLORS[team] ?? FALLBACK_TEAM_COLOR;
 }
