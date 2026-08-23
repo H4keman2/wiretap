@@ -34,7 +34,8 @@ export function PlayerRow({
   const [open, setOpen] = useState(false);
 
   return (
-    <article
+    <>
+      <article
       role="button"
       tabIndex={0}
       aria-label={`Open ${player.name} details`}
@@ -108,6 +109,8 @@ export function PlayerRow({
         </div>
       </div>
 
+      </article>
+
       <PlayerDetail
         player={player}
         rank={rank}
@@ -115,7 +118,7 @@ export function PlayerRow({
         open={open}
         onOpenChange={setOpen}
       />
-    </article>
+    </>
   );
 }
 
