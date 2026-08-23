@@ -7,6 +7,7 @@
  */
 
 import type { RealPosition } from "./ranking";
+import type { SeasonStats } from "./season-stats";
 
 export interface EspnPlayer {
   name: string;
@@ -20,6 +21,8 @@ export interface EspnPlayer {
   percentChange: number;
   adp: number | null;
   injury: string | null;
+  /** Totals from the most recent completed NFL season, when published. */
+  lastSeason: SeasonStats | null;
 }
 
 const POSITION_BY_ID: Record<number, RealPosition> = {
@@ -66,6 +69,14 @@ const TEAM_BY_ID: Record<number, string> = {
   34: "HOU",
 };
 
+interface RawStatEntry {
+  seasonId?: number;
+  scoringPeriodId?: number;
+  statSourceId?: number;
+  statSplitTypeId?: number;
+  stats?: Record<string, number>;
+}
+
 interface RawEspnPlayer {
   fullName?: string;
   active?: boolean;
@@ -78,6 +89,59 @@ interface RawEspnPlayer {
     percentChange?: number;
     averageDraftPosition?: number;
   } | null;
+  stats?: RawStatEntry[] | null;
+}
+
+/** ESPN stat IDs for the season splits we surface. */
+const STAT = {
+  passYds: "3",
+  passTd: "4",
+  interceptions: "20",
+  rushAtt: "23",
+  rushYds: "24",
+  rushTd: "25",
+  recYds: "42",
+  recTd: "43",
+  receptions: "53",
+  targets: "58",
+  games: "210",
+} as const;
+
+function num(map: Record<string, number>, id: string): number {
+  const v = map[id];
+  return typeof v === "number" && Number.isFinite(v) ? Math.round(v * 10) / 10 : 0;
+}
+
+/** Pick the newest real (statSourceId 0) full-season split with games played. */
+function parseLastSeason(rows: RawStatEntry[] | null | undefined): SeasonStats | null {
+  if (!rows) return null;
+  const totals = rows
+    .filter(
+      (r) =>
+        r.statSourceId === 0 &&
+        r.statSplitTypeId === 0 &&
+        r.scoringPeriodId === 0 &&
+        r.stats &&
+        (r.stats[STAT.games] ?? 0) > 0,
+    )
+    .sort((a, b) => (b.seasonId ?? 0) - (a.seasonId ?? 0));
+  const row = totals[0];
+  if (!row?.stats || !row.seasonId) return null;
+  const m = row.stats;
+  return {
+    season: row.seasonId,
+    games: num(m, STAT.games),
+    passYds: num(m, STAT.passYds),
+    passTd: num(m, STAT.passTd),
+    interceptions: num(m, STAT.interceptions),
+    rushAtt: num(m, STAT.rushAtt),
+    rushYds: num(m, STAT.rushYds),
+    rushTd: num(m, STAT.rushTd),
+    targets: num(m, STAT.targets),
+    receptions: num(m, STAT.receptions),
+    recYds: num(m, STAT.recYds),
+    recTd: num(m, STAT.recTd),
+  };
 }
 
 function seasonYear(): number {
@@ -90,12 +154,19 @@ function endpoint(year: number) {
   return `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/players?scoringPeriodId=0&view=kona_player_info`;
 }
 
-const FILTER = JSON.stringify({
-  players: {
-    limit: 1500,
-    sortPercOwned: { sortPriority: 1, sortAsc: false },
-  },
-});
+function filterFor(year: number) {
+  return JSON.stringify({
+    players: {
+      limit: 1500,
+      sortPercOwned: { sortPriority: 1, sortAsc: false },
+      // Ask for real season totals for this season and the previous one; the
+      // newest split with games played becomes the card's "last season" block.
+      filterStatsForExternalIds: { value: [year, year - 1] },
+      filterStatsForSourceIds: { value: [0] },
+      filterStatsForSplitTypeIds: { value: [0] },
+    },
+  });
+}
 
 /** Pull the full ESPN player universe with real ownership data. */
 export async function fetchEspnPlayers(): Promise<EspnPlayer[]> {
@@ -107,7 +178,7 @@ export async function fetchEspnPlayers(): Promise<EspnPlayer[]> {
       const res = await fetch(endpoint(y), {
         headers: {
           accept: "application/json",
-          "x-fantasy-filter": FILTER,
+          "x-fantasy-filter": filterFor(y),
         },
       });
       if (!res.ok) continue;
@@ -135,6 +206,7 @@ export async function fetchEspnPlayers(): Promise<EspnPlayer[]> {
             p.injuryStatus && p.injuryStatus !== "ACTIVE" && p.injuryStatus !== "NORMAL"
               ? p.injuryStatus
               : null,
+          lastSeason: parseLastSeason(p.stats),
         });
       }
       if (out.length > 100) return out;
