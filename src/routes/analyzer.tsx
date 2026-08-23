@@ -182,7 +182,7 @@ function Analyzer() {
             ) : (
               <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
                 {result.recommendations.map((p, i) => (
-                  <PlayerRow key={p.id} player={p} rank={i + 1} />
+                  <PlayerRow key={p.id} player={p} rank={i + 1} format={format} />
                 ))}
               </div>
             )}

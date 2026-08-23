@@ -1,6 +1,8 @@
-import { Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronRight, Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { useState } from "react";
 
-import type { RankedPlayer } from "@/lib/ranking";
+import { PlayerDetail } from "./PlayerDetail";
+import type { RankedPlayer, ScoringFormat } from "@/lib/ranking";
 import { SosSection } from "./SosSection";
 import { teamColor } from "@/lib/team-colors";
 import { cn } from "@/lib/utils";
@@ -17,14 +19,33 @@ const TREND_CLASS = {
   stable: "bg-secondary text-muted-foreground",
 } as const;
 
-export function PlayerRow({ player, rank }: { player: RankedPlayer; rank: number }) {
+export function PlayerRow({
+  player,
+  rank,
+  format = "ppr",
+}: {
+  player: RankedPlayer;
+  rank: number;
+  format?: ScoringFormat;
+}) {
   const TrendIcon = TREND_ICON[player.trendLabel];
   const color = teamColor(player.team);
   const isTopPick = rank === 1;
+  const [open, setOpen] = useState(false);
 
   return (
     <article
-      className="rounded-xl border bg-card shadow-sm transition-shadow"
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${player.name} details`}
+      onClick={() => setOpen(true)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setOpen(true);
+        }
+      }}
+      className="cursor-pointer rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       style={{
         borderColor: color,
         boxShadow: `0 0 0 1px ${color}40, 0 4px 18px -6px ${color}${isTopPick ? "cc" : "aa"}`,
@@ -55,6 +76,7 @@ export function PlayerRow({ player, rank }: { player: RankedPlayer; rank: number
             <span className="shrink-0 text-[10px] font-bold text-muted-foreground">
               {player.team ?? "FA"} • {player.position}
             </span>
+            <ChevronRight className="ml-auto size-4 shrink-0 self-center text-muted-foreground" />
           </div>
 
           <dl className="mt-1 grid grid-cols-3 gap-1 border-y border-border/70 py-1 text-[10px] font-bold uppercase tracking-tight">
@@ -85,6 +107,14 @@ export function PlayerRow({ player, rank }: { player: RankedPlayer; rank: number
           <SosSection sos={player.sos} />
         </div>
       </div>
+
+      <PlayerDetail
+        player={player}
+        rank={rank}
+        format={format}
+        open={open}
+        onOpenChange={setOpen}
+      />
     </article>
   );
 }
