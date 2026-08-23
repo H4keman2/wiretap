@@ -1,6 +1,7 @@
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 
 import type { RankedPlayer } from "@/lib/ranking";
+import { SosSection } from "./SosSection";
 import { teamColor } from "@/lib/team-colors";
 import { cn } from "@/lib/utils";
 
@@ -80,6 +81,8 @@ export function PlayerRow({ player, rank }: { player: RankedPlayer; rank: number
           </dl>
 
           <p className="mt-1.5 text-xs leading-snug text-muted-foreground">{player.reason}</p>
+
+          <SosSection sos={player.sos} />
         </div>
       </div>
     </article>
