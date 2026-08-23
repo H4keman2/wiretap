@@ -17,6 +17,7 @@ export type { SosMatchup, TeamSos };
 
 const TTL_MS = 1000 * 60 * 60 * 12;
 const WINDOW = 4;
+const ESPN_SITE_API = "https://site.web.api.espn.com/apis";
 
 const ABBR_FIX: Record<string, string> = { WSH: "WAS" };
 
@@ -54,10 +55,19 @@ function seasonYear(): number {
 
 async function json<T>(url: string): Promise<T | null> {
   try {
-    const res = await fetch(url, { headers: { accept: "application/json" } });
-    if (!res.ok) return null;
+    const res = await fetch(url, {
+      headers: {
+        accept: "application/json",
+        "user-agent": "WireTap/1.0 (fantasy football schedule analysis)",
+      },
+    });
+    if (!res.ok) {
+      console.error(`[SOS] ESPN request failed (${res.status})`, url);
+      return null;
+    }
     return (await res.json()) as T;
-  } catch {
+  } catch (error) {
+    console.error("[SOS] ESPN request failed", url, error);
     return null;
   }
 }
@@ -66,7 +76,7 @@ async function json<T>(url: string): Promise<T | null> {
 async function defenseStrength(year: number): Promise<Map<string, number>> {
   const out = new Map<string, number>();
   const data = await json<StandingsNode>(
-    `https://site.api.espn.com/apis/v2/sports/football/nfl/standings?season=${year}`,
+    `${ESPN_SITE_API}/v2/sports/football/nfl/standings?season=${year}`,
   );
   if (!data) return out;
 
@@ -92,7 +102,7 @@ async function defenseStrength(year: number): Promise<Map<string, number>> {
 /** Which regular-season week the app should start the SOS window from. */
 async function currentWeek(): Promise<number> {
   const board = await json<ScoreboardResponse>(
-    "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard",
+    `${ESPN_SITE_API}/site/v2/sports/football/nfl/scoreboard`,
   );
   if (board?.season?.type === 2 && board.week?.number) return board.week.number;
   return 1; // pre-season or offseason: look ahead from week 1
@@ -100,7 +110,7 @@ async function currentWeek(): Promise<number> {
 
 async function weekMatchups(year: number, week: number) {
   const board = await json<ScoreboardResponse>(
-    `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${year}&seasontype=2&week=${week}`,
+    `${ESPN_SITE_API}/site/v2/sports/football/nfl/scoreboard?dates=${year}&seasontype=2&week=${week}`,
   );
   const pairs: Array<{ team: string; opponent: string; home: boolean }> = [];
   for (const event of board?.events ?? []) {
@@ -139,12 +149,20 @@ async function build(): Promise<Map<string, TeamSos>> {
   const year = seasonYear();
   const [defense, week] = await Promise.all([defenseStrength(year - 1), currentWeek()]);
 
+  if (defense.size === 0) {
+    throw new Error(`[SOS] No defensive standings returned for ${year - 1}`);
+  }
+
   const values = [...defense.values()];
   const min = Math.min(...values);
   const max = Math.max(...values);
 
   const weeks = Array.from({ length: WINDOW }, (_, i) => week + i).filter((w) => w <= 18);
   const results = await Promise.all(weeks.map((w) => weekMatchups(year, w)));
+
+  if (results.every((pairs) => pairs.length === 0)) {
+    throw new Error(`[SOS] No regular-season matchups returned for ${year}, weeks ${weeks.join(", ")}`);
+  }
 
   const byTeam = new Map<string, SosMatchup[]>();
   results.forEach((pairs, i) => {
@@ -181,7 +199,10 @@ export async function getSosMap(): Promise<Map<string, TeamSos>> {
         if (map.size > 0) cache = { at: Date.now(), map };
         return map;
       })
-      .catch(() => new Map<string, TeamSos>())
+      .catch((error) => {
+        console.error("[SOS] Unable to build schedule ratings", error);
+        return new Map<string, TeamSos>();
+      })
       .finally(() => {
         inflight = null;
       });
