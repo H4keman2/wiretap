@@ -119,7 +119,8 @@ async function weekMatchups(year: number, week: number) {
   for (const event of board?.events ?? []) {
     const competitors = event.competitions?.[0]?.competitors ?? [];
     if (competitors.length !== 2) continue;
-    const [a, b] = competitors;
+    const a = competitors[0]!;
+    const b = competitors[1]!;
     const teamA = norm(a.team?.abbreviation);
     const teamB = norm(b.team?.abbreviation);
     if (!teamA || !teamB) continue;
@@ -160,7 +161,7 @@ async function build(): Promise<Map<string, TeamSos>> {
 
   const byTeam = new Map<string, SosMatchup[]>();
   results.forEach((pairs, i) => {
-    const w = weeks[i];
+    const w = weeks[i]!;
     for (const pair of pairs) {
       const allowed = defense.get(pair.opponent);
       const difficulty = allowed == null ? 5 : toDifficulty(allowed, min, max);
