@@ -5,6 +5,8 @@
  * independently once real usage data comes in.
  */
 
+import type { TeamSos } from "./sos";
+
 export type ScoringFormat = "std" | "half" | "ppr";
 
 export type SlotPosition = "QB" | "RB" | "WR" | "TE" | "FLEX" | "DST" | "K";
@@ -42,6 +44,8 @@ export interface PlayerStat {
   adp?: number | null;
   /** Where the rostered % came from. */
   ownershipSource?: "espn" | "estimate";
+  /** Upcoming strength of schedule for the player's NFL team. */
+  sos?: TeamSos | null;
 }
 
 export interface RankedPlayer extends PlayerStat {
