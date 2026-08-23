@@ -5,6 +5,7 @@
  * independently once real usage data comes in.
  */
 
+import type { SeasonStats } from "./season-stats";
 import type { TeamSos } from "./sos";
 
 export type ScoringFormat = "std" | "half" | "ppr";
@@ -46,6 +47,8 @@ export interface PlayerStat {
   ownershipSource?: "espn" | "estimate";
   /** Upcoming strength of schedule for the player's NFL team. */
   sos?: TeamSos | null;
+  /** Most recent completed season's production (ESPN), when available. */
+  lastSeason?: SeasonStats | null;
 }
 
 export interface RankedPlayer extends PlayerStat {

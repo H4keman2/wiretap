@@ -54,6 +54,7 @@ async function build(): Promise<PlayerStat[]> {
       ownershipChange: match.percentChange,
       adp: match.adp,
       injury: p.injury ?? match.injury,
+      lastSeason: match.lastSeason,
       ownershipSource: "espn" as const,
     };
   });
