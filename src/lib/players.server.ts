@@ -14,6 +14,7 @@
 import { fetchEspnPlayers, type EspnPlayer } from "./espn.server";
 import type { PlayerStat } from "./ranking";
 import { getSleeperPool } from "./sleeper.server";
+import { getSosMap } from "./sos.server";
 
 const TTL_MS = 1000 * 60 * 60 * 6;
 
@@ -33,18 +34,21 @@ function key(name: string, position: string): string {
 }
 
 async function build(): Promise<PlayerStat[]> {
-  const [sleeper, espn] = await Promise.all([
+  const [sleeper, espn, sos] = await Promise.all([
     getSleeperPool(),
     fetchEspnPlayers().catch((): EspnPlayer[] => []),
+    getSosMap(),
   ]);
 
   const espnByKey = new Map(espn.map((p) => [key(p.name, p.position), p]));
 
   const merged: PlayerStat[] = sleeper.map((p) => {
+    const schedule = p.team ? sos.get(p.team) ?? null : null;
     const match = espnByKey.get(key(p.name, p.position));
-    if (!match) return { ...p, ownershipSource: "estimate" as const };
+    if (!match) return { ...p, sos: schedule, ownershipSource: "estimate" as const };
     return {
       ...p,
+      sos: schedule,
       ownership: match.percentOwned,
       startedPct: match.percentStarted,
       ownershipChange: match.percentChange,

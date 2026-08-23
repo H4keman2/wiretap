@@ -11,22 +11,9 @@
  * card can show a verdict up front and the matchup list below.
  */
 
-export interface SosMatchup {
-  week: number;
-  opponent: string;
-  home: boolean;
-  /** 0-10, higher = tougher defense to face. */
-  difficulty: number;
-}
+import type { SosMatchup, TeamSos } from "./sos";
 
-export interface TeamSos {
-  team: string;
-  /** 0-10 average difficulty across the upcoming window. */
-  rating: number;
-  grade: "A" | "B" | "C" | "D" | "F";
-  label: "easy" | "favorable" | "neutral" | "tough" | "brutal";
-  matchups: SosMatchup[];
-}
+export type { SosMatchup, TeamSos };
 
 const TTL_MS = 1000 * 60 * 60 * 12;
 const WINDOW = 4;
