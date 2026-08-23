@@ -19,7 +19,20 @@ const LABEL_TEXT: Record<TeamSos["label"], string> = {
 };
 
 export function SosSection({ sos }: { sos: TeamSos | null | undefined }) {
-  if (!sos || sos.matchups.length === 0) return null;
+  if (!sos || sos.matchups.length === 0) {
+    return (
+      <section className="mt-1.5 border-t border-border/70 pt-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <h4 className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+            Strength of schedule
+          </h4>
+          <span className="text-[10px] font-bold uppercase text-muted-foreground">
+            Schedule pending
+          </span>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="mt-1.5 border-t border-border/70 pt-1.5">
