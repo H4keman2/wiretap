@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Page, SectionLabel } from "@/components/wire/Shell";
+import { SosDebugPanel } from "@/components/wire/SosDebugPanel";
 import { useLeagueProfile, usePro } from "@/lib/league-store";
 import type { SlotPosition } from "@/lib/ranking";
 import { cn } from "@/lib/utils";
@@ -151,6 +152,8 @@ function SettingsPage() {
           )}
         </div>
       </section>
+
+      <SosDebugPanel />
     </Page>
   );
 }
