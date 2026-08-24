@@ -6,49 +6,13 @@
  * in the live pool fail to resolve to a team schedule.
  */
 
+import type { ProbeResult, SosDiagnostics, UnmappedPlayer } from "./sos-diagnostics";
+
+export type { ProbeResult, SosDiagnostics, UnmappedPlayer };
+
 const ESPN_SITE_API = "https://site.web.api.espn.com/apis";
 const WINDOW = 4;
 
-export interface ProbeResult {
-  label: string;
-  url: string;
-  status: number | null;
-  ok: boolean;
-  ms: number;
-  note: string;
-}
-
-export interface UnmappedPlayer {
-  id: string;
-  name: string;
-  position: string;
-  team: string | null;
-  reason: "no-nfl-team" | "team-not-in-schedule" | "no-matchups";
-}
-
-export interface SosDiagnostics {
-  generatedAt: string;
-  params: {
-    seasonYear: number;
-    standingsSeason: number;
-    currentWeek: number;
-    weeksRequested: number[];
-    weekSource: "scoreboard" | "fallback";
-  };
-  probes: ProbeResult[];
-  schedule: {
-    teamsWithSos: number;
-    teamsWithMatchups: number;
-    sampleTeams: Array<{ team: string; grade: string; rating: number; matchups: number }>;
-  };
-  pool: {
-    total: number;
-    mapped: number;
-    unmapped: number;
-    unmappedByReason: Record<string, number>;
-    unmappedSample: UnmappedPlayer[];
-  };
-}
 
 function seasonYear(): number {
   const now = new Date();
