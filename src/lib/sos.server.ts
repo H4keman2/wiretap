@@ -11,11 +11,18 @@
  * card can show a verdict up front and the matchup list below.
  */
 
-import type { SosMatchup, TeamSos } from "./sos";
+import type { SosHealth, SosMatchup, TeamSos } from "./sos";
 
-export type { SosMatchup, TeamSos };
+export type { SosHealth, SosMatchup, TeamSos };
 
 const TTL_MS = 1000 * 60 * 60 * 12;
+/**
+ * When coverage is degraded we deliberately do NOT cache for 12h — the next
+ * request past this cooldown re-probes ESPN instead of serving a thin map.
+ */
+const DEGRADED_RETRY_MS = 1000 * 30;
+/** Below this many teams with matchups, coverage counts as degraded. */
+const MIN_TEAMS_WITH_MATCHUPS = 28;
 const WINDOW = 4;
 const ESPN_SITE_API = "https://site.web.api.espn.com/apis";
 
