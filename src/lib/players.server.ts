@@ -14,11 +14,13 @@
 import { fetchEspnPlayers, type EspnPlayer } from "./espn.server";
 import type { PlayerStat } from "./ranking";
 import { getSleeperPool } from "./sleeper.server";
-import { getSosMap } from "./sos.server";
+import { getSosHealth, getSosMap } from "./sos.server";
 
 const TTL_MS = 1000 * 60 * 60 * 6;
+/** Degraded schedule coverage must not be pinned for 6h — rebuild sooner. */
+const DEGRADED_TTL_MS = 1000 * 60;
 
-let cache: { at: number; pool: PlayerStat[] } | null = null;
+let cache: { at: number; pool: PlayerStat[]; sosDegraded: boolean } | null = null;
 let inflight: Promise<PlayerStat[]> | null = null;
 
 const SUFFIX = /\s+(jr|sr|ii|iii|iv|v)\.?$/i;
@@ -77,11 +79,14 @@ async function build(): Promise<PlayerStat[]> {
 }
 
 export async function getPlayerPool(): Promise<PlayerStat[]> {
-  if (cache && Date.now() - cache.at < TTL_MS) return cache.pool;
+  if (cache) {
+    const ttl = cache.sosDegraded ? DEGRADED_TTL_MS : TTL_MS;
+    if (Date.now() - cache.at < ttl) return cache.pool;
+  }
   if (!inflight) {
     inflight = build()
       .then((pool) => {
-        cache = { at: Date.now(), pool };
+        cache = { at: Date.now(), pool, sosDegraded: getSosHealth().degraded };
         return pool;
       })
       .finally(() => {

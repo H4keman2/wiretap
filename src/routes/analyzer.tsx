@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/wire/Controls";
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
+import { SosWarning } from "@/components/wire/SosWarning";
 import { useLeagueProfile, usePro } from "@/lib/league-store";
 import type { RealPosition, SlotPosition } from "@/lib/ranking";
 import { cn } from "@/lib/utils";
@@ -79,6 +80,7 @@ function Analyzer() {
 
   return (
     <Page format={profile.format}>
+      <SosWarning />
       <section className="space-y-3">
         <SectionLabel>Scoring format</SectionLabel>
         <FormatSelector value={profile.format} onChange={(format) => update({ format })} />

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/wire/Controls";
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
+import { SosWarning } from "@/components/wire/SosWarning";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ScoringFormat, SlotPosition } from "@/lib/ranking";
 import { getRecommendations } from "@/lib/waivers.functions";
@@ -42,6 +43,8 @@ function WaiverBrowser() {
 
   return (
     <Page format={format}>
+      <SosWarning />
+
       <section className="relative overflow-hidden rounded-xl border-b-4 border-action bg-depth p-4 text-depth-foreground">
         <div className="relative z-10">
           <div className="mb-1 flex items-center gap-2">
