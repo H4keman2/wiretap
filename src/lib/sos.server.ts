@@ -195,20 +195,58 @@ async function build(): Promise<Map<string, TeamSos>> {
   return out;
 }
 
-let cache: { at: number; map: Map<string, TeamSos> } | null = null;
+let cache: { at: number; map: Map<string, TeamSos>; degraded: boolean } | null = null;
 let inflight: Promise<Map<string, TeamSos>> | null = null;
+let lastError: string | null = null;
+
+function coverage(map: Map<string, TeamSos>): number {
+  return [...map.values()].filter((t) => t.matchups.length > 0).length;
+}
+
+function cacheIsFresh(): boolean {
+  if (!cache) return false;
+  const ttl = cache.degraded ? DEGRADED_RETRY_MS : TTL_MS;
+  return Date.now() - cache.at < ttl;
+}
+
+/** Coverage snapshot for the debug panel and the in-app warning banner. */
+export function getSosHealth(): SosHealth {
+  const teamsWithMatchups = cache ? coverage(cache.map) : 0;
+  const degraded = cache ? cache.degraded : true;
+  return {
+    teamsWithMatchups,
+    threshold: MIN_TEAMS_WITH_MATCHUPS,
+    degraded,
+    willReprobe: !cacheIsFresh(),
+    lastProbeAt: cache ? new Date(cache.at).toISOString() : null,
+    lastError,
+  };
+}
 
 export async function getSosMap(): Promise<Map<string, TeamSos>> {
-  if (cache && Date.now() - cache.at < TTL_MS) return cache.map;
+  if (cacheIsFresh()) return cache!.map;
   if (!inflight) {
     inflight = build()
       .then((map) => {
-        if (map.size > 0) cache = { at: Date.now(), map };
+        const teams = coverage(map);
+        const degraded = teams < MIN_TEAMS_WITH_MATCHUPS;
+        if (degraded) {
+          console.warn(
+            `[SOS] Degraded coverage: ${teams}/${MIN_TEAMS_WITH_MATCHUPS} teams with matchups — will re-probe on the next request.`,
+          );
+          lastError = `Only ${teams} of ${MIN_TEAMS_WITH_MATCHUPS} teams resolved upcoming matchups.`;
+        } else {
+          lastError = null;
+        }
+        cache = { at: Date.now(), map, degraded };
         return map;
       })
       .catch((error) => {
         console.error("[SOS] Unable to build schedule ratings", error);
-        return new Map<string, TeamSos>();
+        lastError = error instanceof Error ? error.message : "Schedule build failed.";
+        const map = new Map<string, TeamSos>();
+        cache = { at: Date.now(), map, degraded: true };
+        return map;
       })
       .finally(() => {
         inflight = null;
