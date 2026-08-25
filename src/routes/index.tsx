@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/wire/Controls";
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
+import { SosWarning } from "@/components/wire/SosWarning";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ScoringFormat, SlotPosition } from "@/lib/ranking";
 import { getRecommendations } from "@/lib/waivers.functions";
