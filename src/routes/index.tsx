@@ -43,6 +43,8 @@ function WaiverBrowser() {
 
   return (
     <Page format={format}>
+      <SosWarning />
+
       <section className="relative overflow-hidden rounded-xl border-b-4 border-action bg-depth p-4 text-depth-foreground">
         <div className="relative z-10">
           <div className="mb-1 flex items-center gap-2">
