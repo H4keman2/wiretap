@@ -79,6 +79,7 @@ function Analyzer() {
 
   return (
     <Page format={profile.format}>
+      <SosWarning />
       <section className="space-y-3">
         <SectionLabel>Scoring format</SectionLabel>
         <FormatSelector value={profile.format} onChange={(format) => update({ format })} />
