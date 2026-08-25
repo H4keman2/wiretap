@@ -79,11 +79,14 @@ async function build(): Promise<PlayerStat[]> {
 }
 
 export async function getPlayerPool(): Promise<PlayerStat[]> {
-  if (cache && Date.now() - cache.at < TTL_MS) return cache.pool;
+  if (cache) {
+    const ttl = cache.sosDegraded ? DEGRADED_TTL_MS : TTL_MS;
+    if (Date.now() - cache.at < ttl) return cache.pool;
+  }
   if (!inflight) {
     inflight = build()
       .then((pool) => {
-        cache = { at: Date.now(), pool };
+        cache = { at: Date.now(), pool, sosDegraded: getSosHealth().degraded };
         return pool;
       })
       .finally(() => {
