@@ -56,7 +56,7 @@ function WaiverBrowser() {
           <p className="mb-2 font-display text-2xl uppercase leading-none">
             Want to know which position YOUR team needs?
           </p>
-          <p className="mb-4 max-w-[240px] text-xs text-depth-foreground/75">
+          <p className="mb-5 max-w-prose text-xs leading-relaxed text-depth-foreground/75">
             Enter your roster once and Wire Tap flags your weakest spots every week, with the math
             shown.
           </p>
