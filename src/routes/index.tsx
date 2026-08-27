@@ -67,8 +67,8 @@ function WaiverBrowser() {
             Analyze my roster
           </Link>
         </div>
-        <div className="absolute -bottom-5 -right-5 size-32 rounded-full border border-depth-foreground/15" />
-        <div className="absolute -bottom-10 -right-10 size-48 rounded-full border border-depth-foreground/15" />
+        <div className="pointer-events-none absolute -bottom-5 -right-5 -z-10 size-32 rounded-full border border-depth-foreground/15" />
+        <div className="pointer-events-none absolute -bottom-10 -right-10 -z-10 size-48 rounded-full border border-depth-foreground/15" />
       </section>
 
       <section className="space-y-4">
