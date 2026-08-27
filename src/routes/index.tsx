@@ -45,7 +45,7 @@ function WaiverBrowser() {
     <Page format={format}>
       <SosWarning />
 
-      <section className="relative overflow-hidden rounded-xl border-b-4 border-action bg-depth p-4 text-depth-foreground">
+      <section className="relative isolate overflow-hidden rounded-xl border-b-4 border-action bg-depth p-4 pb-5 text-depth-foreground">
         <div className="relative z-10">
           <div className="mb-1 flex items-center gap-2">
             <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
@@ -56,7 +56,7 @@ function WaiverBrowser() {
           <p className="mb-2 font-display text-2xl uppercase leading-none">
             Want to know which position YOUR team needs?
           </p>
-          <p className="mb-4 max-w-[240px] text-xs text-depth-foreground/75">
+          <p className="mb-5 max-w-prose text-xs leading-relaxed text-depth-foreground/75">
             Enter your roster once and Wire Tap flags your weakest spots every week, with the math
             shown.
           </p>
@@ -67,8 +67,8 @@ function WaiverBrowser() {
             Analyze my roster
           </Link>
         </div>
-        <div className="absolute -bottom-5 -right-5 size-32 rounded-full border border-depth-foreground/15" />
-        <div className="absolute -bottom-10 -right-10 size-48 rounded-full border border-depth-foreground/15" />
+        <div className="pointer-events-none absolute -bottom-5 -right-5 -z-10 size-32 rounded-full border border-depth-foreground/15" />
+        <div className="pointer-events-none absolute -bottom-10 -right-10 -z-10 size-48 rounded-full border border-depth-foreground/15" />
       </section>
 
       <section className="space-y-4">

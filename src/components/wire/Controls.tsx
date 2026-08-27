@@ -40,14 +40,14 @@ export function PositionSelector({
   onChange: (v: SlotPosition) => void;
 }) {
   return (
-    <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+    <div className="flex flex-wrap gap-2">
       {SLOT_POSITIONS.map((p) => (
         <button
           key={p}
           type="button"
           onClick={() => onChange(p)}
           className={cn(
-            "shrink-0 rounded-lg border px-4 py-2 text-xs font-bold transition-colors",
+            "min-w-[3.5rem] flex-1 shrink-0 rounded-lg border px-3 py-2 text-center text-xs font-bold transition-colors",
             value === p
               ? "border-action bg-action text-action-foreground"
               : "border-border bg-card text-muted-foreground",
