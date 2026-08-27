@@ -40,7 +40,7 @@ export function PositionSelector({
   onChange: (v: SlotPosition) => void;
 }) {
   return (
-    <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+    <div className="flex flex-wrap gap-2">
       {SLOT_POSITIONS.map((p) => (
         <button
           key={p}
