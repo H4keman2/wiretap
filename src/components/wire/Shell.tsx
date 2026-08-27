@@ -3,6 +3,7 @@ import { ClipboardList, ListFilter, Settings2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { FORMAT_LABEL, type ScoringFormat } from "@/lib/ranking";
+import { SosStatusIndicator } from "@/components/wire/SosStatusIndicator";
 
 export function AppHeader({ format }: { format: ScoringFormat }) {
   return (
@@ -16,10 +17,13 @@ export function AppHeader({ format }: { format: ScoringFormat }) {
           Wire Tap
         </span>
       </Link>
-      <div className="rounded-full bg-depth-foreground/10 px-3 py-1">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-action">
-          {FORMAT_LABEL[format]}
-        </span>
+      <div className="flex items-center gap-2">
+        <SosStatusIndicator />
+        <div className="rounded-full bg-depth-foreground/10 px-3 py-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-action">
+            {FORMAT_LABEL[format]}
+          </span>
+        </div>
       </div>
     </header>
   );
