@@ -94,9 +94,9 @@ async def test_player_cards_render(page):
         return
 
     count = await cards.count()
-    first = await cards.first.inner_text()
-    has_owned = "Owned" in first
-    has_proj = "Proj" in first
+    first = (await cards.first.inner_text()).lower()
+    has_owned = "owned" in first
+    has_proj = "proj" in first
     has_score = "/10" in first
     check(count >= 1, "at least one player card renders", f"count={count}")
     check(
