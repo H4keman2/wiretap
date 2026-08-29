@@ -126,7 +126,8 @@ async def wait_cards(page, timeout=30_000):
 
 async def set_threshold(page, value: int):
     """Drive the Radix slider to an exact value with End/Home + arrow keys."""
-    thumb = page.locator('[aria-label="Ownership threshold"]')
+    thumb = page.get_by_role("slider", name="Ownership threshold")
+    await thumb.wait_for(state="visible")
     await thumb.focus()
     await page.keyboard.press("Home" if value <= 40 else "End")
     for _ in range(30):
