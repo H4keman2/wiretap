@@ -236,10 +236,11 @@ async def test_position_switch_updates_list(page):
         "WR cards respect the active 40% ownership threshold",
         str(wr_owned),
     )
+    wr_bodies = [(await cards.nth(i).inner_text()) for i in range(await cards.count())]
     check(
-        all("WR" in (n or "").split("details")[0].rsplit(" ", 2)[-2:] or True for n in wr_names),
-        "wr aria-labels captured",
-        str(wr_names[:2]),
+        all("• WR" in body for body in wr_bodies),
+        "every card after the switch is a WR",
+        "; ".join(b.splitlines()[1] if len(b.splitlines()) > 1 else b[:40] for b in wr_bodies[:3]),
     )
 
     # Switch back so later tests start from RB.
