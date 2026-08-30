@@ -215,8 +215,7 @@ async def test_position_switch_updates_list(page):
     rb_names = await card_names(page)
     rb_label = await section_label(page)
     check("RB" in rb_label, "section starts on Top RB targets", rb_label)
-    check(rb_names and all(" RB " in f" {n} " or n.endswith(" RB") for n in rb_names) or True,
-          "rb baseline captured", f"count={len(rb_names)}")
+    check(len(rb_names) >= 1, "rb baseline list is non-empty", f"count={len(rb_names)}")
 
     # Switch to WR: heading and list must change, threshold still applies.
     await page.get_by_role("button", name="WR", exact=True).first.click()
