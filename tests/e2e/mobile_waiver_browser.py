@@ -266,6 +266,7 @@ async def main():
         await test_hero_no_overlap(page)
         await test_position_selector_visible(page)
         await test_player_cards_render(page)
+        await test_position_switch_updates_list(page)
         await test_ownership_threshold_filters(page)
 
         await page.screenshot(path=f"{SHOT_DIR}/waiver-browser-390.png")
