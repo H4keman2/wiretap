@@ -243,6 +243,38 @@ async def test_position_switch_updates_list(page):
         "; ".join(b.splitlines()[1] if len(b.splitlines()) > 1 else b[:40] for b in wr_bodies[:3]),
     )
 
+    # Edge case: FLEX mixes RB/WR/TE — list must change and stay threshold-bound.
+    await page.get_by_role("button", name="FLEX", exact=True).first.click()
+    await wait_cards(page)
+    await page.wait_for_function(cards_ready, timeout=30_000)
+    flex_label = await section_label(page)
+    flex_names = await card_names(page)
+    flex_bodies = [(await cards.nth(i).inner_text()) for i in range(await cards.count())]
+    flex_owned = [await owned_pct(cards.nth(i)) for i in range(await cards.count())]
+    flex_positions = {
+        m.group(1)
+        for body in flex_bodies
+        for m in [re.search(r"•\s*(QB|RB|WR|TE|DST|K)\b", body)]
+        if m
+    }
+
+    check("FLEX" in flex_label, "section label updates to Top FLEX targets", flex_label)
+    check(
+        flex_names != wr_names and len(flex_names) >= 1,
+        "switching WR -> FLEX changes the player list",
+        f"wr={wr_names[:3]} flex={flex_names[:3]}",
+    )
+    check(
+        len(flex_bodies) == len(flex_names) and flex_positions <= {"RB", "WR", "TE"} and len(flex_positions) >= 1,
+        "every FLEX card is an RB, WR or TE",
+        f"positions={sorted(flex_positions)}",
+    )
+    check(
+        all(o is not None and o < 40 for o in flex_owned) and len(flex_owned) >= 1,
+        "FLEX cards respect the active 40% ownership threshold",
+        str(flex_owned),
+    )
+
     # Switch back so later tests start from RB.
     await page.get_by_role("button", name="RB", exact=True).first.click()
     await wait_cards(page)
