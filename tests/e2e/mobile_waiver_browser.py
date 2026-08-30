@@ -198,6 +198,56 @@ async def test_ownership_threshold_filters(page):
     )
 
 
+async def section_label(page) -> str:
+    return (await page.get_by_text(re.compile(r"^Top \w+ targets$")).first.inner_text()).strip()
+
+
+async def test_position_switch_updates_list(page):
+    cards = page.locator('article[aria-label^="Open"]')
+    cards_ready = (
+        "([...document.querySelectorAll('article[aria-label^=\"Open\"] dd')]"
+        "  .some(d => /owned/i.test(d.previousElementSibling?.textContent ?? '')))"
+    )
+
+    # Baseline: RB list at the default 40% threshold.
+    await wait_cards(page)
+    await page.wait_for_function(cards_ready, timeout=30_000)
+    rb_names = await card_names(page)
+    rb_label = await section_label(page)
+    check("RB" in rb_label, "section starts on Top RB targets", rb_label)
+    check(len(rb_names) >= 1, "rb baseline list is non-empty", f"count={len(rb_names)}")
+
+    # Switch to WR: heading and list must change, threshold still applies.
+    await page.get_by_role("button", name="WR", exact=True).first.click()
+    await wait_cards(page)
+    await page.wait_for_function(cards_ready, timeout=30_000)
+    wr_label = await section_label(page)
+    wr_names = await card_names(page)
+    wr_owned = [await owned_pct(cards.nth(i)) for i in range(await cards.count())]
+
+    check("WR" in wr_label, "section label updates to Top WR targets", wr_label)
+    check(
+        wr_names != rb_names and len(wr_names) >= 1,
+        "switching RB -> WR changes the player list",
+        f"rb={rb_names[:3]} wr={wr_names[:3]}",
+    )
+    check(
+        all(o is not None and o < 40 for o in wr_owned) and len(wr_owned) >= 1,
+        "WR cards respect the active 40% ownership threshold",
+        str(wr_owned),
+    )
+    wr_bodies = [(await cards.nth(i).inner_text()) for i in range(await cards.count())]
+    check(
+        all("• WR" in body for body in wr_bodies),
+        "every card after the switch is a WR",
+        "; ".join(b.splitlines()[1] if len(b.splitlines()) > 1 else b[:40] for b in wr_bodies[:3]),
+    )
+
+    # Switch back so later tests start from RB.
+    await page.get_by_role("button", name="RB", exact=True).first.click()
+    await wait_cards(page)
+
+
 async def main():
     os.makedirs(SHOT_DIR, exist_ok=True)
     async with async_playwright() as p:
@@ -216,6 +266,7 @@ async def main():
         await test_hero_no_overlap(page)
         await test_position_selector_visible(page)
         await test_player_cards_render(page)
+        await test_position_switch_updates_list(page)
         await test_ownership_threshold_filters(page)
 
         await page.screenshot(path=f"{SHOT_DIR}/waiver-browser-390.png")
