@@ -199,70 +199,61 @@ async def test_ownership_threshold_filters(page):
 
 
 async def test_empty_state_no_stale_cards(page):
-    """Drive the filter to a setting no player can match; the UI must show the
-    empty state and drop every previously rendered card."""
+    """No slider setting can starve every position, so we force the "no matches"
+    case at the network layer: the recommendations call returns an empty list and
+    the UI must show the empty state with zero stale cards left behind."""
     cards = page.locator('article[aria-label^="Open"]')
 
-    # Start from a populated list so we can prove stale cards get cleared.
+    # Baseline: a populated list, so we can prove the cards actually get cleared.
     await set_threshold(page, 80)
     await wait_cards(page)
     before = await cards.count()
     check(before >= 1, "baseline list is populated before forcing the empty state", f"count={before}")
 
-    # The list shows players owned BELOW the threshold, so the tightest setting
-    # (10%) is the extreme with no matches. Scan positions for one that empties.
-    empty_position = None
-    await set_threshold(page, 10)
-    for label in ["K", "DST", "QB", "TE", "WR", "RB"]:
-        await page.get_by_role("button", name=label, exact=True).first.click()
-        empty_msg = page.get_by_text(
-            re.compile(rf"No {label} options under 10% rostered", re.IGNORECASE)
-        )
-        try:
-            # Wait for the query to settle: either cards or the empty state.
-            await page.wait_for_function(
-                "(sel) => document.querySelectorAll('article[aria-label^=\"Open\"]').length > 0"
-                " || [...document.querySelectorAll('p')].some(p => sel.test(p.textContent))",
-                arg=None,
-                timeout=15_000,
-            ) if False else None
-            await empty_msg.first.wait_for(state="visible", timeout=15_000)
-        except Exception:
-            continue
-        empty_position = label
-        break
-
-    if empty_position is None:
-        check(False, "some position yields no matches at the 10% threshold",
-              "every position still returned players")
-        return
-
-    empty = page.get_by_text(
-        re.compile(rf"No {empty_position} options under 10% rostered", re.IGNORECASE)
+    empty_body = (
+        '{"t":10,"i":0,"p":{"k":["result","error","context"],'
+        '"v":[{"t":9,"i":1,"a":[]},{"t":2,"s":0},{"t":2,"s":0}]},"o":0}'
     )
-    check(await empty.count() >= 1, "empty state copy is shown when nothing matches",
-          f"position={empty_position}")
-    if await empty.count():
-        check(await empty.first.is_visible(), "empty state copy is visible")
-    check(await cards.count() == 0, "no stale player cards remain",
-          f"leftover={await cards.count()}")
-    skeletons = page.locator('[data-slot="skeleton"]')
-    check(await skeletons.count() == 0, "no loading skeletons remain in the empty state",
-          f"skeletons={await skeletons.count()}")
 
-    await page.screenshot(path=f"{SHOT_DIR}/empty-state-390.png")
+    async def serve_empty(route):
+        await route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=empty_body,
+        )
 
-    # Recover: widening the filter must bring cards back.
+    await page.route(
+        lambda url: "/_serverFn/" in url and "d2FpdmVy" in url,  # waivers.functions
+        serve_empty,
+    )
+
+    try:
+        # Any filter change re-issues the (now empty) query.
+        await set_threshold(page, 75)
+        empty = page.get_by_text(re.compile(r"No \w+ options under 75% rostered", re.IGNORECASE))
+        try:
+            await empty.first.wait_for(state="visible", timeout=20_000)
+            shown = True
+        except Exception:
+            shown = False
+        check(shown, "empty state copy is shown when no players match")
+        check(await cards.count() == 0, "no stale player cards remain",
+              f"leftover={await cards.count()}")
+        skeletons = page.locator('[data-slot="skeleton"]')
+        check(await skeletons.count() == 0, "no loading skeletons remain in the empty state",
+              f"skeletons={await skeletons.count()}")
+        await page.screenshot(path=f"{SHOT_DIR}/empty-state-390.png")
+    finally:
+        await page.unroute(lambda url: "/_serverFn/" in url and "d2FpdmVy" in url, serve_empty)
+
+    # Recovery: with live data back, the list repopulates.
     await set_threshold(page, 80)
     try:
         await wait_cards(page)
         recovered = await cards.count()
     except Exception:
         recovered = 0
-    check(recovered >= 1, "widening the threshold recovers the list", f"count={recovered}")
-    await page.get_by_role("button", name="RB", exact=True).first.click()
-    await set_threshold(page, 40)
-
+    check(recovered >= 1, "list recovers once results come back", f"count={recovered}")
 
 
 async def section_label(page) -> str:
