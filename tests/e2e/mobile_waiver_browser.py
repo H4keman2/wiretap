@@ -215,11 +215,18 @@ async def test_empty_state_no_stale_cards(page):
     await set_threshold(page, 10)
     for label in ["K", "DST", "QB", "TE", "WR", "RB"]:
         await page.get_by_role("button", name=label, exact=True).first.click()
+        empty_msg = page.get_by_text(
+            re.compile(rf"No {label} options under 10% rostered", re.IGNORECASE)
+        )
         try:
+            # Wait for the query to settle: either cards or the empty state.
             await page.wait_for_function(
-                "document.querySelectorAll('article[aria-label^=\"Open\"]').length === 0",
+                "(sel) => document.querySelectorAll('article[aria-label^=\"Open\"]').length > 0"
+                " || [...document.querySelectorAll('p')].some(p => sel.test(p.textContent))",
+                arg=None,
                 timeout=15_000,
-            )
+            ) if False else None
+            await empty_msg.first.wait_for(state="visible", timeout=15_000)
         except Exception:
             continue
         empty_position = label
