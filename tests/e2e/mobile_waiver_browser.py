@@ -212,7 +212,7 @@ async def test_empty_state_no_stale_cards(page):
 
     empty_body = (
         '{"t":10,"i":0,"p":{"k":["result","error","context"],'
-        '"v":[{"t":9,"i":1,"a":[]},{"t":2,"s":0},{"t":2,"s":0}]},"o":0}'
+        '"v":[{"t":9,"i":1,"l":0,"a":[]},{"t":2,"s":0},{"t":2,"s":0}]},"o":0}'
     )
 
     async def serve_empty(route):
