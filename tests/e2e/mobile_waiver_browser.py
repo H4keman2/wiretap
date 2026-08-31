@@ -12,6 +12,7 @@ Exits non-zero on the first failed assertion. Screenshots land in
 """
 
 import asyncio
+import json
 import os
 import re
 import sys
@@ -210,16 +211,17 @@ async def test_empty_state_no_stale_cards(page):
     before = await cards.count()
     check(before >= 1, "baseline list is populated before forcing the empty state", f"count={before}")
 
-    empty_body = (
-        '{"t":10,"i":0,"p":{"k":["result","error","context"],'
-        '"v":[{"t":9,"i":1,"l":0,"a":[]},{"t":2,"s":0},{"t":2,"s":0}]},"o":0}'
-    )
-
     async def serve_empty(route):
+        """Pass the real request through, then blank out the result array so the
+        client decodes a valid, empty recommendation list."""
+        resp = await route.fetch()
+        payload = json.loads(await resp.text())
+        try:
+            payload["p"]["v"][0] = {"t": 9, "i": 999, "l": 0, "a": []}
+        except Exception:
+            pass
         await route.fulfill(
-            status=200,
-            content_type="application/json",
-            body=empty_body,
+            status=200, content_type="application/json", body=json.dumps(payload)
         )
 
     await page.route(
