@@ -16,6 +16,7 @@ import json
 import os
 import re
 import sys
+import urllib.parse
 
 from playwright.async_api import async_playwright
 
@@ -200,9 +201,10 @@ async def test_ownership_threshold_filters(page):
 
 
 async def test_empty_state_no_stale_cards(page):
-    """No slider setting can starve every position, so we force the "no matches"
-    case at the network layer: the recommendations call returns an empty list and
-    the UI must show the empty state with zero stale cards left behind."""
+    """Even the tightest slider setting (10%) still matches deep players, so we
+    force the genuine "no matches" case by rewriting the request the UI sends to
+    an unmatchable threshold. The response is real server output for an empty
+    pool: the UI must show the empty state and drop every stale card."""
     cards = page.locator('article[aria-label^="Open"]')
 
     # Baseline: a populated list, so we can prove the cards actually get cleared.
@@ -211,51 +213,45 @@ async def test_empty_state_no_stale_cards(page):
     before = await cards.count()
     check(before >= 1, "baseline list is populated before forcing the empty state", f"count={before}")
 
-    async def serve_empty(route):
-        """Pass the real request through, then blank out the result array so the
-        client decodes a valid, empty recommendation list."""
-        resp = await route.fetch()
-        payload = json.loads(await resp.text())
-        try:
-            payload["p"]["v"][0] = {"t": 9, "i": 999, "l": 0, "a": []}
-        except Exception:
-            pass
-        await route.fulfill(
-            status=200, content_type="application/json", body=json.dumps(payload)
-        )
+    def is_waivers_call(url: str) -> bool:
+        return "/_serverFn/" in url and "d2Fpdm" in url  # base64 of "…/waivers…"
 
-    await page.route(
-        lambda url: "/_serverFn/" in url and "d2FpdmVy" in url,  # waivers.functions
-        serve_empty,
-    )
+    async def starve(route):
+        url = route.request.url
+        query = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+        payload = json.loads(query["payload"][0])
+        # data.maxOwnership -> 0; `ownership < 0` can never match a player.
+        payload["t"]["p"]["v"][0]["p"]["v"][2]["s"] = 0
+        starved = f"{url.split('?')[0]}?payload={urllib.parse.quote(json.dumps(payload))}"
+        await route.fulfill(response=await route.fetch(url=starved))
 
+    await page.route(is_waivers_call, starve)
     try:
-        # Any filter change re-issues the (now empty) query.
-        await set_threshold(page, 75)
+        await set_threshold(page, 75)  # any change re-issues the (starved) query
         empty = page.get_by_text(re.compile(r"No \w+ options under 75% rostered", re.IGNORECASE))
         try:
             await empty.first.wait_for(state="visible", timeout=20_000)
             shown = True
         except Exception:
             shown = False
-        check(shown, "empty state copy is shown when no players match")
-        check(await cards.count() == 0, "no stale player cards remain",
-              f"leftover={await cards.count()}")
+        check(shown, "empty state copy is shown when no players match the threshold")
+        leftover = await cards.count()
+        check(leftover == 0, "no stale player cards remain", f"leftover={leftover}")
         skeletons = page.locator('[data-slot="skeleton"]')
         check(await skeletons.count() == 0, "no loading skeletons remain in the empty state",
               f"skeletons={await skeletons.count()}")
         await page.screenshot(path=f"{SHOT_DIR}/empty-state-390.png")
     finally:
-        await page.unroute(lambda url: "/_serverFn/" in url and "d2FpdmVy" in url, serve_empty)
+        await page.unroute(is_waivers_call, starve)
 
-    # Recovery: with live data back, the list repopulates.
+    # Recovery: with live results back, the list repopulates.
     await set_threshold(page, 80)
     try:
         await wait_cards(page)
         recovered = await cards.count()
     except Exception:
         recovered = 0
-    check(recovered >= 1, "list recovers once results come back", f"count={recovered}")
+    check(recovered >= 1, "list recovers once matching players come back", f"count={recovered}")
 
 
 async def section_label(page) -> str:
