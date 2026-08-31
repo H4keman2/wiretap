@@ -12,9 +12,11 @@ Exits non-zero on the first failed assertion. Screenshots land in
 """
 
 import asyncio
+import json
 import os
 import re
 import sys
+import urllib.parse
 
 from playwright.async_api import async_playwright
 
@@ -198,6 +200,60 @@ async def test_ownership_threshold_filters(page):
     )
 
 
+async def test_empty_state_no_stale_cards(page):
+    """Even the tightest slider setting (10%) still matches deep players, so we
+    force the genuine "no matches" case by rewriting the request the UI sends to
+    an unmatchable threshold. The response is real server output for an empty
+    pool: the UI must show the empty state and drop every stale card."""
+    cards = page.locator('article[aria-label^="Open"]')
+
+    # Baseline: a populated list, so we can prove the cards actually get cleared.
+    await set_threshold(page, 80)
+    await wait_cards(page)
+    before = await cards.count()
+    check(before >= 1, "baseline list is populated before forcing the empty state", f"count={before}")
+
+    def is_waivers_call(url: str) -> bool:
+        return "/_serverFn/" in url and "d2Fpdm" in url  # base64 of "…/waivers…"
+
+    async def starve(route):
+        url = route.request.url
+        query = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+        payload = json.loads(query["payload"][0])
+        # data.maxOwnership -> 0; `ownership < 0` can never match a player.
+        payload["t"]["p"]["v"][0]["p"]["v"][2]["s"] = 0
+        starved = f"{url.split('?')[0]}?payload={urllib.parse.quote(json.dumps(payload))}"
+        await route.fulfill(response=await route.fetch(url=starved))
+
+    await page.route(is_waivers_call, starve)
+    try:
+        await set_threshold(page, 75)  # any change re-issues the (starved) query
+        empty = page.get_by_text(re.compile(r"No \w+ options under 75% rostered", re.IGNORECASE))
+        try:
+            await empty.first.wait_for(state="visible", timeout=20_000)
+            shown = True
+        except Exception:
+            shown = False
+        check(shown, "empty state copy is shown when no players match the threshold")
+        leftover = await cards.count()
+        check(leftover == 0, "no stale player cards remain", f"leftover={leftover}")
+        skeletons = page.locator('[data-slot="skeleton"]')
+        check(await skeletons.count() == 0, "no loading skeletons remain in the empty state",
+              f"skeletons={await skeletons.count()}")
+        await page.screenshot(path=f"{SHOT_DIR}/empty-state-390.png")
+    finally:
+        await page.unroute(is_waivers_call, starve)
+
+    # Recovery: with live results back, the list repopulates.
+    await set_threshold(page, 80)
+    try:
+        await wait_cards(page)
+        recovered = await cards.count()
+    except Exception:
+        recovered = 0
+    check(recovered >= 1, "list recovers once matching players come back", f"count={recovered}")
+
+
 async def section_label(page) -> str:
     return (await page.get_by_text(re.compile(r"^Top \w+ targets$")).first.inner_text()).strip()
 
@@ -300,6 +356,7 @@ async def main():
         await test_player_cards_render(page)
         await test_position_switch_updates_list(page)
         await test_ownership_threshold_filters(page)
+        await test_empty_state_no_stale_cards(page)
 
         await page.screenshot(path=f"{SHOT_DIR}/waiver-browser-390.png")
         check(not console_errors, "no console errors", "; ".join(console_errors[:3]))
