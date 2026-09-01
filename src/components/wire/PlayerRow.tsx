@@ -83,7 +83,16 @@ export function PlayerRow({
             <span className="shrink-0 text-[10px] font-bold text-muted-foreground">
               {player.team ?? "FA"} • {player.position}
             </span>
+            {isNew && (
+              <span
+                className="shrink-0 rounded bg-action px-1 py-px text-[9px] font-black uppercase tracking-wider text-action-foreground"
+                title="Newly dropped under your ownership threshold"
+              >
+                New
+              </span>
+            )}
             <ChevronRight className="ml-auto size-4 shrink-0 self-center text-muted-foreground" />
+
           </div>
 
           <dl className="mt-1 grid grid-cols-3 gap-1 border-y border-border/70 py-1 text-[10px] font-bold uppercase tracking-tight">
