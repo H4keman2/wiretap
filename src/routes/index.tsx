@@ -3,7 +3,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/wire/Controls";
+import { LIVE_REFRESH_MS, LiveWatchBar, useLiveWatch } from "@/components/wire/LiveWatch";
 import { PlayerRow } from "@/components/wire/PlayerRow";
+
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,12 +36,18 @@ function WaiverBrowser() {
   const [format, setFormat] = useState<ScoringFormat>("ppr");
   const [slot, setSlot] = useState<SlotPosition>("RB");
   const [maxOwnership, setMaxOwnership] = useState(40);
+  const [live, setLive] = useState(false);
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, isFetching } = useQuery({
     queryKey: ["waivers", format, slot, maxOwnership],
     queryFn: () => getRecommendations({ data: { format, slot, maxOwnership } }),
-    staleTime: 1000 * 60 * 10,
+    staleTime: live ? 0 : 1000 * 60 * 10,
+    refetchInterval: live ? LIVE_REFRESH_MS : false,
+    refetchIntervalInBackground: false,
   });
+
+  const { newIds, lastUpdate } = useLiveWatch(data, `${format}|${slot}|${maxOwnership}`, live);
+
 
   return (
     <Page format={format}>
@@ -75,7 +83,15 @@ function WaiverBrowser() {
         <FormatSelector value={format} onChange={setFormat} />
         <PositionSelector value={slot} onChange={setSlot} />
         <OwnershipSlider value={maxOwnership} onChange={setMaxOwnership} />
+        <LiveWatchBar
+          enabled={live}
+          onEnabledChange={setLive}
+          isFetching={isFetching}
+          lastUpdate={lastUpdate}
+          newCount={newIds.size}
+        />
       </section>
+
 
       <section className="space-y-3">
         <SectionLabel>Top {slot} targets</SectionLabel>
@@ -102,7 +118,14 @@ function WaiverBrowser() {
 
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
           {data?.map((player, i) => (
-            <PlayerRow key={player.id} player={player} rank={i + 1} format={format} />
+            <PlayerRow
+              key={player.id}
+              player={player}
+              rank={i + 1}
+              format={format}
+              isNew={newIds.has(player.id)}
+            />
+
           ))}
         </div>
 
