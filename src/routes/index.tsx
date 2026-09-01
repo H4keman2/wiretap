@@ -34,12 +34,18 @@ function WaiverBrowser() {
   const [format, setFormat] = useState<ScoringFormat>("ppr");
   const [slot, setSlot] = useState<SlotPosition>("RB");
   const [maxOwnership, setMaxOwnership] = useState(40);
+  const [live, setLive] = useState(false);
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, isFetching } = useQuery({
     queryKey: ["waivers", format, slot, maxOwnership],
     queryFn: () => getRecommendations({ data: { format, slot, maxOwnership } }),
-    staleTime: 1000 * 60 * 10,
+    staleTime: live ? 0 : 1000 * 60 * 10,
+    refetchInterval: live ? LIVE_REFRESH_MS : false,
+    refetchIntervalInBackground: false,
   });
+
+  const { newIds, lastUpdate } = useLiveWatch(data, `${format}|${slot}|${maxOwnership}`, live);
+
 
   return (
     <Page format={format}>
