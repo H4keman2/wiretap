@@ -83,7 +83,15 @@ function WaiverBrowser() {
         <FormatSelector value={format} onChange={setFormat} />
         <PositionSelector value={slot} onChange={setSlot} />
         <OwnershipSlider value={maxOwnership} onChange={setMaxOwnership} />
+        <LiveWatchBar
+          enabled={live}
+          onEnabledChange={setLive}
+          isFetching={isFetching}
+          lastUpdate={lastUpdate}
+          newCount={newIds.size}
+        />
       </section>
+
 
       <section className="space-y-3">
         <SectionLabel>Top {slot} targets</SectionLabel>
