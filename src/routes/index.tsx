@@ -118,7 +118,14 @@ function WaiverBrowser() {
 
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
           {data?.map((player, i) => (
-            <PlayerRow key={player.id} player={player} rank={i + 1} format={format} />
+            <PlayerRow
+              key={player.id}
+              player={player}
+              rank={i + 1}
+              format={format}
+              isNew={newIds.has(player.id)}
+            />
+
           ))}
         </div>
 
