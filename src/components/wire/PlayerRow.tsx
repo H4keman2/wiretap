@@ -23,10 +23,12 @@ export function PlayerRow({
   player,
   rank,
   format = "ppr",
+  isNew = false,
 }: {
   player: RankedPlayer;
   rank: number;
   format?: ScoringFormat;
+  isNew?: boolean;
 }) {
   const TrendIcon = TREND_ICON[player.trendLabel];
   const color = teamColor(player.team);
@@ -46,12 +48,16 @@ export function PlayerRow({
           setOpen(true);
         }
       }}
-      className="cursor-pointer rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className={cn(
+        "cursor-pointer rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        isNew && "ring-2 ring-action",
+      )}
       style={{
         borderColor: color,
         boxShadow: `0 0 0 1px ${color}40, 0 4px 18px -6px ${color}${isTopPick ? "cc" : "aa"}`,
       }}
     >
+
       <div className="flex items-stretch">
         <div
           className="flex w-11 shrink-0 flex-col items-center justify-center border-r py-3"
