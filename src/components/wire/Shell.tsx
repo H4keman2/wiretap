@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ClipboardList, ListFilter, Settings2 } from "lucide-react";
+import { ClipboardList, ListFilter, Settings2, Star } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { FORMAT_LABEL, type ScoringFormat } from "@/lib/ranking";
@@ -31,6 +31,7 @@ export function AppHeader({ format }: { format: ScoringFormat }) {
 
 const TABS = [
   { to: "/", label: "Waiver", icon: ListFilter },
+  { to: "/watchlist", label: "Saved", icon: Star },
   { to: "/analyzer", label: "Roster", icon: ClipboardList },
   { to: "/settings", label: "Settings", icon: Settings2 },
 ] as const;

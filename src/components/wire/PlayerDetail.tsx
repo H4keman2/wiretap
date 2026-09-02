@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SosSection } from "./SosSection";
+import { WatchButton } from "./WatchButton";
 import type { RankedPlayer, ScoringFormat } from "@/lib/ranking";
 import { FORMAT_LABEL } from "@/lib/ranking";
 import { perGame, seasonFantasyPoints } from "@/lib/season-stats";
@@ -47,9 +48,12 @@ export function PlayerDetail({
           className="space-y-1 border-b p-4 text-left"
           style={{ backgroundColor: `${color}1f`, borderBottomColor: `${color}55` }}
         >
-          <DialogTitle className="font-display text-2xl uppercase leading-none">
-            {player.name}
-          </DialogTitle>
+          <div className="flex items-center gap-2 pr-6">
+            <DialogTitle className="font-display text-2xl uppercase leading-none">
+              {player.name}
+            </DialogTitle>
+            <WatchButton player={player} size="md" />
+          </div>
           <DialogDescription className="text-[11px] font-bold uppercase tracking-wide">
             #{rank} target • {player.team ?? "Free agent"} • {player.position} • {FORMAT_LABEL[format]}
           </DialogDescription>
