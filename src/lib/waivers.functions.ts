@@ -33,6 +33,21 @@ export const getRecommendations = createServerFn({ method: "GET" })
     });
   });
 
+export const getWatchlistPlayers = createServerFn({ method: "GET" })
+  .inputValidator((data: { ids: string[]; format: ScoringFormat }) => data)
+  .handler(async ({ data }): Promise<RankedPlayer[]> => {
+    if (data.ids.length === 0) return [];
+    const { getPlayerPool } = await import("./players.server");
+    const { scorePlayer } = await import("./ranking");
+    const pool = await getPlayerPool();
+    const wanted = new Set(data.ids);
+    const order = new Map(data.ids.map((id, i) => [id, i]));
+    return pool
+      .filter((p) => wanted.has(p.id))
+      .map((p) => scorePlayer(p, data.format))
+      .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+  });
+
 export const searchPlayers = createServerFn({ method: "GET" })
   .inputValidator((data: { query: string }) => data)
   .handler(

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PlayerDetail } from "./PlayerDetail";
 import type { RankedPlayer, ScoringFormat } from "@/lib/ranking";
 import { SosSection } from "./SosSection";
+import { WatchButton } from "./WatchButton";
 import { teamColor } from "@/lib/team-colors";
 import { cn } from "@/lib/utils";
 
@@ -91,7 +92,11 @@ export function PlayerRow({
                 New
               </span>
             )}
-            <ChevronRight className="ml-auto size-4 shrink-0 self-center text-muted-foreground" />
+            <span className="ml-auto flex shrink-0 items-center gap-1 self-center">
+              <WatchButton player={player} />
+              <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+            </span>
+
 
           </div>
 
