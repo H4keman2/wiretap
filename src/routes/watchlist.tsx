@@ -7,6 +7,7 @@ import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ScoringFormat } from "@/lib/ranking";
+import { cn } from "@/lib/utils";
 import { getWatchlistPlayers } from "@/lib/waivers.functions";
 import { useWatchlist } from "@/lib/watchlist-store";
 
