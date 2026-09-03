@@ -176,8 +176,14 @@ function WatchlistPage() {
           </p>
         )}
 
+        {(data?.length ?? 0) > 0 && visible.length === 0 && (
+          <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
+            No saved {posFilter} players. Pick a different position filter.
+          </p>
+        )}
+
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
-          {data?.map((player, i) => (
+          {visible.map((player, i) => (
             <PlayerRow key={player.id} player={player} rank={i + 1} format={format} />
           ))}
         </div>
