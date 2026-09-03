@@ -77,6 +77,58 @@ function WatchlistPage() {
 
       <FormatSelector value={format} onChange={setFormat} />
 
+      {(data?.length ?? 0) > 0 && (
+        <section className="space-y-2 rounded-xl border border-border bg-card p-3">
+          <div className="space-y-1.5">
+            <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              Sort by
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {SORTS.map((s) => (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => setSort(s.key)}
+                  aria-pressed={sort === s.key}
+                  className={cn(
+                    "rounded-lg border px-3 py-1.5 text-[11px] font-bold uppercase tracking-tight transition-colors",
+                    sort === s.key
+                      ? "border-action bg-action text-action-foreground"
+                      : "border-border bg-background text-muted-foreground",
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              Position
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {["ALL", ...positions].map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPosFilter(p)}
+                  aria-pressed={posFilter === p}
+                  className={cn(
+                    "rounded-lg border px-3 py-1.5 text-[11px] font-bold uppercase tracking-tight transition-colors",
+                    posFilter === p
+                      ? "border-action bg-action text-action-foreground"
+                      : "border-border bg-background text-muted-foreground",
+                  )}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionLabel>{entries.length} saved</SectionLabel>
