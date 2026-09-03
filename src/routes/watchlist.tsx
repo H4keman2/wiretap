@@ -32,8 +32,19 @@ export const Route = createFileRoute("/watchlist")({
   component: WatchlistPage,
 });
 
+type SortKey = "saved" | "ownership" | "score" | "trend";
+
+const SORTS: { key: SortKey; label: string }[] = [
+  { key: "saved", label: "Saved" },
+  { key: "ownership", label: "Owned" },
+  { key: "score", label: "Score" },
+  { key: "trend", label: "Trend" },
+];
+
 function WatchlistPage() {
   const [format, setFormat] = useState<ScoringFormat>("ppr");
+  const [sort, setSort] = useState<SortKey>("saved");
+  const [posFilter, setPosFilter] = useState<string>("ALL");
   const { entries, loaded, clear } = useWatchlist();
   const ids = entries.map((e) => e.id);
 
@@ -43,6 +54,16 @@ function WatchlistPage() {
     enabled: loaded && ids.length > 0,
     staleTime: 1000 * 60 * 10,
   });
+
+  const positions = Array.from(new Set((data ?? []).map((p) => p.position)));
+  const visible = (data ?? [])
+    .filter((p) => posFilter === "ALL" || p.position === posFilter)
+    .sort((a, b) => {
+      if (sort === "ownership") return a.ownership - b.ownership;
+      if (sort === "score") return b.score - a.score;
+      if (sort === "trend") return b.trendDelta - a.trendDelta;
+      return 0;
+    });
 
   return (
     <Page format={format}>
