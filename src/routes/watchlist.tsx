@@ -7,6 +7,7 @@ import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ScoringFormat } from "@/lib/ranking";
+import { cn } from "@/lib/utils";
 import { getWatchlistPlayers } from "@/lib/waivers.functions";
 import { useWatchlist } from "@/lib/watchlist-store";
 
@@ -32,8 +33,19 @@ export const Route = createFileRoute("/watchlist")({
   component: WatchlistPage,
 });
 
+type SortKey = "saved" | "ownership" | "score" | "trend";
+
+const SORTS: { key: SortKey; label: string }[] = [
+  { key: "saved", label: "Saved" },
+  { key: "ownership", label: "Owned" },
+  { key: "score", label: "Score" },
+  { key: "trend", label: "Trend" },
+];
+
 function WatchlistPage() {
   const [format, setFormat] = useState<ScoringFormat>("ppr");
+  const [sort, setSort] = useState<SortKey>("saved");
+  const [posFilter, setPosFilter] = useState<string>("ALL");
   const { entries, loaded, clear } = useWatchlist();
   const ids = entries.map((e) => e.id);
 
@@ -43,6 +55,16 @@ function WatchlistPage() {
     enabled: loaded && ids.length > 0,
     staleTime: 1000 * 60 * 10,
   });
+
+  const positions = Array.from(new Set((data ?? []).map((p) => p.position)));
+  const visible = (data ?? [])
+    .filter((p) => posFilter === "ALL" || p.position === posFilter)
+    .sort((a, b) => {
+      if (sort === "ownership") return a.ownership - b.ownership;
+      if (sort === "score") return b.score - a.score;
+      if (sort === "trend") return b.trendDelta - a.trendDelta;
+      return 0;
+    });
 
   return (
     <Page format={format}>
@@ -56,9 +78,65 @@ function WatchlistPage() {
 
       <FormatSelector value={format} onChange={setFormat} />
 
+      {(data?.length ?? 0) > 0 && (
+        <section className="space-y-2 rounded-xl border border-border bg-card p-3">
+          <div className="space-y-1.5">
+            <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              Sort by
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {SORTS.map((s) => (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => setSort(s.key)}
+                  aria-pressed={sort === s.key}
+                  className={cn(
+                    "rounded-lg border px-3 py-1.5 text-[11px] font-bold uppercase tracking-tight transition-colors",
+                    sort === s.key
+                      ? "border-action bg-action text-action-foreground"
+                      : "border-border bg-background text-muted-foreground",
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              Position
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {["ALL", ...positions].map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPosFilter(p)}
+                  aria-pressed={posFilter === p}
+                  className={cn(
+                    "rounded-lg border px-3 py-1.5 text-[11px] font-bold uppercase tracking-tight transition-colors",
+                    posFilter === p
+                      ? "border-action bg-action text-action-foreground"
+                      : "border-border bg-background text-muted-foreground",
+                  )}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <SectionLabel>{entries.length} saved</SectionLabel>
+          <SectionLabel>
+            {posFilter === "ALL"
+              ? `${entries.length} saved`
+              : `${visible.length} of ${entries.length} saved`}
+          </SectionLabel>
           {entries.length > 0 && (
             <button
               type="button"
@@ -98,8 +176,14 @@ function WatchlistPage() {
           </p>
         )}
 
+        {(data?.length ?? 0) > 0 && visible.length === 0 && (
+          <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
+            No saved {posFilter} players. Pick a different position filter.
+          </p>
+        )}
+
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
-          {data?.map((player, i) => (
+          {visible.map((player, i) => (
             <PlayerRow key={player.id} player={player} rank={i + 1} format={format} />
           ))}
         </div>
