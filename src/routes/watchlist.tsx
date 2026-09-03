@@ -132,7 +132,11 @@ function WatchlistPage() {
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <SectionLabel>{entries.length} saved</SectionLabel>
+          <SectionLabel>
+            {posFilter === "ALL"
+              ? `${entries.length} saved`
+              : `${visible.length} of ${entries.length} saved`}
+          </SectionLabel>
           {entries.length > 0 && (
             <button
               type="button"
