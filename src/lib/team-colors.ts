@@ -53,7 +53,7 @@ export function teamColor(team: string | null | undefined): string {
 function hexToRgb(hex: string) {
   const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(hex.trim());
   if (!m) return { r: 0, g: 210, b: 161 };
-  return { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) };
+  return { r: parseInt(m[1]!, 16), g: parseInt(m[2]!, 16), b: parseInt(m[3]!, 16) };
 }
 
 function rgbToHsl(r: number, g: number, b: number) {
