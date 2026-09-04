@@ -5,7 +5,7 @@ import { PlayerDetail } from "./PlayerDetail";
 import type { RankedPlayer, ScoringFormat } from "@/lib/ranking";
 import { SosSection } from "./SosSection";
 import { WatchButton } from "./WatchButton";
-import { teamColor } from "@/lib/team-colors";
+import { teamColor, teamGlowColor } from "@/lib/team-colors";
 import { cn } from "@/lib/utils";
 
 const TREND_ICON = {
