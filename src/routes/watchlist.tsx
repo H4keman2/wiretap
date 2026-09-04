@@ -46,6 +46,7 @@ function WatchlistPage() {
   const [format, setFormat] = useState<ScoringFormat>("ppr");
   const [sort, setSort] = useState<SortKey>("saved");
   const [posFilter, setPosFilter] = useState<string>("ALL");
+  const [search, setSearch] = useState("");
   const { entries, loaded, clear } = useWatchlist();
   const ids = entries.map((e) => e.id);
 
@@ -56,9 +57,17 @@ function WatchlistPage() {
     staleTime: 1000 * 60 * 10,
   });
 
+  const q = search.trim().toLowerCase();
   const positions = Array.from(new Set((data ?? []).map((p) => p.position)));
   const visible = (data ?? [])
     .filter((p) => posFilter === "ALL" || p.position === posFilter)
+    .filter(
+      (p) =>
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        p.position.toLowerCase().includes(q) ||
+        (p.team ?? "").toLowerCase().includes(q),
+    )
     .sort((a, b) => {
       if (sort === "ownership") return a.ownership - b.ownership;
       if (sort === "score") return b.score - a.score;
