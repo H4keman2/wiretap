@@ -194,7 +194,7 @@ function WatchlistPage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionLabel>
-            {posFilter === "ALL"
+            {visible.length === entries.length
               ? `${entries.length} saved`
               : `${visible.length} of ${entries.length} saved`}
           </SectionLabel>
@@ -238,9 +238,22 @@ function WatchlistPage() {
         )}
 
         {(data?.length ?? 0) > 0 && visible.length === 0 && (
-          <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-            No saved {posFilter} players. Pick a different position filter.
-          </p>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-xs text-muted-foreground">
+              {search
+                ? `No saved players match “${search}”. Try a different search or clear it.`
+                : `No saved ${posFilter} players. Pick a different position filter.`}
+            </p>
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="mt-3 block w-full rounded border border-border bg-background py-2 text-center text-sm font-bold uppercase tracking-tight text-foreground"
+              >
+                Clear search
+              </button>
+            )}
+          </div>
         )}
 
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
