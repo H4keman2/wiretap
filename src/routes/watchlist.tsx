@@ -46,6 +46,7 @@ function WatchlistPage() {
   const [format, setFormat] = useState<ScoringFormat>("ppr");
   const [sort, setSort] = useState<SortKey>("saved");
   const [posFilter, setPosFilter] = useState<string>("ALL");
+  const [search, setSearch] = useState("");
   const { entries, loaded, clear } = useWatchlist();
   const ids = entries.map((e) => e.id);
 
@@ -56,9 +57,17 @@ function WatchlistPage() {
     staleTime: 1000 * 60 * 10,
   });
 
+  const q = search.trim().toLowerCase();
   const positions = Array.from(new Set((data ?? []).map((p) => p.position)));
   const visible = (data ?? [])
     .filter((p) => posFilter === "ALL" || p.position === posFilter)
+    .filter(
+      (p) =>
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        p.position.toLowerCase().includes(q) ||
+        (p.team ?? "").toLowerCase().includes(q),
+    )
     .sort((a, b) => {
       if (sort === "ownership") return a.ownership - b.ownership;
       if (sort === "score") return b.score - a.score;
@@ -80,6 +89,58 @@ function WatchlistPage() {
 
       {(data?.length ?? 0) > 0 && (
         <section className="space-y-2 rounded-xl border border-border bg-card p-3">
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </span>
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search saved players by name, team or position…"
+              aria-label="Search saved players"
+              className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-xs font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-action"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
           <div className="space-y-1.5">
             <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
               Sort by
@@ -133,7 +194,7 @@ function WatchlistPage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionLabel>
-            {posFilter === "ALL"
+            {visible.length === entries.length
               ? `${entries.length} saved`
               : `${visible.length} of ${entries.length} saved`}
           </SectionLabel>
@@ -177,9 +238,22 @@ function WatchlistPage() {
         )}
 
         {(data?.length ?? 0) > 0 && visible.length === 0 && (
-          <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-            No saved {posFilter} players. Pick a different position filter.
-          </p>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-xs text-muted-foreground">
+              {search
+                ? `No saved players match “${search}”. Try a different search or clear it.`
+                : `No saved ${posFilter} players. Pick a different position filter.`}
+            </p>
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="mt-3 block w-full rounded border border-border bg-background py-2 text-center text-sm font-bold uppercase tracking-tight text-foreground"
+              >
+                Clear search
+              </button>
+            )}
+          </div>
         )}
 
         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
