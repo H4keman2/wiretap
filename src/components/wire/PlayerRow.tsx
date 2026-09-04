@@ -55,7 +55,7 @@ export function PlayerRow({
       )}
       style={{
         borderColor: color,
-        boxShadow: `0 0 0 1px ${color}40, 0 4px 18px -6px ${color}${isTopPick ? "cc" : "aa"}`,
+        boxShadow: `0 0 0 1px ${teamGlowColor(player.team, 110)}, 0 4px 20px -6px ${teamGlowColor(player.team, isTopPick ? 235 : 185)}`,
       }}
     >
 
