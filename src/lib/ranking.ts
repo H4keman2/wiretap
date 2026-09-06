@@ -258,3 +258,7 @@ export function rankWaiverPool(pool: PlayerStat[], opts: RankOptions): RankedPla
 function clamp01(n: number) {
   return Math.max(0, Math.min(1, n));
 }
+
+function clamp(n: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, n));
+}
