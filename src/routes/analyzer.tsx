@@ -315,34 +315,51 @@ function RosterEditor({
 
       {roster.length > 0 && (
         <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
-          {roster.map((r) => (
-            <div key={r.id} className="flex items-center gap-2 px-3 py-2">
-              <span className="w-9 shrink-0 text-[10px] font-black uppercase text-muted-foreground">
-                {r.position === "DEF" ? "DST" : r.position}
-              </span>
-              <span className="min-w-0 flex-1 truncate text-sm font-bold">{r.name}</span>
-              <button
-                type="button"
-                onClick={() =>
-                  onChange(roster.map((x) => (x.id === r.id ? { ...x, starter: !x.starter } : x)))
-                }
-                className={cn(
-                  "rounded px-2 py-0.5 text-[10px] font-black uppercase tracking-tight",
-                  r.starter ? "bg-action/15 text-turf" : "bg-secondary text-muted-foreground",
+          {roster.map((r) => {
+            // Typed-and-Add-button entries get a synthetic `manual-*` id
+            // instead of a real player id from search, so the scoring engine
+            // can't find their actual stats and silently substitutes a
+            // generic replacement-level baseline for them. That's a fair
+            // fallback, but it was invisible — flag it so a typo (or a name
+            // that just isn't in the pool) doesn't read as a real score.
+            const unmatched = r.id.startsWith("manual-");
+            return (
+              <div key={r.id} className="flex items-center gap-2 px-3 py-2">
+                <span className="w-9 shrink-0 text-[10px] font-black uppercase text-muted-foreground">
+                  {r.position === "DEF" ? "DST" : r.position}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm font-bold">{r.name}</span>
+                {unmatched && (
+                  <span
+                    className="shrink-0 rounded bg-chart-4/20 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-tight text-chart-4"
+                    title="Not matched to a real player record — scored with a generic replacement-level baseline instead of this player's actual stats. Pick a name from the search suggestions above for an accurate score."
+                  >
+                    Unmatched
+                  </span>
                 )}
-              >
-                {r.starter ? "Starter" : "Bench"}
-              </button>
-              <button
-                type="button"
-                aria-label={`Remove ${r.name}`}
-                onClick={() => onChange(roster.filter((x) => x.id !== r.id))}
-                className="text-muted-foreground"
-              >
-                <Trash2 className="size-4" />
-              </button>
-            </div>
-          ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    onChange(roster.map((x) => (x.id === r.id ? { ...x, starter: !x.starter } : x)))
+                  }
+                  className={cn(
+                    "rounded px-2 py-0.5 text-[10px] font-black uppercase tracking-tight",
+                    r.starter ? "bg-action/15 text-turf" : "bg-secondary text-muted-foreground",
+                  )}
+                >
+                  {r.starter ? "Starter" : "Bench"}
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Remove ${r.name}`}
+                  onClick={() => onChange(roster.filter((x) => x.id !== r.id))}
+                  className="text-muted-foreground"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
     </section>
