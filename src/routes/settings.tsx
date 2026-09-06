@@ -4,9 +4,11 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Page, SectionLabel } from "@/components/wire/Shell";
 import { SosDebugPanel } from "@/components/wire/SosDebugPanel";
 import { useLeagueProfile, usePro } from "@/lib/league-store";
+import { useLiveUpdates } from "@/lib/live-updates-store";
 import type { SlotPosition } from "@/lib/ranking";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/use-theme";
@@ -38,6 +40,7 @@ function SettingsPage() {
   const { profile, update } = useLeagueProfile();
   const { isPro, activate, deactivate, checking } = usePro();
   const { theme, setTheme } = useTheme();
+  const { enabled: liveUpdates, setEnabled: setLiveUpdates } = useLiveUpdates();
   const [license, setLicense] = useState("");
 
   const setSlot = (slot: keyof LeagueConfig, value: number) =>
@@ -66,6 +69,24 @@ function SettingsPage() {
               {opt.label}
             </button>
           ))}
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <SectionLabel>Live updates</SectionLabel>
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
+          <div>
+            <p className="text-sm font-bold">Auto-refresh waiver targets</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+              Refreshes the waiver browser every 60s and flags newly available players. On by
+              default.
+            </p>
+          </div>
+          <Switch
+            checked={liveUpdates}
+            onCheckedChange={setLiveUpdates}
+            aria-label="Live updates"
+          />
         </div>
       </section>
 

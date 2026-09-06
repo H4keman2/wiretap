@@ -25,11 +25,12 @@ export const getRecommendations = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
     const { getPlayerPool } = await import("./players.server");
     const pool = await getPlayerPool();
+    // No `limit` here — show every eligible player under the threshold, not
+    // just a top handful. rankWaiverPool still applies its own hard ceiling.
     return rankWaiverPool(pool, {
       format: data.format,
       slot: data.slot,
       maxOwnership: data.maxOwnership,
-      limit: 5,
     });
   });
 
@@ -99,7 +100,11 @@ export const analyzeTeam = createServerFn({ method: "POST" })
     const rosterIds = new Set(data.roster.map((r) => r.id));
     const recommendations = rankWaiverPool(
       pool.filter((p) => !rosterIds.has(p.id)),
-      { format: data.format, slot: targetSlot, maxOwnership: data.maxOwnership, limit: 5 },
+      {
+        format: data.format,
+        slot: targetSlot,
+        maxOwnership: data.maxOwnership,
+      },
     );
 
     return { verdicts, targetSlot, recommendations };

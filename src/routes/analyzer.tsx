@@ -175,14 +175,16 @@ function Analyzer() {
             <OwnershipSlider value={maxOwnership} onChange={setMaxOwnership} />
           </section>
 
-          <section className="space-y-3">
-            <SectionLabel>Targets for {result.targetSlot}</SectionLabel>
+          <section className="space-y-4">
+            <SectionLabel>
+              All {result.targetSlot} targets under {maxOwnership}% owned
+            </SectionLabel>
             {result.recommendations.length === 0 ? (
               <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
                 Nothing under {maxOwnership}% rostered at {result.targetSlot}. Raise the threshold.
               </p>
             ) : (
-              <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
+              <div className="space-y-4">
                 {result.recommendations.map((p, i) => (
                   <PlayerRow key={p.id} player={p} rank={i + 1} format={profile.format} />
                 ))}

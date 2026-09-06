@@ -3,12 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/wire/Controls";
-import { LIVE_REFRESH_MS, LiveWatchBar, useLiveWatch } from "@/components/wire/LiveWatch";
+import { LIVE_REFRESH_MS, LiveStatusNote, useLiveWatch } from "@/components/wire/LiveWatch";
 import { PlayerRow } from "@/components/wire/PlayerRow";
 
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLiveUpdates } from "@/lib/live-updates-store";
 import type { ScoringFormat, SlotPosition } from "@/lib/ranking";
 import { getRecommendations } from "@/lib/waivers.functions";
 
@@ -36,7 +37,7 @@ function WaiverBrowser() {
   const [format, setFormat] = useState<ScoringFormat>("ppr");
   const [slot, setSlot] = useState<SlotPosition>("RB");
   const [maxOwnership, setMaxOwnership] = useState(40);
-  const [live, setLive] = useState(false);
+  const { enabled: live } = useLiveUpdates();
 
   const { data, isPending, isError, isFetching } = useQuery({
     queryKey: ["waivers", format, slot, maxOwnership],
@@ -48,29 +49,28 @@ function WaiverBrowser() {
 
   const { newIds, lastUpdate } = useLiveWatch(data, `${format}|${slot}|${maxOwnership}`, live);
 
-
   return (
     <Page format={format}>
       <SosWarning />
 
-      <section className="relative isolate overflow-hidden rounded-xl border-b-4 border-action bg-depth p-4 pb-5 text-depth-foreground">
+      <section className="relative isolate overflow-hidden rounded-xl border-b-4 border-action bg-depth p-5 pb-6 text-depth-foreground">
         <div className="relative z-10">
-          <div className="mb-1 flex items-center gap-2">
+          <div className="mb-2 flex items-center gap-2">
             <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
               PRO FEATURE
             </span>
             <h2 className="text-sm font-bold uppercase tracking-wide text-action">Team Analyzer</h2>
           </div>
-          <p className="mb-2 font-display text-2xl uppercase leading-none">
+          <p className="mb-3 font-display text-2xl uppercase leading-none">
             Want to know which position YOUR team needs?
           </p>
-          <p className="mb-5 max-w-prose text-xs leading-relaxed text-depth-foreground/75">
+          <p className="mb-6 max-w-prose text-xs leading-relaxed text-depth-foreground/75">
             Enter your roster once and Wire Tap flags your weakest spots every week, with the math
             shown.
           </p>
           <Link
             to="/analyzer"
-            className="block w-full rounded bg-action py-2 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
+            className="block w-full rounded bg-action py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
           >
             Analyze my roster
           </Link>
@@ -79,26 +79,26 @@ function WaiverBrowser() {
         <div className="pointer-events-none absolute -bottom-10 -right-10 -z-10 size-48 rounded-full border border-depth-foreground/15" />
       </section>
 
-      <section className="space-y-4">
+      <section className="space-y-5">
         <FormatSelector value={format} onChange={setFormat} />
         <PositionSelector value={slot} onChange={setSlot} />
         <OwnershipSlider value={maxOwnership} onChange={setMaxOwnership} />
-        <LiveWatchBar
+        <LiveStatusNote
           enabled={live}
-          onEnabledChange={setLive}
           isFetching={isFetching}
           lastUpdate={lastUpdate}
           newCount={newIds.size}
         />
       </section>
 
-
-      <section className="space-y-3">
-        <SectionLabel>Top {slot} targets</SectionLabel>
+      <section className="space-y-4">
+        <SectionLabel>
+          All {slot} targets under {maxOwnership}% owned
+        </SectionLabel>
 
         {isPending && (
-          <div className="space-y-3">
-            {[0, 1, 2].map((i) => (
+          <div className="space-y-4">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
               <Skeleton key={i} className="h-28 rounded-xl" />
             ))}
           </div>
@@ -116,7 +116,7 @@ function WaiverBrowser() {
           </p>
         )}
 
-        <div className="space-y-3 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
+        <div className="space-y-4">
           {data?.map((player, i) => (
             <PlayerRow
               key={player.id}
@@ -125,7 +125,6 @@ function WaiverBrowser() {
               format={format}
               isNew={newIds.has(player.id)}
             />
-
           ))}
         </div>
 

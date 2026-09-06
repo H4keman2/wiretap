@@ -127,7 +127,6 @@ export function projectPoints(p: PlayerStat, format: ScoringFormat): number {
   return Math.round(pts * 10) / 10;
 }
 
-
 /** Replacement-level weekly output — the "anyone can get this" baseline. */
 export function replacementBaseline(position: RealPosition, format: ScoringFormat): number {
   const rec = RECEPTION_VALUE[format];
@@ -194,7 +193,8 @@ function buildReason(p: PlayerStat, format: ScoringFormat, projection: number): 
   if (p.injury) bits.push(`carrying a ${p.injury.toLowerCase()} tag, confirm status first`);
 
   const lead = `Projects around ${projection.toFixed(1)} pts/week at ${Math.round(p.ownership)}% rostered`;
-  if (bits.length === 0) return `${lead}. Straight depth add with startable upside if the room thins out.`;
+  if (bits.length === 0)
+    return `${lead}. Straight depth add with startable upside if the room thins out.`;
   return `${lead} — ${bits.slice(0, 2).join(", and ")}.`;
 }
 
@@ -245,14 +245,24 @@ export interface RankOptions {
   limit?: number;
 }
 
-/** Filter the eligible pool by availability, then rank it. */
+/**
+ * Hard ceiling on how many ranked players a single call can return,
+ * regardless of what a caller asks for. The UI used to hardcode `limit: 5`
+ * ("Top 5") — this is not that; it's a sanity backstop so a pathological
+ * request (FLEX at an 80% threshold pulls from three real positions at
+ * once) can't return an unbounded array. No normal position-and-threshold
+ * combination gets anywhere near it.
+ */
+const MAX_RANKED_RESULTS = 200;
+
+/** Filter the eligible pool by availability, then rank all of it. */
 export function rankWaiverPool(pool: PlayerStat[], opts: RankOptions): RankedPlayer[] {
-  const { format, slot, maxOwnership, limit = 5 } = opts;
+  const { format, slot, maxOwnership, limit = MAX_RANKED_RESULTS } = opts;
   return pool
     .filter((p) => positionMatches(p, slot) && p.ownership < maxOwnership)
     .map((p) => scorePlayer(p, format))
     .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
+    .slice(0, Math.min(limit, MAX_RANKED_RESULTS));
 }
 
 function clamp01(n: number) {
