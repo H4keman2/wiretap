@@ -89,11 +89,35 @@ function baseProduction(position: RealPosition, posRank: number): number {
   }
 }
 
+/**
+ * How much of a player's prior-season value came from catching the ball.
+ * 0 = pure runner / thrower, 1 = reception-dependent. null when unknown.
+ */
+export function receptionShare(p: PlayerStat): number | null {
+  const s = p.lastSeason;
+  if (!s || s.games < 4) return null;
+  const recValue = s.recYds / 10 + s.recTd * 6 + s.receptions;
+  const rushPassValue =
+    s.rushYds / 10 + s.rushTd * 6 + s.passYds / 25 + s.passTd * 4 - s.interceptions * 2;
+  const total = recValue + Math.max(0, rushPassValue);
+  if (total <= 0) return null;
+  return clamp01(recValue / total);
+}
+
 /** Projected weekly fantasy points for a player in a given format. */
 export function projectPoints(p: PlayerStat, format: ScoringFormat): number {
-  let pts =
+  const model =
     baseProduction(p.position, p.posRank) +
     expectedReceptions(p.position, p.posRank) * RECEPTION_VALUE[format];
+
+  // Blend the model with prior-season production scored in THIS format, so
+  // pass-catching backs rise in PPR and pure runners hold value in standard.
+  const s = p.lastSeason;
+  let pts = model;
+  if (s && s.games >= 4) {
+    const actual = seasonFantasyPoints(s, format) / s.games;
+    pts = model * 0.55 + actual * 0.45;
+  }
 
   if (p.depthOrder === 1) pts *= 1.12;
   else if (p.depthOrder && p.depthOrder >= 3) pts *= 0.82;
@@ -102,6 +126,7 @@ export function projectPoints(p: PlayerStat, format: ScoringFormat): number {
 
   return Math.round(pts * 10) / 10;
 }
+
 
 /** Replacement-level weekly output — the "anyone can get this" baseline. */
 export function replacementBaseline(position: RealPosition, format: ScoringFormat): number {
