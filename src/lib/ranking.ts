@@ -5,7 +5,7 @@
  * independently once real usage data comes in.
  */
 
-import type { SeasonStats } from "./season-stats";
+import { seasonFantasyPoints, type SeasonStats } from "./season-stats";
 import type { TeamSos } from "./sos";
 
 export type ScoringFormat = "std" | "half" | "ppr";
@@ -89,11 +89,35 @@ function baseProduction(position: RealPosition, posRank: number): number {
   }
 }
 
+/**
+ * How much of a player's prior-season value came from catching the ball.
+ * 0 = pure runner / thrower, 1 = reception-dependent. null when unknown.
+ */
+export function receptionShare(p: PlayerStat): number | null {
+  const s = p.lastSeason;
+  if (!s || s.games < 4) return null;
+  const recValue = s.recYds / 10 + s.recTd * 6 + s.receptions;
+  const rushPassValue =
+    s.rushYds / 10 + s.rushTd * 6 + s.passYds / 25 + s.passTd * 4 - s.interceptions * 2;
+  const total = recValue + Math.max(0, rushPassValue);
+  if (total <= 0) return null;
+  return clamp01(recValue / total);
+}
+
 /** Projected weekly fantasy points for a player in a given format. */
 export function projectPoints(p: PlayerStat, format: ScoringFormat): number {
-  let pts =
+  const model =
     baseProduction(p.position, p.posRank) +
     expectedReceptions(p.position, p.posRank) * RECEPTION_VALUE[format];
+
+  // Blend the model with prior-season production scored in THIS format, so
+  // pass-catching backs rise in PPR and pure runners hold value in standard.
+  const s = p.lastSeason;
+  let pts = model;
+  if (s && s.games >= 4) {
+    const actual = seasonFantasyPoints(s, format) / s.games;
+    pts = model * 0.55 + actual * 0.45;
+  }
 
   if (p.depthOrder === 1) pts *= 1.12;
   else if (p.depthOrder && p.depthOrder >= 3) pts *= 0.82;
@@ -102,6 +126,7 @@ export function projectPoints(p: PlayerStat, format: ScoringFormat): number {
 
   return Math.round(pts * 10) / 10;
 }
+
 
 /** Replacement-level weekly output — the "anyone can get this" baseline. */
 export function replacementBaseline(position: RealPosition, format: ScoringFormat): number {
@@ -139,9 +164,23 @@ function trendOf(p: PlayerStat) {
   return { delta, label };
 }
 
+/** How well a player's profile fits the selected scoring format (-1..1). */
+export function formatFit(p: PlayerStat, format: ScoringFormat): number {
+  const share = receptionShare(p);
+  if (share === null) {
+    if (format === "std") return 0;
+    return p.position === "WR" || p.position === "TE" ? 0.15 : 0;
+  }
+  // Neutral profile ~0.5 reception-dependency.
+  const lean = (share - 0.5) * 2; // -1 (pure runner) .. 1 (pure receiver)
+  const formatWeight = format === "ppr" ? 1 : format === "half" ? 0.4 : -0.8;
+  return clamp(lean * formatWeight, -1, 1);
+}
+
 function buildReason(p: PlayerStat, format: ScoringFormat, projection: number): string {
   const bits: string[] = [];
   const { label } = trendOf(p);
+  const fit = formatFit(p, format);
 
   if (p.depthOrder === 1) bits.push(`listed first on the ${p.team ?? "team"} depth chart`);
   else if (p.depthOrder === 2) bits.push("next man up in the rotation");
@@ -149,9 +188,8 @@ function buildReason(p: PlayerStat, format: ScoringFormat, projection: number): 
   if (label === "rising") bits.push("being added fast across leagues this week");
   else if (label === "falling") bits.push("cooling off in adds, buy-low window");
 
-  if (format !== "std" && (p.position === "WR" || p.position === "TE" || p.position === "RB")) {
-    bits.push("reception volume plays up in your format");
-  }
+  if (fit > 0.2) bits.push(`reception volume plays up in ${FORMAT_LABEL[format]}`);
+  else if (fit < -0.2) bits.push(`carries and touchdowns travel well in ${FORMAT_LABEL[format]}`);
 
   if (p.injury) bits.push(`carrying a ${p.injury.toLowerCase()} tag, confirm status first`);
 
@@ -160,7 +198,7 @@ function buildReason(p: PlayerStat, format: ScoringFormat, projection: number): 
   return `${lead} — ${bits.slice(0, 2).join(", and ")}.`;
 }
 
-/** Score a single player 0-10 by projection, trend, and opportunity. */
+/** Score a single player 0-10 by projection, trend, opportunity, and format fit. */
 export function scorePlayer(p: PlayerStat, format: ScoringFormat): RankedPlayer {
   const projection = projectPoints(p, format);
   const baseline = replacementBaseline(p.position, format);
@@ -177,7 +215,10 @@ export function scorePlayer(p: PlayerStat, format: ScoringFormat): RankedPlayer 
     p.depthOrder === null ? 0.45 : p.depthOrder === 1 ? 1 : p.depthOrder === 2 ? 0.65 : 0.3,
   );
 
-  const raw = vor * 0.5 + trend * 0.3 + opportunity * 0.2;
+  // Format fit nudges reception-heavy profiles up in PPR and runners up in standard.
+  const fit = clamp01(0.5 + formatFit(p, format) * 0.5);
+
+  const raw = vor * 0.42 + trend * 0.26 + opportunity * 0.17 + fit * 0.15;
 
   return {
     ...p,
@@ -186,6 +227,7 @@ export function scorePlayer(p: PlayerStat, format: ScoringFormat): RankedPlayer 
     trendLabel: label,
     // Curve so realistic waiver-tier scores spread across a readable 3-9 band.
     score: Math.round(Math.min(10, Math.pow(raw, 0.75) * 13) * 10) / 10,
+
     reason: buildReason(p, format, projection),
   };
 }
@@ -215,4 +257,8 @@ export function rankWaiverPool(pool: PlayerStat[], opts: RankOptions): RankedPla
 
 function clamp01(n: number) {
   return Math.max(0, Math.min(1, n));
+}
+
+function clamp(n: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, n));
 }
