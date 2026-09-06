@@ -2,12 +2,17 @@ import { Link } from "@tanstack/react-router";
 import { ClipboardList, ListFilter, Settings2, Star } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { FORMAT_LABEL, type ScoringFormat } from "@/lib/ranking";
-import { SosStatusIndicator } from "@/components/wire/SosStatusIndicator";
+import type { ScoringFormat } from "@/lib/ranking";
 
-export function AppHeader({ format }: { format: ScoringFormat }) {
+/**
+ * Just the wordmark now — the SOS coverage pill and the format badge that
+ * used to live here were noise: SOS health already has its own banner when
+ * something's actually wrong (SosWarning), and the format is set two taps
+ * away in the controls below. Neither needed permanent header real estate.
+ */
+export function AppHeader() {
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between bg-depth px-4 py-3 shadow-md">
+    <header className="flex items-center bg-depth px-4 py-3 shadow-md">
       <Link to="/" className="flex items-center gap-2">
         <span className="flex size-8 items-center justify-center rounded bg-action">
           <span className="h-4 w-1 rotate-12 rounded-full bg-depth" />
@@ -17,14 +22,6 @@ export function AppHeader({ format }: { format: ScoringFormat }) {
           Wire Tap
         </span>
       </Link>
-      <div className="flex items-center gap-2">
-        <SosStatusIndicator />
-        <div className="rounded-full bg-depth-foreground/10 px-3 py-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-action">
-            {FORMAT_LABEL[format]}
-          </span>
-        </div>
-      </div>
     </header>
   );
 }
@@ -36,9 +33,15 @@ const TABS = [
   { to: "/settings", label: "Settings", icon: Settings2 },
 ] as const;
 
-export function BottomNav() {
+/**
+ * Moved up from a fixed bottom bar to sit right under the header. A bottom
+ * bar permanently ate a strip of every screen and sat far from the content
+ * it controls; up top it's in the natural reading order and frees that
+ * space for actual player data on mobile.
+ */
+export function TopNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-around border-t border-border bg-card px-6 py-3">
+    <nav className="flex items-center justify-around border-b border-border bg-card px-6 py-2.5">
       {TABS.map(({ to, label, icon: Icon }) => (
         <Link
           key={to}
@@ -55,19 +58,27 @@ export function BottomNav() {
   );
 }
 
-export function Page({ format, children }: { format: ScoringFormat; children: ReactNode }) {
+export function Page({
+  format: _format,
+  children,
+}: {
+  format: ScoringFormat;
+  children: ReactNode;
+}) {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <AppHeader format={format} />
-      <main className="mx-auto max-w-lg space-y-6 p-4 pb-28 md:max-w-3xl">{children}</main>
-      <BottomNav />
+      <div className="sticky top-0 z-20">
+        <AppHeader />
+        <TopNav />
+      </div>
+      <main className="mx-auto max-w-2xl space-y-8 p-5 sm:p-6">{children}</main>
     </div>
   );
 }
 
 export function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <h2 className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+    <h2 className="px-1 text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">
       {children}
     </h2>
   );
