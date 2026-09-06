@@ -12,14 +12,14 @@ export function FormatSelector({
   onChange: (v: ScoringFormat) => void;
 }) {
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-3">
       {FORMATS.map((f) => (
         <button
           key={f}
           type="button"
           onClick={() => onChange(f)}
           className={cn(
-            "flex-1 rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-tight transition-colors",
+            "flex-1 rounded-lg border px-4 py-3 text-xs font-bold uppercase tracking-tight transition-colors",
             value === f
               ? "border-action bg-action text-action-foreground"
               : "border-border bg-card text-muted-foreground",
@@ -40,14 +40,14 @@ export function PositionSelector({
   onChange: (v: SlotPosition) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-3">
       {SLOT_POSITIONS.map((p) => (
         <button
           key={p}
           type="button"
           onClick={() => onChange(p)}
           className={cn(
-            "min-w-[3.5rem] flex-1 shrink-0 rounded-lg border px-3 py-2 text-center text-xs font-bold transition-colors",
+            "min-w-[3.5rem] flex-1 shrink-0 rounded-lg border px-4 py-3 text-center text-xs font-bold transition-colors",
             value === p
               ? "border-action bg-action text-action-foreground"
               : "border-border bg-card text-muted-foreground",
@@ -68,8 +68,8 @@ export function OwnershipSlider({
   onChange: (v: number) => void;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <div className="mb-3 flex items-center justify-between">
+    <div className="rounded-xl border border-border bg-card p-5">
+      <div className="mb-4 flex items-center justify-between">
         <label className="text-xs font-bold uppercase text-muted-foreground">
           Availability threshold
         </label>
@@ -83,7 +83,7 @@ export function OwnershipSlider({
         onValueChange={([v]) => onChange(v ?? 40)}
         aria-label="Ownership threshold"
       />
-      <p className="mt-3 text-[11px] text-muted-foreground">
+      <p className="mt-4 text-[11px] text-muted-foreground">
         Show players rostered in fewer than {value}% of leagues.
       </p>
     </div>
