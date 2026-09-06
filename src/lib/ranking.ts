@@ -5,7 +5,7 @@
  * independently once real usage data comes in.
  */
 
-import type { SeasonStats } from "./season-stats";
+import { seasonFantasyPoints, type SeasonStats } from "./season-stats";
 import type { TeamSos } from "./sos";
 
 export type ScoringFormat = "std" | "half" | "ppr";
