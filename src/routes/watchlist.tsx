@@ -2,6 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { FormatSelector } from "@/components/wire/Controls";
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
@@ -199,13 +210,29 @@ function WatchlistPage() {
               : `${visible.length} of ${entries.length} saved`}
           </SectionLabel>
           {entries.length > 0 && (
-            <button
-              type="button"
-              onClick={clear}
-              className="text-[10px] font-black uppercase tracking-wider text-muted-foreground underline"
-            >
-              Clear all
-            </button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  type="button"
+                  className="text-[10px] font-black uppercase tracking-wider text-muted-foreground underline"
+                >
+                  Clear all
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear your whole watchlist?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This removes all {entries.length} saved player{entries.length === 1 ? "" : "s"}{" "}
+                    from this device. There's no undo — you'd have to re-save them one by one.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={clear}>Clear all</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
 
