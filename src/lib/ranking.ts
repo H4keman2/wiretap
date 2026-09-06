@@ -164,9 +164,23 @@ function trendOf(p: PlayerStat) {
   return { delta, label };
 }
 
+/** How well a player's profile fits the selected scoring format (-1..1). */
+export function formatFit(p: PlayerStat, format: ScoringFormat): number {
+  const share = receptionShare(p);
+  if (share === null) {
+    if (format === "std") return 0;
+    return p.position === "WR" || p.position === "TE" ? 0.15 : 0;
+  }
+  // Neutral profile ~0.5 reception-dependency.
+  const lean = (share - 0.5) * 2; // -1 (pure runner) .. 1 (pure receiver)
+  const formatWeight = format === "ppr" ? 1 : format === "half" ? 0.4 : -0.8;
+  return clamp(lean * formatWeight, -1, 1);
+}
+
 function buildReason(p: PlayerStat, format: ScoringFormat, projection: number): string {
   const bits: string[] = [];
   const { label } = trendOf(p);
+  const fit = formatFit(p, format);
 
   if (p.depthOrder === 1) bits.push(`listed first on the ${p.team ?? "team"} depth chart`);
   else if (p.depthOrder === 2) bits.push("next man up in the rotation");
@@ -174,9 +188,8 @@ function buildReason(p: PlayerStat, format: ScoringFormat, projection: number): 
   if (label === "rising") bits.push("being added fast across leagues this week");
   else if (label === "falling") bits.push("cooling off in adds, buy-low window");
 
-  if (format !== "std" && (p.position === "WR" || p.position === "TE" || p.position === "RB")) {
-    bits.push("reception volume plays up in your format");
-  }
+  if (fit > 0.2) bits.push(`reception volume plays up in ${FORMAT_LABEL[format]}`);
+  else if (fit < -0.2) bits.push(`carries and touchdowns travel well in ${FORMAT_LABEL[format]}`);
 
   if (p.injury) bits.push(`carrying a ${p.injury.toLowerCase()} tag, confirm status first`);
 
@@ -185,7 +198,7 @@ function buildReason(p: PlayerStat, format: ScoringFormat, projection: number): 
   return `${lead} — ${bits.slice(0, 2).join(", and ")}.`;
 }
 
-/** Score a single player 0-10 by projection, trend, and opportunity. */
+/** Score a single player 0-10 by projection, trend, opportunity, and format fit. */
 export function scorePlayer(p: PlayerStat, format: ScoringFormat): RankedPlayer {
   const projection = projectPoints(p, format);
   const baseline = replacementBaseline(p.position, format);
@@ -202,7 +215,10 @@ export function scorePlayer(p: PlayerStat, format: ScoringFormat): RankedPlayer 
     p.depthOrder === null ? 0.45 : p.depthOrder === 1 ? 1 : p.depthOrder === 2 ? 0.65 : 0.3,
   );
 
-  const raw = vor * 0.5 + trend * 0.3 + opportunity * 0.2;
+  // Format fit nudges reception-heavy profiles up in PPR and runners up in standard.
+  const fit = clamp01(0.5 + formatFit(p, format) * 0.5);
+
+  const raw = vor * 0.42 + trend * 0.26 + opportunity * 0.17 + fit * 0.15;
 
   return {
     ...p,
@@ -211,6 +227,7 @@ export function scorePlayer(p: PlayerStat, format: ScoringFormat): RankedPlayer 
     trendLabel: label,
     // Curve so realistic waiver-tier scores spread across a readable 3-9 band.
     score: Math.round(Math.min(10, Math.pow(raw, 0.75) * 13) * 10) / 10,
+
     reason: buildReason(p, format, projection),
   };
 }
