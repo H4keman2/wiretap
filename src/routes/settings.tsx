@@ -153,7 +153,9 @@ function SettingsPage() {
         </div>
       </section>
 
-      <SosDebugPanel />
+      {/* Probes raw ESPN endpoints and lists unmatched players — dev-only;
+          the server function backing it also refuses to run in production. */}
+      {import.meta.env.DEV && <SosDebugPanel />}
     </Page>
   );
 }
