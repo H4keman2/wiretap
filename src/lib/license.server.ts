@@ -76,10 +76,16 @@ async function verifyAgainstGumroad(licenseKey: string): Promise<LicenseCheckRes
 export const verifyLicense = createServerFn({ method: "POST" })
   .inputValidator((data: { licenseKey: string }) => data)
   .handler(async ({ data }): Promise<LicenseCheckResult> => {
+    const { isRateLimited, rememberVerified } = await import("./license-guard.server");
+    if (isRateLimited()) {
+      return { valid: false, reason: "Too many attempts. Wait a few minutes and try again." };
+    }
     if (!looksLikeKey(data.licenseKey)) {
       return { valid: false, reason: "That key doesn't look right." };
     }
-    return verifyAgainstGumroad(data.licenseKey);
+    const result = await verifyAgainstGumroad(data.licenseKey);
+    if (result.valid) rememberVerified(data.licenseKey.trim());
+    return result;
   });
 
 /**
@@ -90,8 +96,22 @@ export async function requireValidLicense(licenseKey: string | null | undefined)
   if (!licenseKey || !looksLikeKey(licenseKey)) {
     throw new Error("PRO_REQUIRED");
   }
-  const result = await verifyAgainstGumroad(licenseKey);
+  const key = licenseKey.trim();
+  const { isRateLimited, isRecentlyVerified, rememberVerified } =
+    await import("./license-guard.server");
+  if (isRecentlyVerified(key)) return;
+
+  if (isRateLimited()) {
+    // A real Pro user re-verifying mid-session should never hit this: the
+    // cache above absorbs that traffic. Landing here means either a burst
+    // of distinct/invalid keys from one IP, or the cache TTL just lapsed
+    // during unusually rapid edits — fail closed either way.
+    throw new Error("PRO_REQUIRED");
+  }
+
+  const result = await verifyAgainstGumroad(key);
   if (!result.valid) {
     throw new Error("PRO_REQUIRED");
   }
+  rememberVerified(key);
 }
