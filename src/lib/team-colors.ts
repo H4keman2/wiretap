@@ -96,11 +96,7 @@ function hslToRgb(h: number, s: number, l: number) {
   else if (h < 240) [r, g, b] = [0, x, c];
   else if (h < 300) [r, g, b] = [x, 0, c];
   else [r, g, b] = [c, 0, x];
-  return [
-    Math.round((r + m) * 255),
-    Math.round((g + m) * 255),
-    Math.round((b + m) * 255),
-  ] as const;
+  return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)] as const;
 }
 
 /**
@@ -109,10 +105,7 @@ function hslToRgb(h: number, s: number, l: number) {
  * and holds saturation so the team identity reads in the hue.
  * `alpha` is 0-255.
  */
-export function teamGlowColor(
-  team: string | null | undefined,
-  alpha = 180,
-): string {
+export function teamGlowColor(team: string | null | undefined, alpha = 180): string {
   const { r, g, b } = hexToRgb(teamColor(team));
   const [h, s, l] = rgbToHsl(r, g, b);
   const boostedL = Math.max(l, 0.58);

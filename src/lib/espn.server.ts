@@ -201,7 +201,10 @@ export async function fetchEspnPlayers(): Promise<EspnPlayer[]> {
           percentOwned: Math.max(0, Math.min(100, own.percentOwned ?? 0)),
           percentStarted: Math.max(0, Math.min(100, own.percentStarted ?? 0)),
           percentChange: own.percentChange ?? 0,
-          adp: own.averageDraftPosition && own.averageDraftPosition > 0 ? own.averageDraftPosition : null,
+          adp:
+            own.averageDraftPosition && own.averageDraftPosition > 0
+              ? own.averageDraftPosition
+              : null,
           injury:
             p.injuryStatus && p.injuryStatus !== "ACTIVE" && p.injuryStatus !== "NORMAL"
               ? p.injuryStatus

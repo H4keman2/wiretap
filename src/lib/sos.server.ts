@@ -168,7 +168,9 @@ async function build(): Promise<Map<string, TeamSos>> {
   const results = await Promise.all(weeks.map((w) => weekMatchups(year, w)));
 
   if (results.every((pairs) => pairs.length === 0)) {
-    throw new Error(`[SOS] No regular-season matchups returned for ${year}, weeks ${weeks.join(", ")}`);
+    throw new Error(
+      `[SOS] No regular-season matchups returned for ${year}, weeks ${weeks.join(", ")}`,
+    );
   }
 
   const byTeam = new Map<string, SosMatchup[]>();

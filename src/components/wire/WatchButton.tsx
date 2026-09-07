@@ -17,7 +17,9 @@ export function WatchButton({
     <button
       type="button"
       aria-pressed={saved}
-      aria-label={saved ? `Remove ${player.name} from watchlist` : `Save ${player.name} to watchlist`}
+      aria-label={
+        saved ? `Remove ${player.name} from watchlist` : `Save ${player.name} to watchlist`
+      }
       title={saved ? "Saved to watchlist" : "Save to watchlist"}
       onClick={(e) => {
         e.stopPropagation();

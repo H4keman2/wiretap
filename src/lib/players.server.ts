@@ -45,7 +45,7 @@ async function build(): Promise<PlayerStat[]> {
   const espnByKey = new Map(espn.map((p) => [key(p.name, p.position), p]));
 
   const merged: PlayerStat[] = sleeper.map((p) => {
-    const schedule = p.team ? sos.get(p.team) ?? null : null;
+    const schedule = p.team ? (sos.get(p.team) ?? null) : null;
     const match = espnByKey.get(key(p.name, p.position));
     if (!match) return { ...p, sos: schedule, ownershipSource: "estimate" as const };
     return {

@@ -127,7 +127,9 @@ export function analyzeRoster(
         `Only ${bench.length} bench body here, and ${slot} injuries are expensive to absorb.`,
       );
     } else if (bench.length > 0) {
-      reasons.push(`${bench.length} bench option${bench.length > 1 ? "s" : ""} covering this spot.`);
+      reasons.push(
+        `${bench.length} bench option${bench.length > 1 ? "s" : ""} covering this spot.`,
+      );
     }
 
     verdicts.push({

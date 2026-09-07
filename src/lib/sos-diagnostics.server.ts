@@ -13,7 +13,6 @@ export type { ProbeResult, SosDiagnostics, UnmappedPlayer };
 const ESPN_SITE_API = "https://site.web.api.espn.com/apis";
 const WINDOW = 4;
 
-
 function seasonYear(): number {
   const now = new Date();
   return now.getUTCMonth() < 2 ? now.getUTCFullYear() - 1 : now.getUTCFullYear();
@@ -69,9 +68,10 @@ export async function collectSosDiagnostics(): Promise<SosDiagnostics> {
     "Scoreboard (current week)",
     `${ESPN_SITE_API}/site/v2/sports/football/nfl/scoreboard`,
   );
-  const boardBody = board.body as
-    | { season?: { type?: number; year?: number }; week?: { number?: number } }
-    | null;
+  const boardBody = board.body as {
+    season?: { type?: number; year?: number };
+    week?: { number?: number };
+  } | null;
   const scoreboardWeek =
     boardBody?.season?.type === 2 && boardBody.week?.number ? boardBody.week.number : null;
   const currentWeek = scoreboardWeek ?? 1;

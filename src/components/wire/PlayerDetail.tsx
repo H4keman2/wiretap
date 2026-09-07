@@ -42,7 +42,10 @@ export function PlayerDetail({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-h-[88vh] max-w-lg overflow-y-auto border-2 p-0"
-        style={{ borderColor: color, boxShadow: `0 0 0 1px ${color}55, 0 18px 48px -20px ${color}` }}
+        style={{
+          borderColor: color,
+          boxShadow: `0 0 0 1px ${color}55, 0 18px 48px -20px ${color}`,
+        }}
       >
         <DialogHeader
           className="space-y-1 border-b p-4 text-left"
@@ -55,7 +58,8 @@ export function PlayerDetail({
             <WatchButton player={player} size="md" />
           </div>
           <DialogDescription className="text-[11px] font-bold uppercase tracking-wide">
-            #{rank} target • {player.team ?? "Free agent"} • {player.position} • {FORMAT_LABEL[format]}
+            #{rank} target • {player.team ?? "Free agent"} • {player.position} •{" "}
+            {FORMAT_LABEL[format]}
           </DialogDescription>
         </DialogHeader>
 

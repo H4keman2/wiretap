@@ -46,8 +46,8 @@ export function SosWarning() {
           Schedule data incomplete
         </p>
         <p className="mt-0.5 text-muted-foreground">
-          Only {data.teamsWithMatchups} of {data.threshold} teams resolved upcoming matchups, so some
-          strength-of-schedule grades may show as pending.
+          Only {data.teamsWithMatchups} of {data.threshold} teams resolved upcoming matchups, so
+          some strength-of-schedule grades may show as pending.
         </p>
 
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-wide">

@@ -62,9 +62,7 @@ export function SosDebugPanel() {
                       <span
                         className={cn(
                           "rounded px-1.5 py-px font-black tabular-nums",
-                          p.ok
-                            ? "bg-action/15 text-turf"
-                            : "bg-destructive/10 text-destructive",
+                          p.ok ? "bg-action/15 text-turf" : "bg-destructive/10 text-destructive",
                         )}
                       >
                         {p.status ?? "ERR"} · {p.ms}ms
