@@ -5,7 +5,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { LeagueConnect } from "@/components/wire/LeagueConnect";
 import { Page, SectionLabel } from "@/components/wire/Shell";
+
 import { SosDebugPanel } from "@/components/wire/SosDebugPanel";
 import { useLeagueProfile, usePro } from "@/lib/league-store";
 import { useLiveUpdates } from "@/lib/live-updates-store";
@@ -90,8 +92,11 @@ function SettingsPage() {
         </div>
       </section>
 
+      <LeagueConnect />
+
       <section className="space-y-3">
         <SectionLabel>League profile</SectionLabel>
+
         <div className="rounded-xl border border-border bg-card p-4">
           <label
             className="text-xs font-bold uppercase text-muted-foreground"
