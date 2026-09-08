@@ -108,10 +108,18 @@ export function PlayerRow({
             </div>
 
             <dl className="mt-2 grid grid-cols-3 gap-2 border-y border-border/70 py-2 text-[10px] font-bold uppercase tracking-tight">
-              <Cell
-                label={player.ownershipSource === "espn" ? "Owned · ESPN" : "Owned · est"}
-                value={`${Math.round(player.ownership)}%`}
-              />
+              {player.ownershipSource === "league" ? (
+                <Cell
+                  label="Your league"
+                  value={player.ownership >= 100 ? "Rostered" : "Free agent"}
+                />
+              ) : (
+                <Cell
+                  label={player.ownershipSource === "espn" ? "Owned · ESPN" : "Owned · est"}
+                  value={`${Math.round(player.ownership)}%`}
+                />
+              )}
+
               <Cell label="Proj" value={`${player.projection.toFixed(1)} pts`} />
               <div>
                 <dt className="text-[9px] text-muted-foreground">Trend</dt>
