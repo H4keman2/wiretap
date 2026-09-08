@@ -269,13 +269,16 @@ export const analyzeTeam = createServerFn({ method: "POST" })
     const handcuffOfById = new Map(handcuffs.map((h) => [h.handcuff.id, h.starterName]));
 
     const rosterIds = new Set(data.roster.map((r) => r.id));
-    const recommendations = rankWaiverPool(
-      pool.filter((p) => !rosterIds.has(p.id)),
-      {
-        format: data.format,
-        slot: targetSlot,
-        maxOwnership: data.maxOwnership,
-      },
+    const available = pool.filter((p) => !rosterIds.has(p.id));
+    const wire = data.league?.leagueId
+      ? await applyLeagueAvailability(available, data.league)
+      : available;
+    const recommendations = rankWaiverPool(wire, {
+      format: data.format,
+      slot: targetSlot,
+      maxOwnership: data.league?.leagueId ? 101 : data.maxOwnership,
+    },
+
     ).map((p) => ({ ...p, handcuffOf: handcuffOfById.get(p.id) ?? null }));
 
     return { verdicts, targetSlot, recommendations, rosterPoints, suggestedStarterIds, handcuffs };
