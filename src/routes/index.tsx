@@ -139,15 +139,20 @@ function WaiverBrowser() {
 
         {isError && (
           <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-            Player data is unavailable right now. Try again in a moment.
+            {cred
+              ? "Couldn't read your league just now — check your league details in Settings, or try again in a moment."
+              : "Player data is unavailable right now. Try again in a moment."}
           </p>
         )}
 
         {data?.length === 0 && (
           <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-            No {slot} options under {maxOwnership}% rostered. Raise the threshold to widen the pool.
+            {cred
+              ? `Every ${slot} is already rostered in your league right now.`
+              : `No ${slot} options under ${maxOwnership}% rostered. Raise the threshold to widen the pool.`}
           </p>
         )}
+
 
         <div className="space-y-4">
           {data?.map((player, i) => (
