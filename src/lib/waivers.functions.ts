@@ -277,9 +277,8 @@ export const analyzeTeam = createServerFn({ method: "POST" })
       format: data.format,
       slot: targetSlot,
       maxOwnership: data.league?.leagueId ? 101 : data.maxOwnership,
-    },
+    }).map((p) => ({ ...p, handcuffOf: handcuffOfById.get(p.id) ?? null }));
 
-    ).map((p) => ({ ...p, handcuffOf: handcuffOfById.get(p.id) ?? null }));
 
     return { verdicts, targetSlot, recommendations, rosterPoints, suggestedStarterIds, handcuffs };
   });
