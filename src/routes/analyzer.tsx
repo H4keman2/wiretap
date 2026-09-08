@@ -157,6 +157,36 @@ function Analyzer() {
         </div>
       </section>
 
+      {cred && (
+        <section className="space-y-2 rounded-xl border border-action/50 bg-card p-4">
+          <p className="text-sm font-bold">{connection.summary?.name}</p>
+          {connection.teamId === null ? (
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              Pick which team is yours in{" "}
+              <Link to="/settings" className="font-bold text-turf underline">
+                Settings
+              </Link>{" "}
+              to pull your roster in automatically.
+            </p>
+          ) : (
+            <>
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                Pull your current roster straight from your league — this replaces what's below.
+              </p>
+              <Button
+                size="sm"
+                className="h-9 w-full"
+                disabled={pulling}
+                onClick={pullLeagueRoster}
+              >
+                {pulling ? "Pulling your team…" : "Pull my roster from ESPN"}
+              </Button>
+            </>
+          )}
+        </section>
+      )}
+
+
       <RosterEditor
         roster={roster}
         config={profile.config}
