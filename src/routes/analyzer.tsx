@@ -51,14 +51,36 @@ const POSITIONS: RealPosition[] = ["QB", "RB", "WR", "TE", "DEF", "K"];
 function Analyzer() {
   const { profile, update, loaded } = useLeagueProfile();
   const { isPro, key, loaded: proLoaded } = usePro();
+  const { connection, cred } = useEspnConnection();
   const [maxOwnership, setMaxOwnership] = useState(40);
   const [override, setOverride] = useState<SlotPosition | null>(null);
+  const [pulling, setPulling] = useState(false);
 
   const analysis = useMutation({ mutationFn: analyzeTeam });
 
   const roster = profile.roster;
   const starters = useMemo(() => roster.filter((r) => r.starter), [roster]);
   const fill = useMemo(() => lineupFill(roster, profile.config), [roster, profile.config]);
+
+  const pullLeagueRoster = async () => {
+    if (!cred || connection.teamId === null) return;
+    setPulling(true);
+    try {
+      const { entries, unmatched } = await importLeagueRoster({
+        data: { ...cred, teamId: connection.teamId },
+      });
+      update({ roster: entries });
+      toast.success(
+        unmatched.length > 0
+          ? `Pulled ${entries.length} players — ${unmatched.length} need a name check.`
+          : `Pulled all ${entries.length} players from your league team.`,
+      );
+    } catch {
+      toast.error("Couldn't pull that roster. Check your league details in Settings.");
+    } finally {
+      setPulling(false);
+    }
+  };
 
   useEffect(() => {
     if (!loaded || !isPro || !key || roster.length === 0) return;
@@ -69,15 +91,27 @@ function Analyzer() {
         roster,
         maxOwnership,
         overrideSlot: override,
+        league: cred,
         licenseKey: key,
       },
     });
     // Server re-verifies the license on every call regardless of client state,
     // so a stale or revoked key here simply results in a PRO_REQUIRED error.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loaded, isPro, key, roster, profile.format, profile.config, maxOwnership, override]);
+  }, [
+    loaded,
+    isPro,
+    key,
+    roster,
+    profile.format,
+    profile.config,
+    maxOwnership,
+    override,
+    cred?.leagueId,
+  ]);
 
   if (!proLoaded || !loaded) {
+
     return (
       <Page format={profile.format}>
         <Skeleton className="h-40 rounded-xl" />
