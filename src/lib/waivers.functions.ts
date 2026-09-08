@@ -213,8 +213,11 @@ export interface AnalyzeInput {
   roster: RosterEntry[];
   maxOwnership: number;
   overrideSlot?: SlotPosition | null;
+  /** When present, waiver targets come from this ESPN league's free agents. */
+  league?: LeagueCred | null;
   /** Required. Verified server-side on every call — this is the real paywall. */
   licenseKey: string;
+
 }
 
 /** Projected weekly points for one roster entry, and whether it came from a real matched player record. */
