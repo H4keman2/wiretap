@@ -9,7 +9,9 @@ import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEspnConnection } from "@/lib/league-store";
 import { useLiveUpdates } from "@/lib/live-updates-store";
+
 import type { ScoringFormat, SlotPosition } from "@/lib/ranking";
 import { getRecommendations } from "@/lib/waivers.functions";
 
