@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
+import type { LeagueCred, LeagueSummary } from "./league.functions";
 import { verifyLicense } from "./license.server";
+
 import type { ScoringFormat } from "./ranking";
 import { DEFAULT_LEAGUE, type LeagueConfig, type RosterEntry } from "./weakness";
 
@@ -135,4 +137,77 @@ export function usePro() {
   }, []);
 
   return { isPro, key, activate, deactivate, loaded, checking, error };
+}
+
+/* ------------------------------------------------------------------ *
+ * Connected ESPN league
+ *
+ * Stores the league id and the user's own ESPN session cookies on this
+ * device only, plus the last league snapshot summary and which team is
+ * theirs. Every server call passes the cookies through per request; they
+ * are never persisted server-side.
+ * ------------------------------------------------------------------ */
+
+const ESPN_KEY = "wiretap.espn-league.v1";
+
+export interface EspnConnection {
+  leagueId: string;
+  espnS2: string;
+  swid: string;
+  teamId: number | null;
+  summary: LeagueSummary | null;
+}
+
+export const EMPTY_CONNECTION: EspnConnection = {
+  leagueId: "",
+  espnS2: "",
+  swid: "",
+  teamId: null,
+  summary: null,
+};
+
+export function useEspnConnection() {
+  const [connection, setConnection] = useState<EspnConnection>(EMPTY_CONNECTION);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(ESPN_KEY);
+      if (raw) {
+        setConnection({ ...EMPTY_CONNECTION, ...(JSON.parse(raw) as Partial<EspnConnection>) });
+      }
+    } catch {
+      /* ignore unreadable storage */
+    }
+    setLoaded(true);
+  }, []);
+
+  const save = useCallback((patch: Partial<EspnConnection>) => {
+    setConnection((prev) => {
+      const next = { ...prev, ...patch };
+      try {
+        window.localStorage.setItem(ESPN_KEY, JSON.stringify(next));
+      } catch {
+        /* storage unavailable */
+      }
+      return next;
+    });
+  }, []);
+
+  const clear = useCallback(() => {
+    try {
+      window.localStorage.removeItem(ESPN_KEY);
+    } catch {
+      /* storage unavailable */
+    }
+    setConnection(EMPTY_CONNECTION);
+  }, []);
+
+  /** Credentials to hand to server functions, or null when not connected. */
+  const cred: LeagueCred | null =
+    connection.summary && connection.leagueId
+      ? { leagueId: connection.leagueId, espnS2: connection.espnS2, swid: connection.swid }
+      : null;
+
+  return { connection, cred, save, clear, loaded };
 }

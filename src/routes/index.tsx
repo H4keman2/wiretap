@@ -9,7 +9,9 @@ import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEspnConnection } from "@/lib/league-store";
 import { useLiveUpdates } from "@/lib/live-updates-store";
+
 import type { ScoringFormat, SlotPosition } from "@/lib/ranking";
 import { getRecommendations } from "@/lib/waivers.functions";
 
@@ -38,19 +40,31 @@ function WaiverBrowser() {
   const [slot, setSlot] = useState<SlotPosition>("RB");
   const [maxOwnership, setMaxOwnership] = useState(40);
   const { enabled: live } = useLiveUpdates();
+  const { connection, cred } = useEspnConnection();
+
+  // A connected league dictates scoring — its own settings beat a guess.
+  const leagueFormat = cred ? connection.summary?.format : null;
+  const activeFormat = leagueFormat ?? format;
 
   const { data, isPending, isError, isFetching } = useQuery({
-    queryKey: ["waivers", format, slot, maxOwnership],
-    queryFn: () => getRecommendations({ data: { format, slot, maxOwnership } }),
+    queryKey: ["waivers", activeFormat, slot, maxOwnership, cred?.leagueId ?? "national"],
+    queryFn: () =>
+      getRecommendations({
+        data: { format: activeFormat, slot, maxOwnership, league: cred },
+      }),
     staleTime: live ? 0 : 1000 * 60 * 10,
     refetchInterval: live ? LIVE_REFRESH_MS : false,
     refetchIntervalInBackground: false,
   });
 
-  const { newIds, lastUpdate } = useLiveWatch(data, `${format}|${slot}|${maxOwnership}`, live);
+  const { newIds, lastUpdate } = useLiveWatch(
+    data,
+    `${activeFormat}|${slot}|${maxOwnership}|${cred?.leagueId ?? ""}`,
+    live,
+  );
 
   return (
-    <Page format={format}>
+    <Page format={activeFormat}>
       <SosWarning />
 
       <section className="relative isolate overflow-hidden rounded-xl border-b-4 border-action bg-depth p-5 pb-6 text-depth-foreground">
@@ -80,9 +94,25 @@ function WaiverBrowser() {
       </section>
 
       <section className="space-y-5">
-        <FormatSelector value={format} onChange={setFormat} />
+        {cred && connection.summary ? (
+          <div className="rounded-xl border border-action/50 bg-card p-4">
+            <p className="text-sm font-bold">{connection.summary.name}</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+              Showing only players free in your league, scored with your league's{" "}
+              {connection.summary.size}-team {activeFormat === "std" ? "standard" : activeFormat}{" "}
+              settings.{" "}
+              <Link to="/settings" className="font-bold text-turf underline">
+                Change league
+              </Link>
+            </p>
+          </div>
+        ) : (
+          <>
+            <FormatSelector value={format} onChange={setFormat} />
+            <OwnershipSlider value={maxOwnership} onChange={setMaxOwnership} />
+          </>
+        )}
         <PositionSelector value={slot} onChange={setSlot} />
-        <OwnershipSlider value={maxOwnership} onChange={setMaxOwnership} />
         <LiveStatusNote
           enabled={live}
           isFetching={isFetching}
@@ -93,8 +123,11 @@ function WaiverBrowser() {
 
       <section className="space-y-4">
         <SectionLabel>
-          All {slot} targets under {maxOwnership}% owned
+          {cred
+            ? `${slot} free agents in your league`
+            : `All ${slot} targets under ${maxOwnership}% owned`}
         </SectionLabel>
+
 
         {isPending && (
           <div className="space-y-4">
@@ -106,15 +139,20 @@ function WaiverBrowser() {
 
         {isError && (
           <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-            Player data is unavailable right now. Try again in a moment.
+            {cred
+              ? "Couldn't read your league just now — check your league details in Settings, or try again in a moment."
+              : "Player data is unavailable right now. Try again in a moment."}
           </p>
         )}
 
         {data?.length === 0 && (
           <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-            No {slot} options under {maxOwnership}% rostered. Raise the threshold to widen the pool.
+            {cred
+              ? `Every ${slot} is already rostered in your league right now.`
+              : `No ${slot} options under ${maxOwnership}% rostered. Raise the threshold to widen the pool.`}
           </p>
         )}
+
 
         <div className="space-y-4">
           {data?.map((player, i) => (

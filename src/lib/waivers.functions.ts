@@ -19,25 +19,54 @@ import {
   type RosterEntry,
 } from "./weakness";
 
+import type { LeagueCred } from "./league.functions";
+import type { PlayerStat } from "./ranking";
+
 export interface RecommendationInput {
   format: ScoringFormat;
   slot: SlotPosition;
   maxOwnership: number;
+  /** When present, availability comes from this ESPN league instead of national ownership. */
+  league?: LeagueCred | null;
+}
+
+/**
+ * Swap national ownership for the user's own league: drop everyone rostered
+ * by any team in that league, and mark the rest as genuinely free there.
+ * National ownership is kept alongside as an interest signal.
+ */
+async function applyLeagueAvailability(
+  pool: PlayerStat[],
+  league: LeagueCred,
+): Promise<PlayerStat[]> {
+  const { getLeagueSnapshot, playerKey } = await import("./espn-league.server");
+  const snap = await getLeagueSnapshot(league);
+  const rostered = new Set(snap.rosteredKeys);
+  return pool
+    .filter((p) => !rostered.has(playerKey(p.name, p.position)))
+    .map((p) => ({
+      ...p,
+      nationalOwnership: p.ownership,
+      ownership: 0,
+      ownershipSource: "league" as const,
+    }));
 }
 
 export const getRecommendations = createServerFn({ method: "GET" })
   .inputValidator((data: RecommendationInput) => data)
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
     const { getPlayerPool } = await import("./players.server");
-    const pool = await getPlayerPool();
+    const base = await getPlayerPool();
+    const pool = data.league?.leagueId ? await applyLeagueAvailability(base, data.league) : base;
     // No `limit` here — show every eligible player under the threshold, not
     // just a top handful. rankWaiverPool still applies its own hard ceiling.
     return rankWaiverPool(pool, {
       format: data.format,
       slot: data.slot,
-      maxOwnership: data.maxOwnership,
+      maxOwnership: data.league?.leagueId ? 101 : data.maxOwnership,
     });
   });
+
 
 export const getWatchlistPlayers = createServerFn({ method: "GET" })
   .inputValidator((data: { ids: string[]; format: ScoringFormat }) => data)
@@ -184,8 +213,11 @@ export interface AnalyzeInput {
   roster: RosterEntry[];
   maxOwnership: number;
   overrideSlot?: SlotPosition | null;
+  /** When present, waiver targets come from this ESPN league's free agents. */
+  league?: LeagueCred | null;
   /** Required. Verified server-side on every call — this is the real paywall. */
   licenseKey: string;
+
 }
 
 /** Projected weekly points for one roster entry, and whether it came from a real matched player record. */
@@ -237,14 +269,16 @@ export const analyzeTeam = createServerFn({ method: "POST" })
     const handcuffOfById = new Map(handcuffs.map((h) => [h.handcuff.id, h.starterName]));
 
     const rosterIds = new Set(data.roster.map((r) => r.id));
-    const recommendations = rankWaiverPool(
-      pool.filter((p) => !rosterIds.has(p.id)),
-      {
-        format: data.format,
-        slot: targetSlot,
-        maxOwnership: data.maxOwnership,
-      },
-    ).map((p) => ({ ...p, handcuffOf: handcuffOfById.get(p.id) ?? null }));
+    const available = pool.filter((p) => !rosterIds.has(p.id));
+    const wire = data.league?.leagueId
+      ? await applyLeagueAvailability(available, data.league)
+      : available;
+    const recommendations = rankWaiverPool(wire, {
+      format: data.format,
+      slot: targetSlot,
+      maxOwnership: data.league?.leagueId ? 101 : data.maxOwnership,
+    }).map((p) => ({ ...p, handcuffOf: handcuffOfById.get(p.id) ?? null }));
+
 
     return { verdicts, targetSlot, recommendations, rosterPoints, suggestedStarterIds, handcuffs };
   });

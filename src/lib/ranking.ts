@@ -43,8 +43,11 @@ export interface PlayerStat {
   ownershipChange?: number | null;
   /** Average draft position (ESPN), when available. */
   adp?: number | null;
-  /** Where the rostered % came from. */
-  ownershipSource?: "espn" | "estimate";
+  /** Where the rostered % came from. "league" = the user's own connected league. */
+  ownershipSource?: "espn" | "estimate" | "league";
+  /** League-wide ESPN rostered %, kept alongside league-specific availability. */
+  nationalOwnership?: number | null;
+
   /** Upcoming strength of schedule for the player's NFL team. */
   sos?: TeamSos | null;
   /** Most recent completed season's production (ESPN), when available. */
@@ -228,10 +231,14 @@ function buildReason(p: PlayerStat, format: ScoringFormat, projection: number): 
     else bits.push(`carrying a ${p.injury.toLowerCase()} tag, confirm status before kickoff`);
   }
 
-  const lead = `Projects around ${projection.toFixed(1)} pts/week at ${Math.round(p.ownership)}% rostered`;
+  const lead =
+    p.ownershipSource === "league"
+      ? `Projects around ${projection.toFixed(1)} pts/week and is free in your league (${Math.round(p.nationalOwnership ?? 0)}% rostered nationally)`
+      : `Projects around ${projection.toFixed(1)} pts/week at ${Math.round(p.ownership)}% rostered`;
   if (bits.length === 0)
     return `${lead}. Straight depth add with startable upside if the room thins out.`;
   return `${lead} — ${bits.slice(0, 2).join(", and ")}.`;
+
 }
 
 /** Score a single player 0-10 by projection, trend, opportunity, and format fit. */

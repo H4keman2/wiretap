@@ -12,7 +12,9 @@ import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
-import { useLeagueProfile, usePro } from "@/lib/league-store";
+import { importLeagueRoster } from "@/lib/league.functions";
+import { useEspnConnection, useLeagueProfile, usePro } from "@/lib/league-store";
+
 import { lineupFill, suggestStarterDefault } from "@/lib/lineup";
 import type { RealPosition, SlotPosition } from "@/lib/ranking";
 import { cn } from "@/lib/utils";
@@ -49,14 +51,36 @@ const POSITIONS: RealPosition[] = ["QB", "RB", "WR", "TE", "DEF", "K"];
 function Analyzer() {
   const { profile, update, loaded } = useLeagueProfile();
   const { isPro, key, loaded: proLoaded } = usePro();
+  const { connection, cred } = useEspnConnection();
   const [maxOwnership, setMaxOwnership] = useState(40);
   const [override, setOverride] = useState<SlotPosition | null>(null);
+  const [pulling, setPulling] = useState(false);
 
   const analysis = useMutation({ mutationFn: analyzeTeam });
 
   const roster = profile.roster;
   const starters = useMemo(() => roster.filter((r) => r.starter), [roster]);
   const fill = useMemo(() => lineupFill(roster, profile.config), [roster, profile.config]);
+
+  const pullLeagueRoster = async () => {
+    if (!cred || connection.teamId === null) return;
+    setPulling(true);
+    try {
+      const { entries, unmatched } = await importLeagueRoster({
+        data: { ...cred, teamId: connection.teamId },
+      });
+      update({ roster: entries });
+      toast.success(
+        unmatched.length > 0
+          ? `Pulled ${entries.length} players — ${unmatched.length} need a name check.`
+          : `Pulled all ${entries.length} players from your league team.`,
+      );
+    } catch {
+      toast.error("Couldn't pull that roster. Check your league details in Settings.");
+    } finally {
+      setPulling(false);
+    }
+  };
 
   useEffect(() => {
     if (!loaded || !isPro || !key || roster.length === 0) return;
@@ -67,15 +91,27 @@ function Analyzer() {
         roster,
         maxOwnership,
         overrideSlot: override,
+        league: cred,
         licenseKey: key,
       },
     });
     // Server re-verifies the license on every call regardless of client state,
     // so a stale or revoked key here simply results in a PRO_REQUIRED error.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loaded, isPro, key, roster, profile.format, profile.config, maxOwnership, override]);
+  }, [
+    loaded,
+    isPro,
+    key,
+    roster,
+    profile.format,
+    profile.config,
+    maxOwnership,
+    override,
+    cred?.leagueId,
+  ]);
 
   if (!proLoaded || !loaded) {
+
     return (
       <Page format={profile.format}>
         <Skeleton className="h-40 rounded-xl" />
@@ -120,6 +156,36 @@ function Analyzer() {
           </span>
         </div>
       </section>
+
+      {cred && (
+        <section className="space-y-2 rounded-xl border border-action/50 bg-card p-4">
+          <p className="text-sm font-bold">{connection.summary?.name}</p>
+          {connection.teamId === null ? (
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              Pick which team is yours in{" "}
+              <Link to="/settings" className="font-bold text-turf underline">
+                Settings
+              </Link>{" "}
+              to pull your roster in automatically.
+            </p>
+          ) : (
+            <>
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                Pull your current roster straight from your league — this replaces what's below.
+              </p>
+              <Button
+                size="sm"
+                className="h-9 w-full"
+                disabled={pulling}
+                onClick={pullLeagueRoster}
+              >
+                {pulling ? "Pulling your team…" : "Pull my roster from ESPN"}
+              </Button>
+            </>
+          )}
+        </section>
+      )}
+
 
       <RosterEditor
         roster={roster}
