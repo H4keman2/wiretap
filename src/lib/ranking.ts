@@ -43,8 +43,11 @@ export interface PlayerStat {
   ownershipChange?: number | null;
   /** Average draft position (ESPN), when available. */
   adp?: number | null;
-  /** Where the rostered % came from. */
-  ownershipSource?: "espn" | "estimate";
+  /** Where the rostered % came from. "league" = the user's own connected league. */
+  ownershipSource?: "espn" | "estimate" | "league";
+  /** League-wide ESPN rostered %, kept alongside league-specific availability. */
+  nationalOwnership?: number | null;
+
   /** Upcoming strength of schedule for the player's NFL team. */
   sos?: TeamSos | null;
   /** Most recent completed season's production (ESPN), when available. */
