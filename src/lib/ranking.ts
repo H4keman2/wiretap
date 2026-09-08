@@ -58,10 +58,41 @@ export interface RankedPlayer extends PlayerStat {
   trendDelta: number;
   trendLabel: "rising" | "stable" | "falling";
   reason: string;
+  /**
+   * Name of the rostered starter this player is the direct handcuff for,
+   * when the caller has roster context (Team Analyzer only). Undefined
+   * outside that context, never a signal that no handcuff exists.
+   */
+  handcuffOf?: string | null;
 }
 
 /** Reception value per catch by format. */
 const RECEPTION_VALUE: Record<ScoringFormat, number> = { std: 0, half: 0.5, ppr: 1 };
+
+/**
+ * How much of a player's normal weekly output to expect given a Sleeper
+ * injury tag. These are Sleeper's own vocabulary (Questionable/Doubtful/Out/
+ * IR/PUP/Suspended/NA, occasionally others). A flat 30% haircut for every
+ * tag treated "Out" and "Questionable" as equally risky, which understated
+ * genuinely healthy-ish questionable players and overstated hurt ones who
+ * are effectively droppable that week.
+ */
+const INJURY_MULTIPLIER: Record<string, number> = {
+  Questionable: 0.88,
+  Doubtful: 0.45,
+  Out: 0.15,
+  IR: 0.05,
+  PUP: 0.05,
+  NA: 0.15,
+  Suspended: 0.05,
+  COV: 0.4,
+};
+
+/** Expected fraction of normal output this week given an injury tag (1 = fully healthy). */
+export function injuryFactor(injury: string | null | undefined): number {
+  if (!injury) return 1;
+  return INJURY_MULTIPLIER[injury] ?? 0.75;
+}
 
 /** Rough weekly receptions expected at a given positional rank. */
 function expectedReceptions(position: RealPosition, posRank: number): number {
@@ -122,7 +153,7 @@ export function projectPoints(p: PlayerStat, format: ScoringFormat): number {
   if (p.depthOrder === 1) pts *= 1.12;
   else if (p.depthOrder && p.depthOrder >= 3) pts *= 0.82;
 
-  if (p.injury) pts *= 0.7;
+  pts *= injuryFactor(p.injury);
 
   return Math.round(pts * 10) / 10;
 }
@@ -190,7 +221,12 @@ function buildReason(p: PlayerStat, format: ScoringFormat, projection: number): 
   if (fit > 0.2) bits.push(`reception volume plays up in ${FORMAT_LABEL[format]}`);
   else if (fit < -0.2) bits.push(`carries and touchdowns travel well in ${FORMAT_LABEL[format]}`);
 
-  if (p.injury) bits.push(`carrying a ${p.injury.toLowerCase()} tag, confirm status first`);
+  if (p.injury) {
+    const f = injuryFactor(p.injury);
+    if (f <= 0.2) bits.push(`tagged ${p.injury} — treat as unlikely to play this week`);
+    else if (f <= 0.5) bits.push(`tagged ${p.injury} — real chance he sits, have a plan B`);
+    else bits.push(`carrying a ${p.injury.toLowerCase()} tag, confirm status before kickoff`);
+  }
 
   const lead = `Projects around ${projection.toFixed(1)} pts/week at ${Math.round(p.ownership)}% rostered`;
   if (bits.length === 0)

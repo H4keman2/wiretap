@@ -1,20 +1,28 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, Lock, Plus, Trash2 } from "lucide-react";
+import { ChevronRight, Lock, Plus, Shield, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/wire/Controls";
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
 import { useLeagueProfile, usePro } from "@/lib/league-store";
+import { lineupFill, suggestStarterDefault } from "@/lib/lineup";
 import type { RealPosition, SlotPosition } from "@/lib/ranking";
 import { cn } from "@/lib/utils";
-import { analyzeTeam, searchPlayers } from "@/lib/waivers.functions";
-import type { RosterEntry } from "@/lib/weakness";
+import {
+  analyzeTeam,
+  matchRosterPlayers,
+  searchPlayers,
+  type RosterPoint,
+} from "@/lib/waivers.functions";
+import type { LeagueConfig, RosterEntry } from "@/lib/weakness";
 
 export const Route = createFileRoute("/analyzer")({
   head: () => ({
@@ -48,6 +56,7 @@ function Analyzer() {
 
   const roster = profile.roster;
   const starters = useMemo(() => roster.filter((r) => r.starter), [roster]);
+  const fill = useMemo(() => lineupFill(roster, profile.config), [roster, profile.config]);
 
   useEffect(() => {
     if (!loaded || !isPro || !key || roster.length === 0) return;
@@ -85,16 +94,40 @@ function Analyzer() {
         <SectionLabel>Scoring format</SectionLabel>
         <FormatSelector value={profile.format} onChange={(format) => update({ format })} />
         <p className="px-1 text-[11px] text-muted-foreground">
-          Lineup slots and bench size live in{" "}
+          Starting lineup and bench size live in{" "}
           <Link to="/settings" className="font-bold text-turf underline">
             League settings
-          </Link>
-          . Starters {starters.length} · Bench {roster.length - starters.length} of{" "}
-          {profile.config.bench}.
+          </Link>{" "}
+          — every league's slots are different (3 starting WR, 2 FLEX, whatever yours runs), so
+          set it there once and it applies here automatically.
         </p>
+        <div className="flex flex-wrap gap-1.5">
+          {fill.map((f) => (
+            <span
+              key={f.slot}
+              className={cn(
+                "rounded px-2 py-1 text-[10px] font-black uppercase tabular-nums tracking-tight",
+                f.filled >= f.required
+                  ? "bg-action/15 text-turf"
+                  : "bg-destructive/10 text-destructive",
+              )}
+            >
+              {f.slot} {f.filled}/{f.required}
+            </span>
+          ))}
+          <span className="rounded bg-secondary px-2 py-1 text-[10px] font-black uppercase tabular-nums tracking-tight text-muted-foreground">
+            Bench {roster.length - starters.length}/{profile.config.bench}
+          </span>
+        </div>
       </section>
 
-      <RosterEditor roster={roster} onChange={(next) => update({ roster: next })} />
+      <RosterEditor
+        roster={roster}
+        config={profile.config}
+        rosterPoints={result?.rosterPoints}
+        suggestedStarterIds={result?.suggestedStarterIds}
+        onChange={(next) => update({ roster: next })}
+      />
 
       {roster.length === 0 && (
         <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
@@ -166,6 +199,35 @@ function Analyzer() {
             </div>
           </section>
 
+          {result.handcuffs.length > 0 && (
+            <section className="space-y-2">
+              <SectionLabel>Handcuffs available</SectionLabel>
+              <p className="px-1 text-[11px] text-muted-foreground">
+                The direct backup behind one of your starters — cheap insurance if that starter
+                gets hurt, and often only valuable to whoever owns the starter.
+              </p>
+              <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+                {result.handcuffs.map((h) => (
+                  <div key={h.handcuff.id} className="flex items-center gap-3 px-3 py-2.5">
+                    <Shield className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-bold">
+                        {h.handcuff.name}{" "}
+                        <span className="text-[10px] font-bold text-muted-foreground">
+                          {h.handcuff.team ?? "FA"} · {h.handcuff.position}
+                        </span>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">{h.reason}</p>
+                    </div>
+                    <span className="shrink-0 text-[11px] font-black tabular-nums text-muted-foreground">
+                      {Math.round(h.handcuff.ownership)}% owned
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className="space-y-3">
             <SectionLabel>Override position</SectionLabel>
             <PositionSelector
@@ -210,9 +272,15 @@ function Analyzer() {
 
 function RosterEditor({
   roster,
+  config,
+  rosterPoints,
+  suggestedStarterIds,
   onChange,
 }: {
   roster: RosterEntry[];
+  config: LeagueConfig;
+  rosterPoints?: RosterPoint[] | undefined;
+  suggestedStarterIds?: string[] | undefined;
   onChange: (next: RosterEntry[]) => void;
 }) {
   const [query, setQuery] = useState("");
@@ -220,6 +288,9 @@ function RosterEditor({
   const [options, setOptions] = useState<
     Array<{ id: string; name: string; team: string | null; position: string }>
   >([]);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     if (query.trim().length < 2) {
@@ -240,80 +311,211 @@ function RosterEditor({
     };
   }, [query]);
 
-  const add = (entry: RosterEntry) => {
+  const add = (entry: Omit<RosterEntry, "starter">) => {
     if (roster.some((r) => r.id === entry.id)) return;
-    onChange([...roster, entry]);
+    const starter = suggestStarterDefault(roster, entry.position, config);
+    onChange([...roster, { ...entry, starter }]);
     setQuery("");
     setOptions([]);
   };
 
+  const handleImport = async () => {
+    const lines = Array.from(
+      new Set(
+        bulkText
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean),
+      ),
+    );
+    if (lines.length === 0) return;
+
+    setImporting(true);
+    try {
+      const results = await matchRosterPlayers({ data: { lines } });
+      let working = roster;
+      let added = 0;
+      let unmatched = 0;
+      let skipped = 0;
+      for (const res of results) {
+        if (working.some((r) => r.id === res.id)) {
+          skipped += 1;
+          continue;
+        }
+        const pos = res.position ?? position;
+        const starter = suggestStarterDefault(working, pos, config);
+        working = [...working, { id: res.id, name: res.name, position: pos, starter }];
+        if (res.matched) added += 1;
+        else unmatched += 1;
+      }
+      onChange(working);
+      setBulkText("");
+      setBulkOpen(false);
+
+      if (added === 0 && unmatched === 0) {
+        toast.error(skipped > 0 ? "Already on your roster." : "Couldn't read any names there.");
+      } else {
+        const bits = [`${added} matched`];
+        if (unmatched > 0) bits.push(`${unmatched} unmatched — check name/position`);
+        if (skipped > 0) bits.push(`${skipped} already on roster`);
+        toast.success(`Imported: ${bits.join(", ")}.`);
+      }
+    } catch {
+      toast.error("Import failed, try again in a moment.");
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const pointsById = useMemo(
+    () => new Map((rosterPoints ?? []).map((rp) => [rp.id, rp])),
+    [rosterPoints],
+  );
+
+  const teamAverage = useMemo(() => {
+    const starterPoints = roster
+      .filter((r) => r.starter)
+      .map((r) => pointsById.get(r.id))
+      .filter((rp): rp is RosterPoint => !!rp);
+    if (starterPoints.length === 0) return null;
+    const avg = starterPoints.reduce((sum, rp) => sum + rp.projection, 0) / starterPoints.length;
+    const unmatchedCount = starterPoints.filter((rp) => !rp.matched).length;
+    return { avg, unmatchedCount, of: starterPoints.length };
+  }, [roster, pointsById]);
+
   return (
     <section className="space-y-3">
-      <SectionLabel>Your roster</SectionLabel>
+      <div className="flex items-center justify-between">
+        <SectionLabel>Your roster</SectionLabel>
+        <button
+          type="button"
+          onClick={() => setBulkOpen((v) => !v)}
+          className="text-[11px] font-bold text-turf underline"
+        >
+          {bulkOpen ? "Add one at a time instead" : "Paste in your whole roster"}
+        </button>
+      </div>
 
-      <div className="rounded-xl border border-border bg-card p-3">
-        <div className="flex gap-2">
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Add player by name"
-            className="h-9 text-sm"
+      {bulkOpen ? (
+        <div className="space-y-2 rounded-xl border border-border bg-card p-3">
+          <Textarea
+            value={bulkText}
+            onChange={(e) => setBulkText(e.target.value)}
+            placeholder={"One player per line, e.g.\nBo Nix\nKenneth Walker RB\nAmon-Ra St. Brown"}
+            className="min-h-28 text-sm"
           />
-          <select
-            value={position}
-            onChange={(e) => setPosition(e.target.value as RealPosition)}
-            className="h-9 rounded-md border border-input bg-card px-2 text-xs font-bold"
-            aria-label="Position for manual add"
-          >
-            {POSITIONS.map((p) => (
-              <option key={p} value={p}>
-                {p === "DEF" ? "DST" : p}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] text-muted-foreground">
+              A trailing position (RB, WR…) helps disambiguate common names.
+            </p>
+            <Button
+              size="sm"
+              className="h-9 shrink-0"
+              disabled={importing || !bulkText.trim()}
+              onClick={handleImport}
+            >
+              {importing ? "Matching…" : "Import"}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-card p-3">
+          <div className="flex gap-2">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Add player by name"
+              className="h-9 text-sm"
+            />
+            <select
+              value={position}
+              onChange={(e) => setPosition(e.target.value as RealPosition)}
+              className="h-9 rounded-md border border-input bg-card px-2 text-xs font-bold"
+              aria-label="Position for manual add"
+            >
+              {POSITIONS.map((p) => (
+                <option key={p} value={p}>
+                  {p === "DEF" ? "DST" : p}
+                </option>
+              ))}
+            </select>
+            <Button
+              size="sm"
+              className="h-9 shrink-0"
+              onClick={() =>
+                query.trim() &&
+                add({
+                  id: `manual-${query.trim().toLowerCase()}`,
+                  name: query.trim(),
+                  position,
+                })
+              }
+            >
+              <Plus className="size-4" />
+            </Button>
+          </div>
+
+          {options.length > 0 && (
+            <ul className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border">
+              {options.map((o) => (
+                <li key={o.id}>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-bold hover:bg-secondary"
+                    onClick={() =>
+                      add({
+                        id: o.id,
+                        name: o.name,
+                        position: o.position as RealPosition,
+                      })
+                    }
+                  >
+                    <span>{o.name}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {o.team ?? "FA"} • {o.position === "DEF" ? "DST" : o.position}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {roster.length > 0 && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2">
+          <p className="text-[11px] text-muted-foreground">
+            {teamAverage ? (
+              <>
+                Starters average{" "}
+                <span className="font-black tabular-nums text-foreground">
+                  {teamAverage.avg.toFixed(1)} pts/wk
+                </span>{" "}
+                ({teamAverage.of} starter{teamAverage.of === 1 ? "" : "s"})
+                {teamAverage.unmatchedCount > 0 &&
+                  ` — ${teamAverage.unmatchedCount} unmatched, scored at a generic baseline`}
+              </>
+            ) : (
+              "Running the analysis to score your roster…"
+            )}
+          </p>
           <Button
+            type="button"
+            variant="outline"
             size="sm"
-            className="h-9 shrink-0"
-            onClick={() =>
-              query.trim() &&
-              add({
-                id: `manual-${query.trim().toLowerCase()}`,
-                name: query.trim(),
-                position,
-                starter: true,
-              })
-            }
+            className="h-7 shrink-0 text-[11px]"
+            disabled={!suggestedStarterIds}
+            onClick={() => {
+              if (!suggestedStarterIds) return;
+              const set = new Set(suggestedStarterIds);
+              onChange(roster.map((r) => ({ ...r, starter: set.has(r.id) })));
+              toast.success("Lineup set to your highest-projected legal starters.");
+            }}
           >
-            <Plus className="size-4" />
+            Auto-set lineup
           </Button>
         </div>
-
-        {options.length > 0 && (
-          <ul className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border">
-            {options.map((o) => (
-              <li key={o.id}>
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-bold hover:bg-secondary"
-                  onClick={() =>
-                    add({
-                      id: o.id,
-                      name: o.name,
-                      position: o.position as RealPosition,
-                      starter: true,
-                    })
-                  }
-                >
-                  <span>{o.name}</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {o.team ?? "FA"} • {o.position === "DEF" ? "DST" : o.position}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      )}
 
       {roster.length > 0 && (
         <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
@@ -325,16 +527,22 @@ function RosterEditor({
             // fallback, but it was invisible — flag it so a typo (or a name
             // that just isn't in the pool) doesn't read as a real score.
             const unmatched = r.id.startsWith("manual-");
+            const pts = pointsById.get(r.id);
             return (
               <div key={r.id} className="flex items-center gap-2 px-3 py-2">
                 <span className="w-9 shrink-0 text-[10px] font-black uppercase text-muted-foreground">
                   {r.position === "DEF" ? "DST" : r.position}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-sm font-bold">{r.name}</span>
+                {pts && (
+                  <span className="shrink-0 text-[11px] font-bold tabular-nums text-muted-foreground">
+                    {pts.projection.toFixed(1)}
+                  </span>
+                )}
                 {unmatched && (
                   <span
                     className="shrink-0 rounded bg-chart-4/20 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-tight text-chart-4"
-                    title="Not matched to a real player record — scored with a generic replacement-level baseline instead of this player's actual stats. Pick a name from the search suggestions above for an accurate score."
+                    title="Not matched to a real player record — scored with a generic replacement-level baseline instead of this player's actual stats. Pick a name from the search suggestions above, or re-import with the position included, for an accurate score."
                   >
                     Unmatched
                   </span>

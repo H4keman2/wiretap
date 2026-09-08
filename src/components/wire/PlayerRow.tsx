@@ -93,6 +93,14 @@ export function PlayerRow({
                   New
                 </span>
               )}
+              {player.handcuffOf && (
+                <span
+                  className="shrink-0 rounded bg-chart-4/20 px-1 py-px text-[9px] font-black uppercase tracking-wider text-chart-4"
+                  title={`Direct backup to your ${player.handcuffOf} — insurance if he's hurt or benched`}
+                >
+                  Handcuff
+                </span>
+              )}
               <span className="ml-auto flex shrink-0 items-center gap-1.5 self-center">
                 <WatchButton player={player} />
                 <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
