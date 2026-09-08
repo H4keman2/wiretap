@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
+import type { LeagueCred, LeagueSummary } from "./league.functions";
 import { verifyLicense } from "./license.server";
+
 import type { ScoringFormat } from "./ranking";
 import { DEFAULT_LEAGUE, type LeagueConfig, type RosterEntry } from "./weakness";
 
