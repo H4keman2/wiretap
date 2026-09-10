@@ -155,6 +155,12 @@ function WaiverBrowser() {
         )}
 
 
+        <OwnershipCompare
+          players={data}
+          connected={!!cred}
+          leagueName={connection.summary?.name ?? null}
+        />
+
         <div className="space-y-4">
           {data?.map((player, i) => (
             <PlayerRow
