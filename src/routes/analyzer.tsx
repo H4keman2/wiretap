@@ -58,7 +58,22 @@ function Analyzer() {
   const [override, setOverride] = useState<SlotPosition | null>(null);
   const [pulling, setPulling] = useState(false);
 
-  const analysis = useMutation({ mutationFn: analyzeTeam });
+  const analysis = useMutation({
+    mutationFn: analyzeTeam,
+    onSuccess: (res) => {
+      // Injury tags on starters are time-critical, so surface them up front
+      // rather than waiting for the user to scroll to the section.
+      const urgent = res.injuryAlerts.filter((a) => a.severity !== "questionable");
+      const alert = urgent[0] ?? res.injuryAlerts[0];
+      if (!alert) return;
+      const count = res.injuryAlerts.length;
+      toast.warning(`${alert.playerName} — ${alert.injury}`, {
+        description: alert.best
+          ? `Start ${alert.best.name} instead (${alert.best.projection} proj pts).${count > 1 ? ` ${count - 1} more starter${count > 2 ? "s" : ""} tagged.` : ""}`
+          : `No healthy replacement found at ${alert.position}.`,
+      });
+    },
+  });
 
   const roster = profile.roster;
   const starters = useMemo(() => roster.filter((r) => r.starter), [roster]);
