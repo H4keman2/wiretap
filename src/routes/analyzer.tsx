@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Lock, Plus, Shield, Trash2 } from "lucide-react";
+
+import { InjuryAlerts } from "@/components/wire/InjuryAlerts";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -264,6 +266,8 @@ function Analyzer() {
               ))}
             </div>
           </section>
+
+          <InjuryAlerts alerts={result.injuryAlerts} />
 
           {result.handcuffs.length > 0 && (
             <section className="space-y-2">
