@@ -6,6 +6,7 @@ import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/
 import { LIVE_REFRESH_MS, LiveStatusNote, useLiveWatch } from "@/components/wire/LiveWatch";
 import { PlayerRow } from "@/components/wire/PlayerRow";
 
+import { OwnershipCompare } from "@/components/wire/OwnershipCompare";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
 import { Skeleton } from "@/components/ui/skeleton";
