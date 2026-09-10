@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { findHandcuffs, type HandcuffSuggestion } from "./handcuffs";
+import { findInjuredStarters, type InjuryAlert } from "./injuries";
 import { requireValidLicense } from "./license.server";
 import { suggestLineup } from "./lineup";
 import {
@@ -237,6 +238,8 @@ export interface AnalyzeOutput {
   suggestedStarterIds: string[];
   /** Direct backups to rostered starters, available on the wire. */
   handcuffs: HandcuffSuggestion[];
+  /** Starters carrying an injury tag, with the best substitution for each. */
+  injuryAlerts: InjuryAlert[];
 }
 
 export const analyzeTeam = createServerFn({ method: "POST" })
@@ -280,5 +283,22 @@ export const analyzeTeam = createServerFn({ method: "POST" })
     }).map((p) => ({ ...p, handcuffOf: handcuffOfById.get(p.id) ?? null }));
 
 
-    return { verdicts, targetSlot, recommendations, rosterPoints, suggestedStarterIds, handcuffs };
+    const injuryAlerts = findInjuredStarters(
+      data.roster,
+      stats,
+      pool,
+      data.config,
+      data.format,
+      Math.max(data.maxOwnership, 60),
+    );
+
+    return {
+      verdicts,
+      targetSlot,
+      recommendations,
+      rosterPoints,
+      suggestedStarterIds,
+      handcuffs,
+      injuryAlerts,
+    };
   });
