@@ -160,7 +160,7 @@ export function findInjuredStarters(
         (r) =>
           !starterIds.has(r.id) &&
           r.id !== entry.id &&
-          eligible(r.position, entry.position, config),
+          eligible(r.position, slots.get(entry.id) ?? entry.position),
       )
       .map((r) => stats.get(r.id))
       .filter((p): p is PlayerStat => !!p && playable(p))
@@ -172,7 +172,7 @@ export function findInjuredStarters(
           !rosterIds.has(p.id) &&
           p.ownership <= maxWireOwnership &&
           playable(p) &&
-          eligible(p.position, entry.position, config),
+          eligible(p.position, slots.get(entry.id) ?? entry.position),
       )
       .map((p) => toOption(p, format, "wire"))
       .sort((a, b) => b.projection - a.projection)
