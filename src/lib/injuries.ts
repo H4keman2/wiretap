@@ -61,16 +61,52 @@ function verdictFor(severity: InjurySeverity, injury: string, name: string): str
   return `${injury} — ${first} should play, but confirm his status before kickoff.`;
 }
 
-/** Whether `candidate` can legally fill the slot the injured player occupies. */
-function eligible(
-  candidate: RealPosition,
-  injured: RealPosition,
+type OccupiedSlot = "FLEX" | RealPosition;
+
+/**
+ * Whether `candidate` can legally fill the slot the injured player
+ * occupies. Direct slots (QB, dedicated RB/WR/TE, K, DEF) only accept
+ * their own position; FLEX slots accept RB/WR/TE.
+ */
+function eligible(candidate: RealPosition, slot: OccupiedSlot): boolean {
+  if (slot === "FLEX") return FLEX_ELIGIBLE.includes(candidate);
+  return candidate === slot;
+}
+
+/**
+ * Map each starter to the slot they actually occupy, given the league's
+ * slot config. RB/WR/TE starters beyond their position's direct
+ * requirement spill into FLEX, in roster order. Everyone else fills their
+ * own direct slot.
+ */
+function starterSlots(
+  roster: RosterEntry[],
   config: LeagueConfig,
-): boolean {
-  if (candidate === injured) return true;
-  return (
-    config.FLEX > 0 && FLEX_ELIGIBLE.includes(injured) && FLEX_ELIGIBLE.includes(candidate)
-  );
+): Map<string, OccupiedSlot> {
+  const slots = new Map<string, OccupiedSlot>();
+  const directUsed: Partial<Record<RealPosition, number>> = {};
+  let flexUsed = 0;
+
+  for (const entry of roster) {
+    if (!entry.starter) continue;
+    const pos = entry.position;
+    const directNeed = config[directSlotFor(pos)];
+    const used = directUsed[pos] ?? 0;
+
+    if (used < directNeed) {
+      directUsed[pos] = used + 1;
+      slots.set(entry.id, pos);
+    } else if (config.FLEX > 0 && FLEX_ELIGIBLE.includes(pos) && flexUsed < config.FLEX) {
+      flexUsed += 1;
+      slots.set(entry.id, "FLEX");
+    } else {
+      // Overfilled/illegal lineup — treat as their direct slot so we still
+      // surface the alert with same-position replacements.
+      slots.set(entry.id, pos);
+    }
+  }
+
+  return slots;
 }
 
 function toOption(
