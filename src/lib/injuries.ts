@@ -141,6 +141,7 @@ export function findInjuredStarters(
 ): InjuryAlert[] {
   const rosterIds = new Set(roster.map((r) => r.id));
   const starterIds = new Set(roster.filter((r) => r.starter).map((r) => r.id));
+  const slots = starterSlots(roster, config);
   const alerts: InjuryAlert[] = [];
 
   for (const entry of roster) {
