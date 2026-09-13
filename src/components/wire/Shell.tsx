@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ClipboardList, ListFilter, Settings2, Star } from "lucide-react";
+import { ArrowLeftRight, ClipboardList, ListFilter, Settings2, Star } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { ScoringFormat } from "@/lib/ranking";
@@ -29,6 +29,7 @@ export function AppHeader() {
 const TABS = [
   { to: "/", label: "Waiver", icon: ListFilter },
   { to: "/watchlist", label: "Saved", icon: Star },
+  { to: "/trade", label: "Trade", icon: ArrowLeftRight },
   { to: "/analyzer", label: "Roster", icon: ClipboardList },
   { to: "/settings", label: "Settings", icon: Settings2 },
 ] as const;
@@ -41,7 +42,7 @@ const TABS = [
  */
 export function TopNav() {
   return (
-    <nav className="flex items-center justify-around border-b border-border bg-card px-6 py-2.5">
+    <nav className="flex items-center justify-around border-b border-border bg-card px-2 py-2.5">
       {TABS.map(({ to, label, icon: Icon }) => (
         <Link
           key={to}
