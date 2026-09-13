@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalyzerRouteImport } from './routes/analyzer'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as TradeRouteImport } from './routes/trade'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TradeRoute = TradeRouteImport.update({
+  id: '/trade',
+  path: '/trade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analyzer': typeof AnalyzerRoute
   '/settings': typeof SettingsRoute
+  '/trade': typeof TradeRoute
   '/watchlist': typeof WatchlistRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analyzer': typeof AnalyzerRoute
   '/settings': typeof SettingsRoute
+  '/trade': typeof TradeRoute
   '/watchlist': typeof WatchlistRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analyzer': typeof AnalyzerRoute
   '/settings': typeof SettingsRoute
+  '/trade': typeof TradeRoute
   '/watchlist': typeof WatchlistRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/analyzer' | '/settings' | '/watchlist'
+  fullPaths: '/' | '/analyzer' | '/settings' | '/trade' | '/watchlist'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analyzer' | '/settings' | '/watchlist'
-  id: '__root__' | '/' | '/analyzer' | '/settings' | '/watchlist'
+  to: '/' | '/analyzer' | '/settings' | '/trade' | '/watchlist'
+  id: '__root__' | '/' | '/analyzer' | '/settings' | '/trade' | '/watchlist'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyzerRoute: typeof AnalyzerRoute
   SettingsRoute: typeof SettingsRoute
+  TradeRoute: typeof TradeRoute
   WatchlistRoute: typeof WatchlistRoute
 }
 
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trade': {
+      id: '/trade'
+      path: '/trade'
+      fullPath: '/trade'
+      preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/watchlist': {
       id: '/watchlist'
       path: '/watchlist'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyzerRoute: AnalyzerRoute,
   SettingsRoute: SettingsRoute,
+  TradeRoute: TradeRoute,
   WatchlistRoute: WatchlistRoute,
 }
 export const routeTree = rootRouteImport

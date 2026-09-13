@@ -42,7 +42,7 @@ const TABS = [
  */
 export function TopNav() {
   return (
-    <nav className="flex items-center justify-around border-b border-border bg-card px-6 py-2.5">
+    <nav className="flex items-center justify-around border-b border-border bg-card px-2 py-2.5">
       {TABS.map(({ to, label, icon: Icon }) => (
         <Link
           key={to}
