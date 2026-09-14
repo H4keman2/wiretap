@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowLeftRight, X } from "lucide-react";
+import { ArrowLeftRight, Plus, X } from "lucide-react";
 import { useState } from "react";
 
 import { FormatSelector } from "@/components/wire/Controls";
@@ -16,17 +16,17 @@ import { getWatchlistPlayers, searchPlayers } from "@/lib/waivers.functions";
 export const Route = createFileRoute("/trade")({
   head: () => ({
     meta: [
-      { title: "Trade Analyzer — Compare Two Fantasy Players" },
+      { title: "Trade Analyzer — Compare Multi-Player Fantasy Trades" },
       {
         name: "description",
         content:
-          "Compare any two fantasy football players side by side on projections, rostered percentage, last-season production, trend and strength of schedule before you offer a trade.",
+          "Compare fantasy football trades of any size side by side on projections, rostered percentage, last-season production, trend and strength of schedule before you send the offer.",
       },
       { property: "og:title", content: "Wire Tap Trade Analyzer" },
       {
         property: "og:description",
         content:
-          "Side-by-side player comparison with a clear verdict on which side of the trade wins.",
+          "Multi-player trade comparison with a clear verdict on which side of the deal wins.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -37,14 +37,14 @@ export const Route = createFileRoute("/trade")({
 
 type Pick = { id: string; name: string; team: string | null; position: string };
 
-function PlayerPicker({
+function PlayerSearch({
   slotLabel,
-  value,
-  onChange,
+  exclude,
+  onAdd,
 }: {
   slotLabel: string;
-  value: Pick | null;
-  onChange: (p: Pick | null) => void;
+  exclude: string[];
+  onAdd: (p: Pick) => void;
 }) {
   const [query, setQuery] = useState("");
 
@@ -55,64 +55,38 @@ function PlayerPicker({
     staleTime: 1000 * 60 * 5,
   });
 
-  if (value) {
-    const color = teamColor(value.team);
-    return (
-      <div
-        className="flex items-center justify-between gap-2 rounded-xl border-2 bg-card p-3"
-        style={{ borderColor: color, boxShadow: `0 0 0 1px ${color}44` }}
-      >
-        <div className="min-w-0">
-          <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
-            {slotLabel}
-          </p>
-          <p className="truncate font-display text-lg uppercase leading-none">{value.name}</p>
-          <p className="mt-0.5 text-[10px] font-bold uppercase text-muted-foreground">
-            {value.team ?? "Free agent"} • {value.position}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            onChange(null);
-            setQuery("");
-          }}
-          aria-label={`Remove ${value.name}`}
-          className="shrink-0 rounded-lg border border-border p-1.5 text-muted-foreground"
-        >
-          <X className="size-4" strokeWidth={3} />
-        </button>
-      </div>
-    );
-  }
+  const visible = results?.filter((r) => !exclude.includes(r.id));
 
   return (
-    <div className="space-y-2 rounded-xl border border-border bg-card p-3">
-      <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
-        {slotLabel}
-      </p>
+    <div className="space-y-2">
       <input
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search a player by name…"
-        aria-label={`${slotLabel} — search a player`}
+        placeholder="Add a player by name…"
+        aria-label={`${slotLabel} — add a player`}
         className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium outline-none placeholder:text-muted-foreground/70 focus:border-action"
       />
       {query.trim().length >= 2 && (
         <div className="space-y-1">
           {isFetching && !results && <Skeleton className="h-8 rounded-lg" />}
-          {results?.length === 0 && (
+          {visible?.length === 0 && (
             <p className="text-[11px] text-muted-foreground">No player matches that name.</p>
           )}
-          {results?.map((r) => (
+          {visible?.map((r) => (
             <button
               key={r.id}
               type="button"
-              onClick={() => onChange(r)}
+              onClick={() => {
+                onAdd(r);
+                setQuery("");
+              }}
               className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-background px-2.5 py-2 text-left"
             >
-              <span className="truncate text-xs font-bold">{r.name}</span>
+              <span className="flex min-w-0 items-center gap-1.5">
+                <Plus className="size-3 shrink-0 text-action" strokeWidth={3} />
+                <span className="truncate text-xs font-bold">{r.name}</span>
+              </span>
               <span className="shrink-0 text-[10px] font-bold uppercase text-muted-foreground">
                 {r.team ?? "FA"} • {r.position}
               </span>
@@ -124,13 +98,72 @@ function PlayerPicker({
   );
 }
 
+function SidePicker({
+  slotLabel,
+  players,
+  exclude,
+  onChange,
+}: {
+  slotLabel: string;
+  players: Pick[];
+  exclude: string[];
+  onChange: (p: Pick[]) => void;
+}) {
+  return (
+    <div className="space-y-2 rounded-xl border border-border bg-card p-3">
+      <div className="flex items-center justify-between">
+        <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
+          {slotLabel}
+        </p>
+        <p className="text-[9px] font-bold uppercase text-muted-foreground">
+          {players.length === 0
+            ? "No players yet"
+            : `${players.length} player${players.length === 1 ? "" : "s"}`}
+        </p>
+      </div>
+
+      {players.map((p) => {
+        const color = teamColor(p.team);
+        return (
+          <div
+            key={p.id}
+            className="flex items-center justify-between gap-2 rounded-lg border-2 bg-background p-2.5"
+            style={{ borderColor: color, boxShadow: `0 0 0 1px ${color}44` }}
+          >
+            <div className="min-w-0">
+              <p className="truncate font-display text-base uppercase leading-none">{p.name}</p>
+              <p className="mt-0.5 text-[10px] font-bold uppercase text-muted-foreground">
+                {p.team ?? "Free agent"} • {p.position}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onChange(players.filter((x) => x.id !== p.id))}
+              aria-label={`Remove ${p.name}`}
+              className="shrink-0 rounded-lg border border-border p-1.5 text-muted-foreground"
+            >
+              <X className="size-4" strokeWidth={3} />
+            </button>
+          </div>
+        );
+      })}
+
+      <PlayerSearch
+        slotLabel={slotLabel}
+        exclude={exclude}
+        onAdd={(p) => onChange([...players, p])}
+      />
+    </div>
+  );
+}
+
 function TradePage() {
   const [format, setFormat] = useState<ScoringFormat>("ppr");
-  const [a, setA] = useState<Pick | null>(null);
-  const [b, setB] = useState<Pick | null>(null);
+  const [a, setA] = useState<Pick[]>([]);
+  const [b, setB] = useState<Pick[]>([]);
 
-  const ids = [a?.id, b?.id].filter(Boolean) as string[];
-  const both = !!a && !!b;
+  const ids = [...a, ...b].map((p) => p.id);
+  const both = a.length > 0 && b.length > 0;
 
   const { data, isPending, isError } = useQuery({
     queryKey: ["trade", format, ids.join(",")],
@@ -139,20 +172,21 @@ function TradePage() {
     staleTime: 1000 * 60 * 10,
   });
 
-  const playerA = data?.find((p) => p.id === a?.id) ?? null;
-  const playerB = data?.find((p) => p.id === b?.id) ?? null;
-  const analysis = playerA && playerB ? analyzeTrade(playerA, playerB, format) : null;
+  const sideA = a.map((p) => data?.find((d) => d.id === p.id)).filter((p) => !!p);
+  const sideB = b.map((p) => data?.find((d) => d.id === p.id)).filter((p) => !!p);
+  const ready = both && !!data && sideA.length === a.length && sideB.length === b.length;
+  const analysis = ready ? analyzeTrade(sideA, sideB, format) : null;
 
-  const colorA = teamColor(playerA?.team ?? a?.team ?? null);
-  const colorB = teamColor(playerB?.team ?? b?.team ?? null);
+  const colorA = teamColor(a[0]?.team ?? null);
+  const colorB = teamColor(b[0]?.team ?? null);
 
   return (
     <Page format={format}>
       <section className="space-y-1">
         <h1 className="font-display text-3xl uppercase leading-none">Trade Analyzer</h1>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Put two players head to head on projections, rostered %, proven production, momentum and
-          upcoming matchups — then trade before the wire moves.
+          Stack any number of players on each side — 1-for-1 or a full package — and compare
+          projections, rostered %, proven production, momentum and upcoming matchups.
         </p>
       </section>
 
@@ -160,18 +194,18 @@ function TradePage() {
 
       <section className="space-y-3">
         <SectionLabel>The two sides</SectionLabel>
-        <PlayerPicker slotLabel="You give up" value={a} onChange={setA} />
+        <SidePicker slotLabel="You give up" players={a} exclude={ids} onChange={setA} />
         <div className="flex items-center justify-center">
           <span className="rounded-full border border-border bg-card p-2 text-muted-foreground">
             <ArrowLeftRight className="size-4" strokeWidth={3} />
           </span>
         </div>
-        <PlayerPicker slotLabel="You get back" value={b} onChange={setB} />
+        <SidePicker slotLabel="You get back" players={b} exclude={ids} onChange={setB} />
       </section>
 
       {!both && (
         <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-          Pick a player on each side to see the comparison and a verdict.
+          Add at least one player to each side to see the comparison and a verdict.
         </p>
       )}
 
@@ -188,25 +222,25 @@ function TradePage() {
         </p>
       )}
 
-      {both && data && (!playerA || !playerB) && (
+      {both && data && !ready && (
         <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-          One of those players has no current data — pick someone else to compare.
+          One of those players has no current data — swap him out to compare.
         </p>
       )}
 
-      {analysis && playerA && playerB && (
+      {analysis && (
         <>
           <section
             className={cn(
               "rounded-xl border-2 p-4",
-              analysis.verdict.side === "even" ? "border-border bg-card" : "bg-depth text-depth-foreground",
+              analysis.verdict.side === "even"
+                ? "border-border bg-card"
+                : "bg-depth text-depth-foreground",
             )}
             style={
               analysis.verdict.side === "even"
                 ? undefined
-                : {
-                    borderColor: analysis.verdict.side === "a" ? colorA : colorB,
-                  }
+                : { borderColor: analysis.verdict.side === "a" ? colorA : colorB }
             }
           >
             <p className="text-[10px] font-black uppercase tracking-wider text-action">Verdict</p>
@@ -221,14 +255,14 @@ function TradePage() {
             <div className="overflow-hidden rounded-xl border border-border bg-card">
               <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-border px-3 py-2">
                 <p className="truncate text-[11px] font-black uppercase" style={{ color: colorA }}>
-                  {playerA.name}
+                  {sideA.map((p) => p.name).join(" + ")}
                 </p>
                 <span className="text-[9px] font-black uppercase text-muted-foreground">vs</span>
                 <p
                   className="truncate text-right text-[11px] font-black uppercase"
                   style={{ color: colorB }}
                 >
-                  {playerB.name}
+                  {sideB.map((p) => p.name).join(" + ")}
                 </p>
               </div>
               {analysis.metrics.map((m) => (
@@ -263,20 +297,13 @@ function TradePage() {
           </section>
 
           <section className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-border bg-card p-3">
-              <p className="font-display text-base uppercase leading-none">{playerA.name}</p>
-              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-                {playerA.reason}
-              </p>
-              <SosSection sos={playerA.sos} />
-            </div>
-            <div className="rounded-xl border border-border bg-card p-3">
-              <p className="font-display text-base uppercase leading-none">{playerB.name}</p>
-              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-                {playerB.reason}
-              </p>
-              <SosSection sos={playerB.sos} />
-            </div>
+            {[...sideA, ...sideB].map((p) => (
+              <div key={p.id} className="rounded-xl border border-border bg-card p-3">
+                <p className="font-display text-base uppercase leading-none">{p.name}</p>
+                <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{p.reason}</p>
+                <SosSection sos={p.sos} />
+              </div>
+            ))}
           </section>
 
           <ProxyNote />
