@@ -181,18 +181,30 @@ async function build(): Promise<Map<string, TeamSos>> {
   const min = Math.min(...values);
   const max = Math.max(...values);
 
-  const weeks = Array.from({ length: WINDOW }, (_, i) => week + i).filter((w) => w <= 18);
-  const results = await Promise.all(weeks.map((w) => weekMatchups(year, w)));
+  const probed = Array.from({ length: WINDOW + LOOKAHEAD_SLACK }, (_, i) => week + i).filter(
+    (w) => w <= 18,
+  );
+  const probedResults = await Promise.all(probed.map((w) => weekMatchups(year, w)));
 
-  if (results.every((pairs) => pairs.length === 0)) {
+  if (probedResults.every((pairs) => pairs.length === 0)) {
     throw new Error(
-      `[SOS] No regular-season matchups returned for ${year}, weeks ${weeks.join(", ")}`,
+      `[SOS] No upcoming regular-season matchups returned for ${year}, weeks ${probed.join(", ")}`,
     );
   }
+
+  // Drop weeks already played out, then keep the next WINDOW weeks that still
+  // have games left, so the list rolls forward as each week finishes.
+  const upcoming = probed
+    .map((w, i) => ({ week: w, pairs: probedResults[i]! }))
+    .filter((entry) => entry.pairs.length > 0)
+    .slice(0, WINDOW);
+  const weeks = upcoming.map((entry) => entry.week);
+  const results = upcoming.map((entry) => entry.pairs);
 
   const byTeam = new Map<string, SosMatchup[]>();
   results.forEach((pairs, i) => {
     const w = weeks[i]!;
+
     for (const pair of pairs) {
       const allowed = defense.get(pair.opponent);
       const difficulty = allowed == null ? 5 : toDifficulty(allowed, min, max);
