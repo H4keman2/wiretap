@@ -15,15 +15,18 @@ import type { SosHealth, SosMatchup, TeamSos } from "./sos";
 
 export type { SosHealth, SosMatchup, TeamSos };
 
-const TTL_MS = 1000 * 60 * 60 * 12;
+const TTL_MS = 1000 * 60 * 60 * 3;
 /**
- * When coverage is degraded we deliberately do NOT cache for 12h — the next
- * request past this cooldown re-probes ESPN instead of serving a thin map.
+ * When coverage is degraded we deliberately do NOT cache for the full TTL — the
+ * next request past this cooldown re-probes ESPN instead of serving a thin map.
  */
 const DEGRADED_RETRY_MS = 1000 * 30;
 /** Below this many teams with matchups, coverage counts as degraded. */
 const MIN_TEAMS_WITH_MATCHUPS = 28;
 const WINDOW = 4;
+/** Extra weeks probed so finished weeks can be dropped and still fill the window. */
+const LOOKAHEAD_SLACK = 2;
+
 const ESPN_SITE_API = "https://site.web.api.espn.com/apis";
 
 const ABBR_FIX: Record<string, string> = { WSH: "WAS" };
@@ -47,13 +50,16 @@ interface StandingsNode {
 interface ScoreboardResponse {
   events?: Array<{
     week?: { number?: number };
+    status?: { type?: { completed?: boolean; state?: string } };
     competitions?: Array<{
+      status?: { type?: { completed?: boolean; state?: string } };
       competitors?: Array<{ homeAway?: string; team?: { abbreviation?: string } }>;
     }>;
   }>;
   season?: { year?: number; type?: number };
   week?: { number?: number };
 }
+
 
 function seasonYear(): number {
   const now = new Date();
@@ -115,13 +121,23 @@ async function currentWeek(): Promise<number> {
   return 1; // pre-season or offseason: look ahead from week 1
 }
 
+/**
+ * Upcoming matchups for a week. Games that have already finished are skipped,
+ * so a week rolls off the window as soon as it is played out.
+ */
 async function weekMatchups(year: number, week: number) {
   const board = await json<ScoreboardResponse>(
     `${ESPN_SITE_API}/site/v2/sports/football/nfl/scoreboard?dates=${year}&seasontype=2&week=${week}`,
   );
   const pairs: Array<{ team: string; opponent: string; home: boolean }> = [];
   for (const event of board?.events ?? []) {
-    const competitors = event.competitions?.[0]?.competitors ?? [];
+    const competition = event.competitions?.[0];
+    const state = competition?.status?.type?.state ?? event.status?.type?.state;
+    const done =
+      (competition?.status?.type?.completed ?? event.status?.type?.completed) === true ||
+      state === "post";
+    if (done) continue;
+    const competitors = competition?.competitors ?? [];
     if (competitors.length !== 2) continue;
     const a = competitors[0]!;
     const b = competitors[1]!;
@@ -133,6 +149,7 @@ async function weekMatchups(year: number, week: number) {
   }
   return pairs;
 }
+
 
 /**
  * Map points allowed per game to a 0-10 difficulty where a stingy defense
@@ -164,18 +181,30 @@ async function build(): Promise<Map<string, TeamSos>> {
   const min = Math.min(...values);
   const max = Math.max(...values);
 
-  const weeks = Array.from({ length: WINDOW }, (_, i) => week + i).filter((w) => w <= 18);
-  const results = await Promise.all(weeks.map((w) => weekMatchups(year, w)));
+  const probed = Array.from({ length: WINDOW + LOOKAHEAD_SLACK }, (_, i) => week + i).filter(
+    (w) => w <= 18,
+  );
+  const probedResults = await Promise.all(probed.map((w) => weekMatchups(year, w)));
 
-  if (results.every((pairs) => pairs.length === 0)) {
+  if (probedResults.every((pairs) => pairs.length === 0)) {
     throw new Error(
-      `[SOS] No regular-season matchups returned for ${year}, weeks ${weeks.join(", ")}`,
+      `[SOS] No upcoming regular-season matchups returned for ${year}, weeks ${probed.join(", ")}`,
     );
   }
+
+  // Drop weeks already played out, then keep the next WINDOW weeks that still
+  // have games left, so the list rolls forward as each week finishes.
+  const upcoming = probed
+    .map((w, i) => ({ week: w, pairs: probedResults[i]! }))
+    .filter((entry) => entry.pairs.length > 0)
+    .slice(0, WINDOW);
+  const weeks = upcoming.map((entry) => entry.week);
+  const results = upcoming.map((entry) => entry.pairs);
 
   const byTeam = new Map<string, SosMatchup[]>();
   results.forEach((pairs, i) => {
     const w = weeks[i]!;
+
     for (const pair of pairs) {
       const allowed = defense.get(pair.opponent);
       const difficulty = allowed == null ? 5 : toDifficulty(allowed, min, max);
