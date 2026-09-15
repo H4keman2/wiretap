@@ -121,13 +121,23 @@ async function currentWeek(): Promise<number> {
   return 1; // pre-season or offseason: look ahead from week 1
 }
 
+/**
+ * Upcoming matchups for a week. Games that have already finished are skipped,
+ * so a week rolls off the window as soon as it is played out.
+ */
 async function weekMatchups(year: number, week: number) {
   const board = await json<ScoreboardResponse>(
     `${ESPN_SITE_API}/site/v2/sports/football/nfl/scoreboard?dates=${year}&seasontype=2&week=${week}`,
   );
   const pairs: Array<{ team: string; opponent: string; home: boolean }> = [];
   for (const event of board?.events ?? []) {
-    const competitors = event.competitions?.[0]?.competitors ?? [];
+    const competition = event.competitions?.[0];
+    const state = competition?.status?.type?.state ?? event.status?.type?.state;
+    const done =
+      (competition?.status?.type?.completed ?? event.status?.type?.completed) === true ||
+      state === "post";
+    if (done) continue;
+    const competitors = competition?.competitors ?? [];
     if (competitors.length !== 2) continue;
     const a = competitors[0]!;
     const b = competitors[1]!;
@@ -139,6 +149,7 @@ async function weekMatchups(year: number, week: number) {
   }
   return pairs;
 }
+
 
 /**
  * Map points allowed per game to a 0-10 difficulty where a stingy defense
