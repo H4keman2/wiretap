@@ -50,13 +50,16 @@ interface StandingsNode {
 interface ScoreboardResponse {
   events?: Array<{
     week?: { number?: number };
+    status?: { type?: { completed?: boolean; state?: string } };
     competitions?: Array<{
+      status?: { type?: { completed?: boolean; state?: string } };
       competitors?: Array<{ homeAway?: string; team?: { abbreviation?: string } }>;
     }>;
   }>;
   season?: { year?: number; type?: number };
   week?: { number?: number };
 }
+
 
 function seasonYear(): number {
   const now = new Date();
