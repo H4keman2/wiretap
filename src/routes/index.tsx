@@ -65,35 +65,18 @@ function WaiverBrowser() {
     live,
   );
 
+  // The schedule week the SOS window currently opens on — the honest answer to
+  // "is this current?", read off the data itself rather than a second fetch.
+  const week = data?.find((p) => p.sos?.matchups?.length)?.sos?.matchups?.[0]?.week ?? null;
+
   return (
     <Page format={activeFormat}>
       <SosWarning />
 
-      <section className="relative isolate overflow-hidden rounded-xl border-b-4 border-action bg-depth p-5 pb-6 text-depth-foreground">
-        <div className="relative z-10">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
-              PRO FEATURE
-            </span>
-            <h2 className="text-sm font-bold uppercase tracking-wide text-action">Team Analyzer</h2>
-          </div>
-          <p className="mb-3 font-display text-2xl uppercase leading-none">
-            Want to know which position YOUR team needs?
-          </p>
-          <p className="mb-6 max-w-prose text-xs leading-relaxed text-depth-foreground/75">
-            Enter your roster once and Wire Tap flags your weakest spots every week, with the math
-            shown.
-          </p>
-          <Link
-            to="/analyzer"
-            className="block w-full rounded bg-action py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
-          >
-            Analyze my roster
-          </Link>
-        </div>
-        <div className="pointer-events-none absolute -bottom-5 -right-5 -z-10 size-32 rounded-full border border-depth-foreground/15" />
-        <div className="pointer-events-none absolute -bottom-10 -right-10 -z-10 size-48 rounded-full border border-depth-foreground/15" />
-      </section>
+      <Hero week={week} poolSize={data?.length ?? null} updatedAt={dataUpdatedAt} />
+
+      <HowItWorks />
+
 
       <section className="space-y-5">
         {cred && connection.summary ? (
