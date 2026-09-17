@@ -48,7 +48,7 @@ function WaiverBrowser() {
   const leagueFormat = cred ? connection.summary?.format : null;
   const activeFormat = leagueFormat ?? format;
 
-  const { data, isPending, isError, isFetching } = useQuery({
+  const { data, isPending, isError, isFetching, dataUpdatedAt } = useQuery({
     queryKey: ["waivers", activeFormat, slot, maxOwnership, cred?.leagueId ?? "national"],
     queryFn: () =>
       getRecommendations({
