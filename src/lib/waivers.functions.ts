@@ -260,6 +260,8 @@ export interface AnalyzeOutput {
   handcuffs: HandcuffSuggestion[];
   /** Starters carrying an injury tag, with the best substitution for each. */
   injuryAlerts: InjuryAlert[];
+  /** When the injury tags behind these alerts were last read from ESPN. */
+  injuryUpdatedAt: number;
 }
 
 export const analyzeTeam = createServerFn({ method: "POST" })
@@ -270,7 +272,7 @@ export const analyzeTeam = createServerFn({ method: "POST" })
     await requireValidLicense(data.licenseKey);
 
     const { getPlayerPool } = await import("./players.server");
-    const pool = await getPlayerPool();
+    const { pool, injuryUpdatedAt } = await withLiveInjuries(await getPlayerPool());
     const stats = new Map(pool.map((p) => [p.id, p]));
 
     const verdicts = analyzeRoster(data.roster, stats, data.config, data.format);
