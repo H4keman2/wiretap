@@ -1,9 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Lock, Plus, Shield, Trash2 } from "lucide-react";
 
 import { InjuryAlerts } from "@/components/wire/InjuryAlerts";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,10 @@ import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
+import { LIVE_REFRESH_MS } from "@/components/wire/LiveWatch";
 import { importLeagueRoster } from "@/lib/league.functions";
 import { useEspnConnection, useLeagueProfile, usePro } from "@/lib/league-store";
+import { useLiveUpdates } from "@/lib/live-updates-store";
 
 import { lineupFill, suggestStarterDefault } from "@/lib/lineup";
 import type { RealPosition, SlotPosition } from "@/lib/ranking";
@@ -58,26 +60,43 @@ function Analyzer() {
   const [override, setOverride] = useState<SlotPosition | null>(null);
   const [pulling, setPulling] = useState(false);
 
-  const analysis = useMutation({
-    mutationFn: analyzeTeam,
-    onSuccess: (res) => {
-      // Injury tags on starters are time-critical, so surface them up front
-      // rather than waiting for the user to scroll to the section.
-      const urgent = res.injuryAlerts.filter((a) => a.severity !== "questionable");
-      const alert = urgent[0] ?? res.injuryAlerts[0];
-      if (!alert) return;
-      const count = res.injuryAlerts.length;
-      toast.warning(`${alert.playerName} — ${alert.injury}`, {
-        description: alert.best
-          ? `Start ${alert.best.name} instead (${alert.best.projection} proj pts).${count > 1 ? ` ${count - 1} more starter${count > 2 ? "s" : ""} tagged.` : ""}`
-          : `No healthy replacement found at ${alert.position}.`,
-      });
-    },
-  });
+  const { enabled: live } = useLiveUpdates();
 
   const roster = profile.roster;
   const starters = useMemo(() => roster.filter((r) => r.starter), [roster]);
   const fill = useMemo(() => lineupFill(roster, profile.config), [roster, profile.config]);
+
+  // Runs on a live cycle rather than only on edit, so a starter being ruled
+  // out (or cleared) re-scores the roster and refreshes the waiver targets on
+  // its own. The server re-verifies the license on every call, so a stale key
+  // here just comes back as PRO_REQUIRED.
+  const analysis = useQuery({
+    queryKey: [
+      "analysis",
+      profile.format,
+      JSON.stringify(profile.config),
+      JSON.stringify(roster),
+      maxOwnership,
+      override ?? "auto",
+      cred?.leagueId ?? "national",
+    ],
+    queryFn: () =>
+      analyzeTeam({
+        data: {
+          format: profile.format,
+          config: profile.config,
+          roster,
+          maxOwnership,
+          overrideSlot: override,
+          league: cred,
+          licenseKey: key!,
+        },
+      }),
+    enabled: loaded && isPro && !!key && roster.length > 0,
+    staleTime: live ? 0 : 1000 * 60 * 10,
+    refetchInterval: live ? LIVE_REFRESH_MS : false,
+    refetchIntervalInBackground: false,
+  });
 
   const pullLeagueRoster = async () => {
     if (!cred || connection.teamId === null) return;
@@ -99,33 +118,49 @@ function Analyzer() {
     }
   };
 
+  // Announce *changes* in status, not the same tag over and over: a starter
+  // newly tagged gets a warning with the replacement, and a starter whose tag
+  // cleared gets an all-clear so the user knows to put him back in.
+  const seenInjuries = useRef<Map<string, string> | null>(null);
   useEffect(() => {
-    if (!loaded || !isPro || !key || roster.length === 0) return;
-    analysis.mutate({
-      data: {
-        format: profile.format,
-        config: profile.config,
-        roster,
-        maxOwnership,
-        overrideSlot: override,
-        league: cred,
-        licenseKey: key,
-      },
-    });
-    // Server re-verifies the license on every call regardless of client state,
-    // so a stale or revoked key here simply results in a PRO_REQUIRED error.
+    const data = analysis.data;
+    if (!data) return;
+    const current = new Map(data.injuryAlerts.map((a) => [a.playerId, a.injury]));
+    const prev = seenInjuries.current;
+    seenInjuries.current = current;
+
+    if (!prev) {
+      const urgent = data.injuryAlerts.filter((a) => a.severity !== "questionable");
+      const alert = urgent[0] ?? data.injuryAlerts[0];
+      if (!alert) return;
+      const count = data.injuryAlerts.length;
+      toast.warning(`${alert.playerName} — ${alert.injury}`, {
+        description: alert.best
+          ? `Start ${alert.best.name} instead (${alert.best.projection} proj pts).${count > 1 ? ` ${count - 1} more starter${count > 2 ? "s" : ""} tagged.` : ""}`
+          : `No healthy replacement found at ${alert.position}.`,
+      });
+      return;
+    }
+
+    for (const alert of data.injuryAlerts) {
+      if (prev.get(alert.playerId) === alert.injury) continue;
+      toast.warning(`${alert.playerName} — ${alert.injury}`, {
+        description: alert.best
+          ? `Start ${alert.best.name} instead (${alert.best.projection} proj pts).`
+          : `No healthy replacement found at ${alert.position}.`,
+      });
+    }
+
+    for (const [id, tag] of prev) {
+      if (current.has(id)) continue;
+      const name = roster.find((r) => r.id === id)?.name ?? "Your starter";
+      toast.success(`${name} is cleared to play`, {
+        description: `No longer listed as ${tag} — he's back in your lineup.`,
+      });
+    }
+    // roster is only read for a display name here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    loaded,
-    isPro,
-    key,
-    roster,
-    profile.format,
-    profile.config,
-    maxOwnership,
-    override,
-    cred?.leagueId,
-  ]);
+  }, [analysis.data]);
 
   if (!proLoaded || !loaded) {
 
@@ -282,7 +317,13 @@ function Analyzer() {
             </div>
           </section>
 
-          <InjuryAlerts alerts={result.injuryAlerts} />
+          <InjuryAlerts
+            alerts={result.injuryAlerts}
+            updatedAt={result.injuryUpdatedAt}
+            live={live}
+            checking={analysis.isFetching}
+          />
+
 
           {result.handcuffs.length > 0 && (
             <section className="space-y-2">
@@ -342,7 +383,7 @@ function Analyzer() {
         </>
       )}
 
-      {analysis.isPending && <Skeleton className="h-28 rounded-xl" />}
+      {analysis.isFetching && !result && <Skeleton className="h-28 rounded-xl" />}
 
       {analysis.isError && (
         <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-xs text-destructive">

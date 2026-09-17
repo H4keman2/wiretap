@@ -53,11 +53,31 @@ async function applyLeagueAvailability(
     }));
 }
 
+/**
+ * Overlay live injury tags onto the (long-cached) player pool so a player
+ * ruled out — or cleared to play — changes rankings and injury alerts on the
+ * next refresh instead of at the next pool rebuild.
+ */
+async function withLiveInjuries(
+  pool: PlayerStat[],
+): Promise<{ pool: PlayerStat[]; injuryUpdatedAt: number }> {
+  const { getInjuryFeed, injuryKey } = await import("./espn-injuries.server");
+  const feed = await getInjuryFeed();
+  if (feed.byKey.size === 0) return { pool, injuryUpdatedAt: feed.fetchedAt };
+  const fresh = pool.map((p) => {
+    const k = injuryKey(p.name, p.position);
+    if (!feed.byKey.has(k)) return p;
+    const injury = feed.byKey.get(k) ?? null;
+    return injury === p.injury ? p : { ...p, injury };
+  });
+  return { pool: fresh, injuryUpdatedAt: feed.fetchedAt };
+}
+
 export const getRecommendations = createServerFn({ method: "GET" })
   .inputValidator((data: RecommendationInput) => data)
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
     const { getPlayerPool } = await import("./players.server");
-    const base = await getPlayerPool();
+    const { pool: base } = await withLiveInjuries(await getPlayerPool());
     const pool = data.league?.leagueId ? await applyLeagueAvailability(base, data.league) : base;
     // No `limit` here — show every eligible player under the threshold, not
     // just a top handful. rankWaiverPool still applies its own hard ceiling.
@@ -240,6 +260,8 @@ export interface AnalyzeOutput {
   handcuffs: HandcuffSuggestion[];
   /** Starters carrying an injury tag, with the best substitution for each. */
   injuryAlerts: InjuryAlert[];
+  /** When the injury tags behind these alerts were last read from ESPN. */
+  injuryUpdatedAt: number;
 }
 
 export const analyzeTeam = createServerFn({ method: "POST" })
@@ -250,7 +272,7 @@ export const analyzeTeam = createServerFn({ method: "POST" })
     await requireValidLicense(data.licenseKey);
 
     const { getPlayerPool } = await import("./players.server");
-    const pool = await getPlayerPool();
+    const { pool, injuryUpdatedAt } = await withLiveInjuries(await getPlayerPool());
     const stats = new Map(pool.map((p) => [p.id, p]));
 
     const verdicts = analyzeRoster(data.roster, stats, data.config, data.format);
@@ -300,5 +322,6 @@ export const analyzeTeam = createServerFn({ method: "POST" })
       suggestedStarterIds,
       handcuffs,
       injuryAlerts,
+      injuryUpdatedAt,
     };
   });
