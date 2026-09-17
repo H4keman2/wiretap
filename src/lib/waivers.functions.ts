@@ -322,5 +322,6 @@ export const analyzeTeam = createServerFn({ method: "POST" })
       suggestedStarterIds,
       handcuffs,
       injuryAlerts,
+      injuryUpdatedAt,
     };
   });
