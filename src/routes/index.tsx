@@ -157,6 +157,28 @@ function WaiverBrowser() {
           ))}
         </div>
 
+        <section className="rounded-xl border-b-4 border-action bg-depth p-5 text-depth-foreground">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
+              PRO
+            </span>
+            <h2 className="text-sm font-bold uppercase tracking-wide text-action">Team Analyzer</h2>
+          </div>
+          <p className="mb-2 font-display text-xl uppercase leading-none">
+            Which position does YOUR team need?
+          </p>
+          <p className="mb-4 text-xs leading-relaxed text-depth-foreground/75">
+            Enter your roster once and Wire Tap flags your weakest spots every week, with the math
+            shown — plus injury alerts and a suggested lineup.
+          </p>
+          <Link
+            to="/analyzer"
+            className="block w-full rounded bg-action py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
+          >
+            Analyze my roster
+          </Link>
+        </section>
+
         <ProxyNote />
       </section>
     </Page>
