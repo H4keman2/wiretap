@@ -1,9 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Lock, Plus, Shield, Trash2 } from "lucide-react";
 
 import { InjuryAlerts } from "@/components/wire/InjuryAlerts";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,10 @@ import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
+import { LIVE_REFRESH_MS } from "@/components/wire/LiveWatch";
 import { importLeagueRoster } from "@/lib/league.functions";
 import { useEspnConnection, useLeagueProfile, usePro } from "@/lib/league-store";
+import { useLiveUpdates } from "@/lib/live-updates-store";
 
 import { lineupFill, suggestStarterDefault } from "@/lib/lineup";
 import type { RealPosition, SlotPosition } from "@/lib/ranking";
