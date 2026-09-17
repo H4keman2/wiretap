@@ -106,7 +106,7 @@ function WaiverBrowser() {
         />
       </section>
 
-      <section className="space-y-4">
+      <section id="targets" className="scroll-mt-32 space-y-4">
         <SectionLabel>
           {cred
             ? `${slot} free agents in your league`
