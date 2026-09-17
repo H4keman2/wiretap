@@ -317,7 +317,13 @@ function Analyzer() {
             </div>
           </section>
 
-          <InjuryAlerts alerts={result.injuryAlerts} />
+          <InjuryAlerts
+            alerts={result.injuryAlerts}
+            updatedAt={result.injuryUpdatedAt}
+            live={live}
+            checking={analysis.isFetching}
+          />
+
 
           {result.handcuffs.length > 0 && (
             <section className="space-y-2">
@@ -377,7 +383,7 @@ function Analyzer() {
         </>
       )}
 
-      {analysis.isPending && <Skeleton className="h-28 rounded-xl" />}
+      {analysis.isFetching && !result && <Skeleton className="h-28 rounded-xl" />}
 
       {analysis.isError && (
         <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-xs text-destructive">
