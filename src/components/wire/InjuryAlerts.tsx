@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight } from "lucide-react";
+import { Activity, AlertTriangle, ArrowRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -18,12 +18,47 @@ const TONE: Record<InjuryAlert["severity"], { chip: string; label: string; ring:
   },
 };
 
+function freshness(updatedAt: number | undefined, checking: boolean): string {
+  if (checking) return "checking now";
+  if (!updatedAt) return "";
+  const s = Math.max(0, Math.round((Date.now() - updatedAt) / 1000));
+  if (s < 60) return `checked ${s}s ago`;
+  return `checked ${Math.round(s / 60)}m ago`;
+}
+
 /**
  * Injury watch for the current starting lineup: who's tagged, how likely
  * they are to sit, and the best replacement (bench first, then the wire).
+ * Status is re-read on the live cycle, so this stays current without the
+ * user re-running anything.
  */
-export function InjuryAlerts({ alerts }: { alerts: InjuryAlert[] }) {
-  if (alerts.length === 0) return null;
+export function InjuryAlerts({
+  alerts,
+  updatedAt,
+  live = false,
+  checking = false,
+}: {
+  alerts: InjuryAlert[];
+  updatedAt?: number;
+  live?: boolean;
+  checking?: boolean;
+}) {
+  const note = freshness(updatedAt, checking);
+
+  if (alerts.length === 0) {
+    if (!live) return null;
+    return (
+      <section className="flex items-center gap-2 rounded-xl border border-border bg-card p-3">
+        <Activity className="size-4 shrink-0 text-turf" aria-hidden="true" />
+        <p className="text-[11px] text-muted-foreground">
+          <span className="font-black uppercase tracking-tight text-foreground">
+            All starters active
+          </span>
+          {note ? ` · ${note}` : ""} — we'll flag it here the moment one gets tagged.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-2">
@@ -31,8 +66,10 @@ export function InjuryAlerts({ alerts }: { alerts: InjuryAlert[] }) {
         <AlertTriangle className="size-4 text-destructive" aria-hidden="true" />
         <h2 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
           Injury watch — {alerts.length} starter{alerts.length === 1 ? "" : "s"} tagged
+          {note ? ` · ${note}` : ""}
         </h2>
       </div>
+
 
       <div className="space-y-2">
         {alerts.map((a) => {
