@@ -118,33 +118,49 @@ function Analyzer() {
     }
   };
 
+  // Announce *changes* in status, not the same tag over and over: a starter
+  // newly tagged gets a warning with the replacement, and a starter whose tag
+  // cleared gets an all-clear so the user knows to put him back in.
+  const seenInjuries = useRef<Map<string, string> | null>(null);
   useEffect(() => {
-    if (!loaded || !isPro || !key || roster.length === 0) return;
-    analysis.mutate({
-      data: {
-        format: profile.format,
-        config: profile.config,
-        roster,
-        maxOwnership,
-        overrideSlot: override,
-        league: cred,
-        licenseKey: key,
-      },
-    });
-    // Server re-verifies the license on every call regardless of client state,
-    // so a stale or revoked key here simply results in a PRO_REQUIRED error.
+    const data = analysis.data;
+    if (!data) return;
+    const current = new Map(data.injuryAlerts.map((a) => [a.playerId, a.injury]));
+    const prev = seenInjuries.current;
+    seenInjuries.current = current;
+
+    if (!prev) {
+      const urgent = data.injuryAlerts.filter((a) => a.severity !== "questionable");
+      const alert = urgent[0] ?? data.injuryAlerts[0];
+      if (!alert) return;
+      const count = data.injuryAlerts.length;
+      toast.warning(`${alert.playerName} — ${alert.injury}`, {
+        description: alert.best
+          ? `Start ${alert.best.name} instead (${alert.best.projection} proj pts).${count > 1 ? ` ${count - 1} more starter${count > 2 ? "s" : ""} tagged.` : ""}`
+          : `No healthy replacement found at ${alert.position}.`,
+      });
+      return;
+    }
+
+    for (const alert of data.injuryAlerts) {
+      if (prev.get(alert.playerId) === alert.injury) continue;
+      toast.warning(`${alert.playerName} — ${alert.injury}`, {
+        description: alert.best
+          ? `Start ${alert.best.name} instead (${alert.best.projection} proj pts).`
+          : `No healthy replacement found at ${alert.position}.`,
+      });
+    }
+
+    for (const [id, tag] of prev) {
+      if (current.has(id)) continue;
+      const name = roster.find((r) => r.id === id)?.name ?? "Your starter";
+      toast.success(`${name} is cleared to play`, {
+        description: `No longer listed as ${tag} — he's back in your lineup.`,
+      });
+    }
+    // roster is only read for a display name here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    loaded,
-    isPro,
-    key,
-    roster,
-    profile.format,
-    profile.config,
-    maxOwnership,
-    override,
-    cred?.leagueId,
-  ]);
+  }, [analysis.data]);
 
   if (!proLoaded || !loaded) {
 
