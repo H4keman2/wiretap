@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalyzerRouteImport } from './routes/analyzer'
+import { Route as ProRouteImport } from './routes/pro'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TradeRouteImport } from './routes/trade'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const AnalyzerRoute = AnalyzerRouteImport.update({
   id: '/analyzer',
   path: '/analyzer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProRoute = ProRouteImport.update({
+  id: '/pro',
+  path: '/pro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -44,6 +50,7 @@ const WatchlistRoute = WatchlistRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analyzer': typeof AnalyzerRoute
+  '/pro': typeof ProRoute
   '/settings': typeof SettingsRoute
   '/trade': typeof TradeRoute
   '/watchlist': typeof WatchlistRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analyzer': typeof AnalyzerRoute
+  '/pro': typeof ProRoute
   '/settings': typeof SettingsRoute
   '/trade': typeof TradeRoute
   '/watchlist': typeof WatchlistRoute
@@ -59,21 +67,30 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analyzer': typeof AnalyzerRoute
+  '/pro': typeof ProRoute
   '/settings': typeof SettingsRoute
   '/trade': typeof TradeRoute
   '/watchlist': typeof WatchlistRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/analyzer' | '/settings' | '/trade' | '/watchlist'
+  fullPaths: '/' | '/analyzer' | '/pro' | '/settings' | '/trade' | '/watchlist'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analyzer' | '/settings' | '/trade' | '/watchlist'
-  id: '__root__' | '/' | '/analyzer' | '/settings' | '/trade' | '/watchlist'
+  to: '/' | '/analyzer' | '/pro' | '/settings' | '/trade' | '/watchlist'
+  id:
+    | '__root__'
+    | '/'
+    | '/analyzer'
+    | '/pro'
+    | '/settings'
+    | '/trade'
+    | '/watchlist'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyzerRoute: typeof AnalyzerRoute
+  ProRoute: typeof ProRoute
   SettingsRoute: typeof SettingsRoute
   TradeRoute: typeof TradeRoute
   WatchlistRoute: typeof WatchlistRoute
@@ -93,6 +110,13 @@ declare module '@tanstack/react-router' {
       path: '/analyzer'
       fullPath: '/analyzer'
       preLoaderRoute: typeof AnalyzerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pro': {
+      id: '/pro'
+      path: '/pro'
+      fullPath: '/pro'
+      preLoaderRoute: typeof ProRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -122,6 +146,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyzerRoute: AnalyzerRoute,
+  ProRoute: ProRoute,
   SettingsRoute: SettingsRoute,
   TradeRoute: TradeRoute,
   WatchlistRoute: WatchlistRoute,
