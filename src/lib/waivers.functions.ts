@@ -53,6 +53,26 @@ async function applyLeagueAvailability(
     }));
 }
 
+/**
+ * Overlay live injury tags onto the (long-cached) player pool so a player
+ * ruled out — or cleared to play — changes rankings and injury alerts on the
+ * next refresh instead of at the next pool rebuild.
+ */
+async function withLiveInjuries(
+  pool: PlayerStat[],
+): Promise<{ pool: PlayerStat[]; injuryUpdatedAt: number }> {
+  const { getInjuryFeed, injuryKey } = await import("./espn-injuries.server");
+  const feed = await getInjuryFeed();
+  if (feed.byKey.size === 0) return { pool, injuryUpdatedAt: feed.fetchedAt };
+  const fresh = pool.map((p) => {
+    const k = injuryKey(p.name, p.position);
+    if (!feed.byKey.has(k)) return p;
+    const injury = feed.byKey.get(k) ?? null;
+    return injury === p.injury ? p : { ...p, injury };
+  });
+  return { pool: fresh, injuryUpdatedAt: feed.fetchedAt };
+}
+
 export const getRecommendations = createServerFn({ method: "GET" })
   .inputValidator((data: RecommendationInput) => data)
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
