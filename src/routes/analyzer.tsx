@@ -709,15 +709,23 @@ function Paywall({ format }: { format: "std" | "half" | "ppr" }) {
         <Lock className="mb-3 size-6 text-action" />
         <p className="font-display text-3xl uppercase leading-none">Team Analyzer is Pro</p>
         <p className="mt-2 text-xs text-depth-foreground/75">
-          Roster entry, positional weakness scoring, and auto-flagged weak spots. Season pass or
-          weekly, cancel whenever.
+          Roster entry, positional weakness scoring, auto-flagged weak spots, and live injury alerts
+          with named replacements. One $4.99 season pass, unlimited re-runs.
         </p>
-        <Link
-          to="/settings"
-          className="mt-4 block w-full rounded bg-action py-2 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
-        >
-          Enter license key
-        </Link>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          <Link
+            to="/pro"
+            className="block rounded bg-action px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
+          >
+            See plans — $4.99
+          </Link>
+          <Link
+            to="/settings"
+            className="block rounded border border-depth-foreground/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-depth-foreground"
+          >
+            Enter license key
+          </Link>
+        </div>
       </section>
       <section className="space-y-2 rounded-xl border border-border bg-card p-4">
         <SectionLabel>What you get</SectionLabel>
@@ -725,6 +733,7 @@ function Paywall({ format }: { format: "std" | "half" | "ppr" }) {
           <li>• Reusable league profile — lineup slots and bench size saved.</li>
           <li>• Every position scored against replacement level, math shown.</li>
           <li>• Ranked list: "Your weakest positions are RB, then TE".</li>
+          <li>• Live injury alerts with the best legal replacement named.</li>
           <li>• Manual position override inside the analysis.</li>
         </ul>
         <Link to="/" className="block pt-2 text-xs font-bold text-turf underline">

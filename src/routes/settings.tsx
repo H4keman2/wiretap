@@ -172,7 +172,11 @@ function SettingsPage() {
                 </Button>
               </div>
               <p className="mt-2 text-[11px] text-muted-foreground">
-                Your key is verified against your purchase, not just checked for the right shape.
+                Your key is verified against your purchase, not just checked for the right shape. Don't
+                have one yet?{" "}
+                <Link to="/pro" className="font-bold text-turf underline">
+                  Get the season pass — $4.99
+                </Link>
               </p>
             </>
           )}
