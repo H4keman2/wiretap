@@ -60,26 +60,43 @@ function Analyzer() {
   const [override, setOverride] = useState<SlotPosition | null>(null);
   const [pulling, setPulling] = useState(false);
 
-  const analysis = useMutation({
-    mutationFn: analyzeTeam,
-    onSuccess: (res) => {
-      // Injury tags on starters are time-critical, so surface them up front
-      // rather than waiting for the user to scroll to the section.
-      const urgent = res.injuryAlerts.filter((a) => a.severity !== "questionable");
-      const alert = urgent[0] ?? res.injuryAlerts[0];
-      if (!alert) return;
-      const count = res.injuryAlerts.length;
-      toast.warning(`${alert.playerName} — ${alert.injury}`, {
-        description: alert.best
-          ? `Start ${alert.best.name} instead (${alert.best.projection} proj pts).${count > 1 ? ` ${count - 1} more starter${count > 2 ? "s" : ""} tagged.` : ""}`
-          : `No healthy replacement found at ${alert.position}.`,
-      });
-    },
-  });
+  const { enabled: live } = useLiveUpdates();
 
   const roster = profile.roster;
   const starters = useMemo(() => roster.filter((r) => r.starter), [roster]);
   const fill = useMemo(() => lineupFill(roster, profile.config), [roster, profile.config]);
+
+  // Runs on a live cycle rather than only on edit, so a starter being ruled
+  // out (or cleared) re-scores the roster and refreshes the waiver targets on
+  // its own. The server re-verifies the license on every call, so a stale key
+  // here just comes back as PRO_REQUIRED.
+  const analysis = useQuery({
+    queryKey: [
+      "analysis",
+      profile.format,
+      JSON.stringify(profile.config),
+      JSON.stringify(roster),
+      maxOwnership,
+      override ?? "auto",
+      cred?.leagueId ?? "national",
+    ],
+    queryFn: () =>
+      analyzeTeam({
+        data: {
+          format: profile.format,
+          config: profile.config,
+          roster,
+          maxOwnership,
+          overrideSlot: override,
+          league: cred,
+          licenseKey: key!,
+        },
+      }),
+    enabled: loaded && isPro && !!key && roster.length > 0,
+    staleTime: live ? 0 : 1000 * 60 * 10,
+    refetchInterval: live ? LIVE_REFRESH_MS : false,
+    refetchIntervalInBackground: false,
+  });
 
   const pullLeagueRoster = async () => {
     if (!cred || connection.teamId === null) return;
