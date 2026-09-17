@@ -77,7 +77,7 @@ export const getRecommendations = createServerFn({ method: "GET" })
   .inputValidator((data: RecommendationInput) => data)
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
     const { getPlayerPool } = await import("./players.server");
-    const base = await getPlayerPool();
+    const { pool: base } = await withLiveInjuries(await getPlayerPool());
     const pool = data.league?.leagueId ? await applyLeagueAvailability(base, data.league) : base;
     // No `limit` here — show every eligible player under the threshold, not
     // just a top handful. rankWaiverPool still applies its own hard ceiling.
