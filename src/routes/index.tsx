@@ -171,12 +171,20 @@ function WaiverBrowser() {
             Enter your roster once and Wire Tap flags your weakest spots every week, with the math
             shown — plus injury alerts and a suggested lineup.
           </p>
-          <Link
-            to="/analyzer"
-            className="block w-full rounded bg-action py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
-          >
-            Analyze my roster
-          </Link>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link
+              to="/pro"
+              className="block rounded bg-action px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
+            >
+              See plans — $4.99
+            </Link>
+            <Link
+              to="/analyzer"
+              className="block rounded border border-depth-foreground/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-depth-foreground"
+            >
+              Analyze my roster
+            </Link>
+          </div>
         </section>
 
         <ProxyNote />
