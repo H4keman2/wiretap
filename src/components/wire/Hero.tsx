@@ -57,8 +57,8 @@ export function Hero({
           {poolSize !== null && (
             <div className="flex items-center gap-1.5">
               <Users className="size-3.5 text-action" strokeWidth={3} />
-              <dt className="sr-only">Players ranked</dt>
-              <dd>{poolSize} ranked</dd>
+              <dt className="sr-only">Targets listed</dt>
+              <dd>{poolSize} targets</dd>
             </div>
           )}
           {fresh && (
