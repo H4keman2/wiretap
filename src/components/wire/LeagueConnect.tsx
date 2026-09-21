@@ -1,21 +1,25 @@
 import { useMutation } from "@tanstack/react-query";
+import { Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { SectionLabel } from "./Shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { connectLeague } from "@/lib/league.functions";
+import { connectLeague, importLeagueRoster } from "@/lib/league.functions";
 import { useEspnConnection, useLeagueProfile } from "@/lib/league-store";
 import { FORMAT_LABEL } from "@/lib/ranking";
+import { cn } from "@/lib/utils";
 
 /**
- * "Connect my real league" panel. Reads the user's own ESPN league so
- * availability, scoring and lineup slots come from that league instead of
- * ESPN's national averages.
+ * Guided "connect my real league" walkthrough.
+ *
+ * Step 1 — league ID (accepts a pasted ESPN league URL too)
+ * Step 2 — private-league sign-in values, only when ESPN asks for them
+ * Step 3 — pick your team and sync its roster into the analyzer
  */
 export function LeagueConnect() {
-  const { connection, save, clear, loaded } = useEspnConnection();
+  const { connection, cred, save, clear, loaded } = useEspnConnection();
   const { update } = useLeagueProfile();
 
   const [leagueId, setLeagueId] = useState("");
@@ -42,16 +46,35 @@ export function LeagueConnect() {
     },
   });
 
+  const sync = useMutation({
+    mutationFn: importLeagueRoster,
+    onSuccess: ({ entries, unmatched }) => {
+      update({ roster: entries });
+      toast.success(
+        unmatched.length
+          ? `Synced ${entries.length} players — ${unmatched.length} need a manual check`
+          : `Synced ${entries.length} players from your team`,
+      );
+    },
+    onError: (err: Error) => toast.error(err.message || "Couldn't pull that roster."),
+  });
+
   const summary = connection.summary;
 
   if (!loaded) return null;
+
+  /** ESPN league URLs carry the id as ?leagueId=123456 — accept a full paste. */
+  const handleLeagueInput = (raw: string) => {
+    const fromUrl = raw.match(/leagueId=(\d+)/i)?.[1];
+    setLeagueId(fromUrl ?? raw.replace(/[^\d]/g, ""));
+  };
 
   return (
     <section className="space-y-3">
       <SectionLabel>Your ESPN league</SectionLabel>
 
       {summary ? (
-        <div className="space-y-3 rounded-xl border border-action/50 bg-card p-4">
+        <div className="space-y-4 rounded-xl border border-action/50 bg-card p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="font-display text-xl uppercase leading-none">{summary.name}</p>
@@ -73,17 +96,13 @@ export function LeagueConnect() {
             </Button>
           </div>
 
-          <div>
-            <label className="text-xs font-bold uppercase text-muted-foreground" htmlFor="my-team">
-              Which team is yours?
-            </label>
+          <Step n={3} title="Pick your team and sync it" done={connection.teamId !== null}>
             <select
               id="my-team"
+              aria-label="Which team is yours?"
               value={connection.teamId ?? ""}
-              onChange={(e) =>
-                save({ teamId: e.target.value === "" ? null : Number(e.target.value) })
-              }
-              className="mt-2 h-9 w-full rounded-md border border-input bg-card px-2 text-sm font-bold"
+              onChange={(e) => save({ teamId: e.target.value === "" ? null : Number(e.target.value) })}
+              className="h-9 w-full rounded-md border border-input bg-card px-2 text-sm font-bold"
             >
               <option value="">Choose your team…</option>
               {summary.teams.map((t) => (
@@ -92,88 +111,130 @@ export function LeagueConnect() {
                 </option>
               ))}
             </select>
-          </div>
 
-          <p className="text-[11px] leading-relaxed text-muted-foreground">
-            Waiver targets now show only players nobody in this league has rostered, scored with
-            your league's own settings.
-          </p>
+            <Button
+              className="mt-2 h-9 w-full"
+              disabled={connection.teamId === null || sync.isPending || !cred}
+              onClick={() => {
+                if (!cred || connection.teamId === null) return;
+                sync.mutate({ data: { ...cred, teamId: connection.teamId } });
+              }}
+            >
+              {sync.isPending ? "Syncing your roster…" : "Sync my roster into Wire Tap"}
+            </Button>
+
+            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+              Waiver targets now show only players nobody in this league has rostered, scored with
+              your league's own settings.
+            </p>
+          </Step>
         </div>
       ) : (
-        <div className="space-y-3 rounded-xl border border-border bg-card p-4">
-          <div>
-            <label className="text-xs font-bold uppercase text-muted-foreground" htmlFor="league-id">
-              ESPN league ID
-            </label>
+        <div className="space-y-4 rounded-xl border border-border bg-card p-4">
+          <Step n={1} title="Find your league ID" done={leagueId.trim().length > 0}>
             <Input
               id="league-id"
+              aria-label="ESPN league ID"
               value={leagueId}
-              onChange={(e) => setLeagueId(e.target.value)}
+              onChange={(e) => handleLeagueInput(e.target.value)}
               placeholder="90273659"
               inputMode="numeric"
-              className="mt-2 h-9 text-sm"
+              className="h-9 text-sm"
             />
             <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-              It's the <span className="font-bold">leagueId</span> number in your ESPN league URL.
+              Open your league on ESPN and copy the <span className="font-bold">leagueId</span>{" "}
+              number from the address bar — or paste the whole link here and we'll pull it out.
             </p>
-          </div>
+          </Step>
 
-          {showCookies ? (
-            <div className="space-y-3 border-t border-border pt-3">
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Private leagues need the two sign-in values from your own ESPN session. In a
-                browser signed in to ESPN, open developer tools → Application → Cookies →
-                fantasy.espn.com, then copy <span className="font-bold">espn_s2</span> and{" "}
-                <span className="font-bold">SWID</span>. They stay on this device only.
-              </p>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground" htmlFor="s2">
-                  espn_s2
-                </label>
+          <Step n={2} title="Private league? Add your sign-in values" done={Boolean(espnS2 && swid)}>
+            {showCookies ? (
+              <div className="space-y-3">
+                <ol className="space-y-1 text-[11px] leading-relaxed text-muted-foreground">
+                  <li>1. Sign in to ESPN in this browser.</li>
+                  <li>2. Open developer tools → Application → Cookies → fantasy.espn.com.</li>
+                  <li>
+                    3. Copy <span className="font-bold">espn_s2</span> and{" "}
+                    <span className="font-bold">SWID</span> below. They stay on this device only and
+                    are never stored on our side.
+                  </li>
+                </ol>
                 <Input
                   id="s2"
+                  aria-label="espn_s2"
                   value={espnS2}
                   onChange={(e) => setEspnS2(e.target.value)}
-                  placeholder="AEB..."
-                  className="mt-2 h-9 text-sm"
+                  placeholder="espn_s2 — AEB..."
+                  className="h-9 text-sm"
                 />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted-foreground" htmlFor="swid">
-                  SWID
-                </label>
                 <Input
                   id="swid"
+                  aria-label="SWID"
                   value={swid}
                   onChange={(e) => setSwid(e.target.value)}
-                  placeholder="{XXXXXXXX-XXXX-...}"
-                  className="mt-2 h-9 text-sm"
+                  placeholder="SWID — {XXXXXXXX-XXXX-...}"
+                  className="h-9 text-sm"
                 />
               </div>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowCookies(true)}
-              className="text-[11px] font-bold text-turf underline"
-            >
-              My league is private
-            </button>
-          )}
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowCookies(true)}
+                className="text-[11px] font-bold text-turf underline"
+              >
+                My league is private — show me how
+              </button>
+            )}
+          </Step>
 
-          <Button
-            className="h-9 w-full"
-            disabled={connect.isPending || !leagueId.trim()}
-            onClick={() =>
-              connect.mutate({
-                data: { leagueId: leagueId.trim(), espnS2: espnS2.trim(), swid: swid.trim() },
-              })
-            }
-          >
-            {connect.isPending ? "Reading your league…" : "Connect league"}
-          </Button>
+          <Step n={3} title="Connect and sync" done={false}>
+            <Button
+              className="h-9 w-full"
+              disabled={connect.isPending || !leagueId.trim()}
+              onClick={() =>
+                connect.mutate({
+                  data: { leagueId: leagueId.trim(), espnS2: espnS2.trim(), swid: swid.trim() },
+                })
+              }
+            >
+              {connect.isPending ? "Reading your league…" : "Connect league"}
+            </Button>
+            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+              Next you'll pick which team is yours, then pull its roster straight into the analyzer.
+            </p>
+          </Step>
         </div>
       )}
     </section>
+  );
+}
+
+function Step({
+  n,
+  title,
+  done,
+  children,
+}: {
+  n: number;
+  title: string;
+  done: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex gap-3">
+      <span
+        className={cn(
+          "mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border text-[11px] font-black",
+          done ? "border-action bg-action text-action-foreground" : "border-border text-muted-foreground",
+        )}
+        aria-hidden
+      >
+        {done ? <Check className="size-3.5" /> : n}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-bold uppercase tracking-tight">{title}</p>
+        <div className="mt-2">{children}</div>
+      </div>
+    </div>
   );
 }
