@@ -1,5 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeftRight, ClipboardList, ListFilter, Settings2, Star } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ClipboardList,
+  ListFilter,
+  MessageCircleQuestion,
+  Settings2,
+  Star,
+} from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { ScoringFormat } from "@/lib/ranking";
@@ -28,6 +35,7 @@ export function AppHeader() {
 
 const TABS = [
   { to: "/", label: "Waiver", icon: ListFilter },
+  { to: "/ask", label: "Ask", icon: MessageCircleQuestion },
   { to: "/watchlist", label: "Saved", icon: Star },
   { to: "/trade", label: "Trade", icon: ArrowLeftRight },
   { to: "/analyzer", label: "Roster", icon: ClipboardList },
