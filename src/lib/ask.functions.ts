@@ -190,8 +190,8 @@ export const askWaiver = createServerFn({ method: "POST" })
         user_id: context.userId,
         question: data.question,
         format: data.format,
-        roster: data.roster,
-        candidates,
+        roster: data.roster as unknown as never,
+        candidates: candidates as unknown as never,
         answer,
       })
       .select("id, created_at")
@@ -224,7 +224,7 @@ export const getAskHistory = createServerFn({ method: "GET" })
       question: row.question,
       answer: row.answer,
       createdAt: row.created_at,
-      candidates: (row.candidates ?? []) as CandidateBrief[],
+      candidates: (row.candidates ?? []) as unknown as CandidateBrief[],
     }));
   });
 
