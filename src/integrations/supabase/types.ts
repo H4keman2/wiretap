@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      waiver_questions: {
+        Row: {
+          answer: string
+          candidates: Json
+          created_at: string
+          format: string
+          id: string
+          question: string
+          roster: Json
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          candidates?: Json
+          created_at?: string
+          format?: string
+          id?: string
+          question: string
+          roster?: Json
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          candidates?: Json
+          created_at?: string
+          format?: string
+          id?: string
+          question?: string
+          roster?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
