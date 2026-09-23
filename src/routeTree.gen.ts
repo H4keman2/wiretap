@@ -10,20 +10,32 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AnalyzerRouteImport } from './routes/analyzer'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TradeRouteImport } from './routes/trade'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
+import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnalyzerRoute = AnalyzerRouteImport.update({
   id: '/analyzer',
   path: '/analyzer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProRoute = ProRouteImport.update({
@@ -46,50 +58,83 @@ const WatchlistRoute = WatchlistRouteImport.update({
   path: '/watchlist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAskRoute = AuthenticatedAskRouteImport.update({
+  id: '/ask',
+  path: '/ask',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analyzer': typeof AnalyzerRoute
+  '/auth': typeof AuthRoute
   '/pro': typeof ProRoute
   '/settings': typeof SettingsRoute
   '/trade': typeof TradeRoute
   '/watchlist': typeof WatchlistRoute
+  '/ask': typeof AuthenticatedAskRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analyzer': typeof AnalyzerRoute
+  '/auth': typeof AuthRoute
   '/pro': typeof ProRoute
   '/settings': typeof SettingsRoute
   '/trade': typeof TradeRoute
   '/watchlist': typeof WatchlistRoute
+  '/ask': typeof AuthenticatedAskRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/analyzer': typeof AnalyzerRoute
+  '/auth': typeof AuthRoute
   '/pro': typeof ProRoute
   '/settings': typeof SettingsRoute
   '/trade': typeof TradeRoute
   '/watchlist': typeof WatchlistRoute
+  '/_authenticated/ask': typeof AuthenticatedAskRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/analyzer' | '/pro' | '/settings' | '/trade' | '/watchlist'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analyzer' | '/pro' | '/settings' | '/trade' | '/watchlist'
-  id:
-    | '__root__'
+  fullPaths:
     | '/'
     | '/analyzer'
+    | '/auth'
     | '/pro'
     | '/settings'
     | '/trade'
     | '/watchlist'
+    | '/ask'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/analyzer'
+    | '/auth'
+    | '/pro'
+    | '/settings'
+    | '/trade'
+    | '/watchlist'
+    | '/ask'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/analyzer'
+    | '/auth'
+    | '/pro'
+    | '/settings'
+    | '/trade'
+    | '/watchlist'
+    | '/_authenticated/ask'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AnalyzerRoute: typeof AnalyzerRoute
+  AuthRoute: typeof AuthRoute
   ProRoute: typeof ProRoute
   SettingsRoute: typeof SettingsRoute
   TradeRoute: typeof TradeRoute
@@ -105,11 +150,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/analyzer': {
       id: '/analyzer'
       path: '/analyzer'
       fullPath: '/analyzer'
       preLoaderRoute: typeof AnalyzerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pro': {
@@ -140,12 +199,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WatchlistRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/ask': {
+      id: '/_authenticated/ask'
+      path: '/ask'
+      fullPath: '/ask'
+      preLoaderRoute: typeof AuthenticatedAskRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAskRoute: typeof AuthenticatedAskRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAskRoute: AuthenticatedAskRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AnalyzerRoute: AnalyzerRoute,
+  AuthRoute: AuthRoute,
   ProRoute: ProRoute,
   SettingsRoute: SettingsRoute,
   TradeRoute: TradeRoute,
