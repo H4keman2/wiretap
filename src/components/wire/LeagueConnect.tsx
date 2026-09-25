@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { Check } from "lucide-react";
-import { useState } from "react";
+import { Bookmark, Check, Copy } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { SectionLabel } from "./Shell";
@@ -60,6 +60,31 @@ export function LeagueConnect() {
   });
 
   const summary = connection.summary;
+
+  // Pick up values handed over by the "Grab my ESPN login" bookmark. They
+  // arrive in the URL hash (never sent to any server) and are wiped at once.
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash.startsWith("#espn=")) return;
+    try {
+      const params = new URLSearchParams(decodeURIComponent(hash.slice(6)));
+      const id = params.get("leagueId") ?? "";
+      const s2 = params.get("s2") ?? "";
+      const sw = params.get("swid") ?? "";
+      if (id) setLeagueId(id.replace(/[^\d]/g, ""));
+      if (s2) setEspnS2(s2);
+      if (sw) setSwid(sw);
+      setShowCookies(true);
+      toast.success(
+        s2 && sw
+          ? "ESPN details filled in — press Connect league"
+          : "League ID filled in. ESPN hid your sign-in values; add them below if the league is private.",
+      );
+    } catch {
+      toast.error("Couldn't read what the bookmark sent over.");
+    }
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }, []);
 
   if (!loaded) return null;
 
@@ -131,6 +156,7 @@ export function LeagueConnect() {
         </div>
       ) : (
         <div className="space-y-4 rounded-xl border border-border bg-card p-4">
+          <GrabBookmark />
           <Step n={1} title="Find your league ID" done={leagueId.trim().length > 0}>
             <Input
               id="league-id"
