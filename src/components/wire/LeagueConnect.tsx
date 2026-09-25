@@ -264,3 +264,62 @@ function Step({
     </div>
   );
 }
+
+/** Builds the bookmarklet that reads ESPN values on fantasy.espn.com and sends them here. */
+function bookmarkletCode(target: string) {
+  const js = `(function(){var h=location.hostname;if(!/espn\\.com$/.test(h)){alert('Open your ESPN fantasy league page first, then click this bookmark.');return;}var c={};document.cookie.split(';').forEach(function(p){var i=p.indexOf('=');if(i>0)c[p.slice(0,i).trim()]=p.slice(i+1).trim();});var m=location.href.match(/leagueId=(\\d+)/i);var id=m?m[1]:'';if(!id){id=prompt('Wire Tap: what is your league ID?')||'';}var q=new URLSearchParams({leagueId:id,s2:decodeURIComponent(c.espn_s2||''),swid:decodeURIComponent(c.SWID||'')}).toString();location.href=${JSON.stringify(target)}+'#espn='+encodeURIComponent(q);})();`;
+  return `javascript:${js}`;
+}
+
+function GrabBookmark() {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const [code, setCode] = useState("");
+
+  useEffect(() => {
+    const c = bookmarkletCode(`${window.location.origin}/settings`);
+    setCode(c);
+    // React blocks javascript: links in JSX, so attach it directly.
+    ref.current?.setAttribute("href", c);
+  }, []);
+
+  return (
+    <div className="rounded-lg border border-action/40 bg-action/5 p-3">
+      <p className="text-xs font-bold uppercase tracking-tight">Fastest way: grab it from ESPN</p>
+      <ol className="mt-2 space-y-1 text-[11px] leading-relaxed text-muted-foreground">
+        <li>1. Drag the button below onto your bookmarks bar (once).</li>
+        <li>2. Open your league on fantasy.espn.com while signed in.</li>
+        <li>3. Click the bookmark — you'll land back here with everything filled in.</li>
+      </ol>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <a
+          ref={ref}
+          onClick={(e) => {
+            e.preventDefault();
+            toast.info("Drag this button to your bookmarks bar instead of clicking it.");
+          }}
+          className="inline-flex h-9 cursor-grab items-center gap-1.5 rounded-md bg-action px-3 text-xs font-black uppercase text-action-foreground"
+        >
+          <Bookmark className="size-3.5" /> Grab my ESPN login
+        </a>
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(code);
+              toast.success("Copied — make a new bookmark and paste this as its address.");
+            } catch {
+              toast.error("Couldn't copy. Drag the button instead.");
+            }
+          }}
+          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-bold"
+        >
+          <Copy className="size-3.5" /> Copy instead
+        </button>
+      </div>
+      <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+        On a phone, use "Copy instead" and save it as a bookmark. Values go straight to this device
+        and are never stored on our side.
+      </p>
+    </div>
+  );
+}
