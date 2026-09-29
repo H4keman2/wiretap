@@ -34,6 +34,8 @@ export interface LeagueTeam {
   id: number;
   name: string;
   roster: LeagueRosterPlayer[];
+  /** FAAB dollars this team has already spent this season. */
+  budgetSpent: number;
 }
 
 export interface LeagueSnapshot {
@@ -131,6 +133,7 @@ interface RawTeam {
   nickname?: string;
   abbrev?: string;
   roster?: { entries?: RawRosterEntry[] } | null;
+  transactionCounter?: { acquisitionBudgetSpent?: number } | null;
 }
 
 interface RawLeague {
@@ -237,6 +240,7 @@ async function fetchLeague(cred: EspnLeagueCred, season: number): Promise<League
   const teams: LeagueTeam[] = rawTeams.map((t) => ({
     id: t.id ?? 0,
     name: teamName(t),
+    budgetSpent: Math.max(0, t.transactionCounter?.acquisitionBudgetSpent ?? 0),
     roster: (t.roster?.entries ?? [])
       .map((e): LeagueRosterPlayer | null => {
         const p = e.playerPoolEntry?.player;

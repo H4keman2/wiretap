@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AnalyzerRouteImport } from './routes/analyzer'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BidsRouteImport } from './routes/bids'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TradeRouteImport } from './routes/trade'
@@ -36,6 +37,11 @@ const AnalyzerRoute = AnalyzerRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BidsRoute = BidsRouteImport.update({
+  id: '/bids',
+  path: '/bids',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProRoute = ProRouteImport.update({
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analyzer': typeof AnalyzerRoute
   '/auth': typeof AuthRoute
+  '/bids': typeof BidsRoute
   '/pro': typeof ProRoute
   '/settings': typeof SettingsRoute
   '/trade': typeof TradeRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analyzer': typeof AnalyzerRoute
   '/auth': typeof AuthRoute
+  '/bids': typeof BidsRoute
   '/pro': typeof ProRoute
   '/settings': typeof SettingsRoute
   '/trade': typeof TradeRoute
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/analyzer': typeof AnalyzerRoute
   '/auth': typeof AuthRoute
+  '/bids': typeof BidsRoute
   '/pro': typeof ProRoute
   '/settings': typeof SettingsRoute
   '/trade': typeof TradeRoute
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyzer'
     | '/auth'
+    | '/bids'
     | '/pro'
     | '/settings'
     | '/trade'
@@ -112,6 +122,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analyzer'
     | '/auth'
+    | '/bids'
     | '/pro'
     | '/settings'
     | '/trade'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/analyzer'
     | '/auth'
+    | '/bids'
     | '/pro'
     | '/settings'
     | '/trade'
@@ -135,6 +147,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AnalyzerRoute: typeof AnalyzerRoute
   AuthRoute: typeof AuthRoute
+  BidsRoute: typeof BidsRoute
   ProRoute: typeof ProRoute
   SettingsRoute: typeof SettingsRoute
   TradeRoute: typeof TradeRoute
@@ -169,6 +182,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bids': {
+      id: '/bids'
+      path: '/bids'
+      fullPath: '/bids'
+      preLoaderRoute: typeof BidsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pro': {
@@ -225,6 +245,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AnalyzerRoute: AnalyzerRoute,
   AuthRoute: AuthRoute,
+  BidsRoute: BidsRoute,
   ProRoute: ProRoute,
   SettingsRoute: SettingsRoute,
   TradeRoute: TradeRoute,

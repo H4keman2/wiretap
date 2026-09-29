@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import {
   ArrowLeftRight,
   ClipboardList,
+  Gavel,
   ListFilter,
   MessageCircleQuestion,
   Settings2,
@@ -35,6 +36,7 @@ export function AppHeader() {
 
 const TABS = [
   { to: "/", label: "Waiver", icon: ListFilter },
+  { to: "/bids", label: "Bids", icon: Gavel },
   { to: "/ask", label: "Ask", icon: MessageCircleQuestion },
   { to: "/watchlist", label: "Saved", icon: Star },
   { to: "/trade", label: "Trade", icon: ArrowLeftRight },
@@ -50,13 +52,13 @@ const TABS = [
  */
 export function TopNav() {
   return (
-    <nav className="flex items-center justify-around border-b border-border bg-card px-2 py-2.5">
+    <nav className="flex items-center justify-around border-b border-border bg-card px-1 py-2.5">
       {TABS.map(({ to, label, icon: Icon }) => (
         <Link
           key={to}
           to={to}
           activeOptions={{ exact: to === "/" }}
-          className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-muted-foreground transition-colors"
+          className="flex flex-col items-center gap-1 rounded-lg px-1.5 py-1.5 text-muted-foreground transition-colors sm:px-3"
           activeProps={{ className: "bg-action/15 text-action" }}
         >
           <Icon className="size-5" strokeWidth={2.5} />
