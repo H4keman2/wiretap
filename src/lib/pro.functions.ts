@@ -1,32 +1,32 @@
 import { createServerFn } from "@tanstack/react-start";
 
 /**
- * Exposes the Gumroad purchase URL for the Team Analyzer season pass so the
- * sales page can render a real buy button without hardcoding the product
- * permalink in the client bundle. The product id is the same env var
- * license.server.ts uses to verify keys (GUMROAD_PRODUCT_ID), which Gumroad
- * accepts as either a permalink slug or a numeric product id. The purchase
- * link form (gumroad.com/l/<permalink>) only resolves with the permalink,
- * so if the env is set to the numeric id the link won't open a checkout —
- * flag that so the UI can warn instead of sending buyers to a dead page.
+ * Checkout link for the Team Analyzer season pass.
+ *
+ * GUMROAD_PRODUCT_ID now holds Gumroad's *API* product id (needed by
+ * license.server.ts to verify keys against the licenses/verify endpoint),
+ * which does not resolve as a gumroad.com/l/<id> checkout link. The buy
+ * button therefore uses the product's public permalink directly.
+ *
+ * If the permalink ever changes (e.g. the product is renamed on Gumroad),
+ * update GUMROAD_CHECKOUT_URL below — license verification is unaffected
+ * because it keeps reading GUMROAD_PRODUCT_ID.
  */
+export const GUMROAD_CHECKOUT_URL = "https://gumroad.com/l/mcmnke";
+
 export interface ProInfo {
   price: string;
-  gumroadUrl: string | null;
-  /** False when GUMROAD_PRODUCT_ID looks like a numeric id, not a permalink. */
+  gumroadUrl: string;
+  /** Kept for compatibility with callers; the permalink is always valid. */
   urlLikelyValid: boolean;
 }
 
 export const getProInfo = createServerFn({ method: "GET" }).handler(
   async (): Promise<ProInfo> => {
-    const productId = process.env["GUMROAD_PRODUCT_ID"];
-    const looksNumeric = !!productId && /^\d+$/.test(productId.trim());
     return {
       price: "$4.99",
-      gumroadUrl: productId
-        ? `https://gumroad.com/l/${productId.trim()}`
-        : null,
-      urlLikelyValid: !!productId && !looksNumeric,
+      gumroadUrl: GUMROAD_CHECKOUT_URL,
+      urlLikelyValid: true,
     };
   },
 );
