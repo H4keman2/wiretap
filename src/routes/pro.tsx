@@ -141,25 +141,15 @@ function ProPage() {
           </div>
 
           <div className="flex flex-col gap-2 pt-1 sm:flex-row">
-            {buyUrl ? (
-              <a
-                href={buyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
-              >
-                Get the season pass
-                <ArrowRight className="size-4" strokeWidth={3} />
-              </a>
-            ) : (
-              <Link
-                to="/settings"
-                className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
-              >
-                Enter license key
-                <ArrowRight className="size-4" strokeWidth={3} />
-              </Link>
-            )}
+            <a
+              href={BUY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
+            >
+              Get the season pass
+              <ArrowRight className="size-4" strokeWidth={3} />
+            </a>
             <a
               href="#features"
               className="flex items-center justify-center rounded border border-depth-foreground/25 px-4 py-3 text-sm font-bold uppercase tracking-tight text-depth-foreground"
