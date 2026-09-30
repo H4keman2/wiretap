@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { suggestBid, useBids } from "@/lib/bids";
 import { getLeagueBudget } from "@/lib/league.functions";
-import { useEspnConnection } from "@/lib/league-store";
+import { useEspnConnection, usePro } from "@/lib/league-store";
 import type { RankedPlayer, SlotPosition } from "@/lib/ranking";
 import { teamColor } from "@/lib/team-colors";
 import { getRecommendations } from "@/lib/waivers.functions";
@@ -43,13 +43,18 @@ function BidsPage() {
   const teamId = connection.teamId;
   const [slot, setSlot] = useState<SlotPosition>("RB");
   const { bids, upsert, remove, clear } = useBids();
+  const { isPro, key, loaded: proLoaded } = usePro();
 
   const budget = useQuery({
-    queryKey: ["league-budget", cred?.leagueId, teamId],
-    queryFn: () => getLeagueBudget({ data: { ...cred!, teamId: teamId! } }),
-    enabled: !!cred && teamId !== null,
+    queryKey: ["league-budget", cred?.leagueId, teamId, key],
+    queryFn: () => getLeagueBudget({ data: { ...cred!, teamId: teamId!, licenseKey: key ?? "" } }),
+    enabled: proLoaded && isPro && !!key && !!cred && teamId !== null,
     staleTime: 1000 * 60 * 3,
+    retry: (count, err) => !(err as Error)?.message?.includes("PRO_REQUIRED") && count < 2,
   });
+  const needsPro =
+    (proLoaded && !isPro) ||
+    (budget.isError && (budget.error as Error).message.includes("PRO_REQUIRED"));
 
   const players = useQuery({
     queryKey: ["bid-players", cred?.leagueId, format, slot],
@@ -104,7 +109,17 @@ function BidsPage() {
       <Header />
 
       <section className="grid grid-cols-3 gap-3" aria-label="Your budget">
-        {budget.isLoading ? (
+        {needsPro ? (
+          <div className="col-span-3 rounded-xl border border-action/40 bg-action/5 p-4 text-sm">
+            <p className="font-bold">Live league budget is a Pro feature</p>
+            <p className="mt-1 text-muted-foreground">
+              Upgrade to read your remaining FAAB straight from ESPN.
+            </p>
+            <Link to="/pro" className="mt-2 inline-block font-bold text-turf underline">
+              Get Pro — $4.99
+            </Link>
+          </div>
+        ) : budget.isLoading ? (
           <Skeleton className="col-span-3 h-20" />
         ) : budget.isError ? (
           <p className="col-span-3 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">

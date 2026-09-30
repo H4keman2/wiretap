@@ -103,7 +103,7 @@ function Analyzer() {
     setPulling(true);
     try {
       const { entries, unmatched } = await importLeagueRoster({
-        data: { ...cred, teamId: connection.teamId },
+        data: { ...cred, teamId: connection.teamId, licenseKey: key ?? "" },
       });
       update({ roster: entries });
       toast.success(

@@ -23,6 +23,7 @@ interface GumroadVerifyResponse {
     subscription_cancelled_at?: string | null;
     subscription_failed_at?: string | null;
   };
+  uses?: number;
 }
 
 export interface LicenseCheckResult {
@@ -35,7 +36,12 @@ function looksLikeKey(key: string): boolean {
   return key.trim().length >= 8;
 }
 
-async function verifyAgainstGumroad(licenseKey: string): Promise<LicenseCheckResult> {
+const MAX_DEVICES = 3;
+
+async function verifyAgainstGumroad(
+  licenseKey: string,
+  incrementUses: boolean,
+): Promise<LicenseCheckResult> {
   const productId = process.env["GUMROAD_PRODUCT_ID"];
   if (!productId) {
     // Fail closed: if the server isn't configured, no key can unlock Pro.
@@ -49,6 +55,7 @@ async function verifyAgainstGumroad(licenseKey: string): Promise<LicenseCheckRes
       body: new URLSearchParams({
         product_id: productId,
         license_key: licenseKey.trim(),
+        increment_uses_count: incrementUses ? "true" : "false",
       }),
     });
 
@@ -64,6 +71,13 @@ async function verifyAgainstGumroad(licenseKey: string): Promise<LicenseCheckRes
     }
     if (purchase?.subscription_cancelled_at || purchase?.subscription_failed_at) {
       return { valid: false, reason: "This subscription is no longer active." };
+    }
+
+    if (typeof data.uses === "number" && data.uses > MAX_DEVICES) {
+      return {
+        valid: false,
+        reason: "This key has already been activated on the maximum of 3 devices.",
+      };
     }
 
     return { valid: true };
@@ -83,7 +97,7 @@ export const verifyLicense = createServerFn({ method: "POST" })
     if (!looksLikeKey(data.licenseKey)) {
       return { valid: false, reason: "That key doesn't look right." };
     }
-    const result = await verifyAgainstGumroad(data.licenseKey);
+    const result = await verifyAgainstGumroad(data.licenseKey, true);
     if (result.valid) rememberVerified(data.licenseKey.trim());
     return result;
   });
@@ -109,7 +123,7 @@ export async function requireValidLicense(licenseKey: string | null | undefined)
     throw new Error("PRO_REQUIRED");
   }
 
-  const result = await verifyAgainstGumroad(key);
+  const result = await verifyAgainstGumroad(key, false);
   if (!result.valid) {
     throw new Error("PRO_REQUIRED");
   }
