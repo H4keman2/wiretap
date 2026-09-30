@@ -150,20 +150,13 @@ function ProPage() {
               Get the season pass
               <ArrowRight className="size-4" strokeWidth={3} />
             </a>
-            <a
-              href="#features"
+            <Link
+              to="/settings"
               className="flex items-center justify-center rounded border border-depth-foreground/25 px-4 py-3 text-sm font-bold uppercase tracking-tight text-depth-foreground"
             >
-              See what's included
-            </a>
+              Enter license key
+            </Link>
           </div>
-
-          {buyBroken && (
-            <p className="text-[11px] leading-relaxed text-warn">
-              The buy link isn't fully configured yet — if checkout doesn't open, grab a key from your
-              Gumroad product page and paste it in Settings.
-            </p>
-          )}
         </div>
 
         <div className="pointer-events-none absolute -right-8 -top-10 -z-10 size-40 rounded-full border border-depth-foreground/10" />
