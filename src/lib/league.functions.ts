@@ -28,6 +28,12 @@ export interface LeagueSummary {
   rosteredCount: number;
 }
 
+/** Pro gate — dynamic import keeps license.server out of the client graph. */
+async function requireLicense(key: string) {
+  const { requireValidLicense } = await import("./license.server");
+  await requireValidLicense(key);
+}
+
 function friendly(err: unknown): Error {
   const message = err instanceof Error ? err.message : "Couldn't read that league.";
   return new Error(message);
@@ -35,8 +41,9 @@ function friendly(err: unknown): Error {
 
 /** Read a league's settings, size, and team list so the user can pick their team. */
 export const connectLeague = createServerFn({ method: "POST" })
-  .inputValidator((data: LeagueCred) => data)
+  .inputValidator((data: LeagueCred & { licenseKey: string }) => data)
   .handler(async ({ data }): Promise<LeagueSummary> => {
+    await requireLicense(data.licenseKey);
     const { getLeagueSnapshot } = await import("./espn-league.server");
     try {
       const snap = await getLeagueSnapshot(data);
@@ -62,8 +69,9 @@ export const connectLeague = createServerFn({ method: "POST" })
 
 /** Pull one team's roster out of the league, ready to drop into the analyzer. */
 export const importLeagueRoster = createServerFn({ method: "POST" })
-  .inputValidator((data: LeagueCred & { teamId: number }) => data)
+  .inputValidator((data: LeagueCred & { teamId: number; licenseKey: string }) => data)
   .handler(async ({ data }): Promise<{ entries: RosterEntry[]; unmatched: string[] }> => {
+    await requireLicense(data.licenseKey);
     const { getLeagueSnapshot, playerKey } = await import("./espn-league.server");
     const { getPlayerPool } = await import("./players.server");
 
@@ -105,8 +113,9 @@ export interface LeagueBudget {
 
 /** Read your team's live FAAB budget from ESPN. */
 export const getLeagueBudget = createServerFn({ method: "POST" })
-  .inputValidator((data: LeagueCred & { teamId: number }) => data)
+  .inputValidator((data: LeagueCred & { teamId: number; licenseKey: string }) => data)
   .handler(async ({ data }): Promise<LeagueBudget> => {
+    await requireLicense(data.licenseKey);
     const { getLeagueSnapshot } = await import("./espn-league.server");
     try {
       const snap = await getLeagueSnapshot(data);

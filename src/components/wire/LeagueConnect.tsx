@@ -2,12 +2,13 @@ import { useMutation } from "@tanstack/react-query";
 import { Bookmark, Check, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 
 import { SectionLabel } from "./Shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { connectLeague, importLeagueRoster } from "@/lib/league.functions";
-import { useEspnConnection, useLeagueProfile } from "@/lib/league-store";
+import { useEspnConnection, useLeagueProfile, usePro } from "@/lib/league-store";
 import { FORMAT_LABEL } from "@/lib/ranking";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
 export function LeagueConnect() {
   const { connection, cred, save, clear, loaded } = useEspnConnection();
   const { update } = useLeagueProfile();
+  const { isPro, key, loaded: proLoaded } = usePro();
 
   const [leagueId, setLeagueId] = useState("");
   const [espnS2, setEspnS2] = useState("");
@@ -86,7 +88,28 @@ export function LeagueConnect() {
     window.history.replaceState(null, "", window.location.pathname + window.location.search);
   }, []);
 
-  if (!loaded) return null;
+  if (!loaded || !proLoaded) return null;
+
+  if (!isPro) {
+    return (
+      <section className="space-y-3">
+        <SectionLabel>Your ESPN league</SectionLabel>
+        <div className="space-y-3 rounded-xl border border-action/50 bg-card p-4">
+          <p className="font-display text-xl uppercase leading-none">League sync is a Pro feature</p>
+          <p className="text-sm text-muted-foreground">
+            Connecting your ESPN league unlocks real-ownership waiver data, roster sync and your live
+            FAAB budget.
+          </p>
+          <Button asChild className="h-9 w-full">
+            <Link to="/pro">Get Pro — $4.99</Link>
+          </Button>
+          <p className="text-[11px] text-muted-foreground">
+            Already bought it? Enter your key in Settings.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   /** ESPN league URLs carry the id as ?leagueId=123456 — accept a full paste. */
   const handleLeagueInput = (raw: string) => {
@@ -142,7 +165,7 @@ export function LeagueConnect() {
               disabled={connection.teamId === null || sync.isPending || !cred}
               onClick={() => {
                 if (!cred || connection.teamId === null) return;
-                sync.mutate({ data: { ...cred, teamId: connection.teamId } });
+                sync.mutate({ data: { ...cred, teamId: connection.teamId, licenseKey: key ?? "" } });
               }}
             >
               {sync.isPending ? "Syncing your roster…" : "Sync my roster into Wire Tap"}
@@ -219,7 +242,12 @@ export function LeagueConnect() {
               disabled={connect.isPending || !leagueId.trim()}
               onClick={() =>
                 connect.mutate({
-                  data: { leagueId: leagueId.trim(), espnS2: espnS2.trim(), swid: swid.trim() },
+                  data: {
+                    leagueId: leagueId.trim(),
+                    espnS2: espnS2.trim(),
+                    swid: swid.trim(),
+                    licenseKey: key ?? "",
+                  },
                 })
               }
             >
