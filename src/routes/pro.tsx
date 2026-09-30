@@ -263,7 +263,6 @@ function ProPage() {
             Get the season pass — $4.99
             <ArrowRight className="size-4" strokeWidth={3} />
           </a>
-        </div>
           <Link
             to="/analyzer"
             className="flex items-center justify-center rounded border border-depth-foreground/25 px-4 py-3 text-sm font-bold uppercase tracking-tight text-depth-foreground"
