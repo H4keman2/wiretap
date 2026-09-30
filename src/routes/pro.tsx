@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -16,7 +15,6 @@ import {
 } from "lucide-react";
 
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
-import { getProInfo } from "@/lib/pro.functions";
 
 export const Route = createFileRoute("/pro")({
   head: () => ({
@@ -110,16 +108,9 @@ const FAQ = [
   },
 ] as const;
 
+const BUY_URL = "https://gumroad.com/l/mcmnke";
+
 function ProPage() {
-  const { data: proInfo } = useQuery({
-    queryKey: ["pro-info"],
-    queryFn: () => getProInfo({ data: undefined }),
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const buyUrl = proInfo?.gumroadUrl ?? null;
-  const buyBroken = proInfo && !proInfo.urlLikelyValid;
-
   return (
     <Page format="ppr">
       {/* Hero -------------------------------------------------------- */}
@@ -142,7 +133,7 @@ function ProPage() {
 
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
             <span className="font-display text-4xl uppercase leading-none text-action">
-              {proInfo?.price ?? "$4.99"}
+              $4.99
             </span>
             <span className="text-xs font-bold uppercase tracking-tight text-depth-foreground/60">
               for the season
@@ -150,39 +141,22 @@ function ProPage() {
           </div>
 
           <div className="flex flex-col gap-2 pt-1 sm:flex-row">
-            {buyUrl ? (
-              <a
-                href={buyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
-              >
-                Get the season pass
-                <ArrowRight className="size-4" strokeWidth={3} />
-              </a>
-            ) : (
-              <Link
-                to="/settings"
-                className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
-              >
-                Enter license key
-                <ArrowRight className="size-4" strokeWidth={3} />
-              </Link>
-            )}
             <a
-              href="#features"
+              href={BUY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
+            >
+              Get the season pass
+              <ArrowRight className="size-4" strokeWidth={3} />
+            </a>
+            <Link
+              to="/settings"
               className="flex items-center justify-center rounded border border-depth-foreground/25 px-4 py-3 text-sm font-bold uppercase tracking-tight text-depth-foreground"
             >
-              See what's included
-            </a>
+              Enter license key
+            </Link>
           </div>
-
-          {buyBroken && (
-            <p className="text-[11px] leading-relaxed text-warn">
-              The buy link isn't fully configured yet — if checkout doesn't open, grab a key from your
-              Gumroad product page and paste it in Settings.
-            </p>
-          )}
         </div>
 
         <div className="pointer-events-none absolute -right-8 -top-10 -z-10 size-40 rounded-full border border-depth-foreground/10" />
@@ -280,25 +254,15 @@ function ProPage() {
           a guess.
         </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          {buyUrl ? (
-            <a
-              href={buyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
-            >
-              Get the season pass — {proInfo?.price ?? "$4.99"}
-              <ArrowRight className="size-4" strokeWidth={3} />
-            </a>
-          ) : (
-            <Link
-              to="/settings"
-              className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
-            >
-              Enter license key
-              <ArrowRight className="size-4" strokeWidth={3} />
-            </Link>
-          )}
+          <a
+            href={BUY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
+          >
+            Get the season pass — $4.99
+            <ArrowRight className="size-4" strokeWidth={3} />
+          </a>
           <Link
             to="/analyzer"
             className="flex items-center justify-center rounded border border-depth-foreground/25 px-4 py-3 text-sm font-bold uppercase tracking-tight text-depth-foreground"
