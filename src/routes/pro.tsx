@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
-import { getProInfo } from "@/lib/pro.functions";
 
 export const Route = createFileRoute("/pro")({
   head: () => ({
