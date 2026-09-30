@@ -108,16 +108,9 @@ const FAQ = [
   },
 ] as const;
 
+const BUY_URL = "https://gumroad.com/l/mcmnke";
+
 function ProPage() {
-  const { data: proInfo } = useQuery({
-    queryKey: ["pro-info"],
-    queryFn: () => getProInfo({ data: undefined }),
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const buyUrl = proInfo?.gumroadUrl ?? null;
-  const buyBroken = proInfo && !proInfo.urlLikelyValid;
-
   return (
     <Page format="ppr">
       {/* Hero -------------------------------------------------------- */}
@@ -140,7 +133,7 @@ function ProPage() {
 
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
             <span className="font-display text-4xl uppercase leading-none text-action">
-              {proInfo?.price ?? "$4.99"}
+              $4.99
             </span>
             <span className="text-xs font-bold uppercase tracking-tight text-depth-foreground/60">
               for the season
