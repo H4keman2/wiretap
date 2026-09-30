@@ -254,25 +254,16 @@ function ProPage() {
           a guess.
         </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          {buyUrl ? (
-            <a
-              href={buyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
-            >
-              Get the season pass — {proInfo?.price ?? "$4.99"}
-              <ArrowRight className="size-4" strokeWidth={3} />
-            </a>
-          ) : (
-            <Link
-              to="/settings"
-              className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
-            >
-              Enter license key
-              <ArrowRight className="size-4" strokeWidth={3} />
-            </Link>
-          )}
+          <a
+            href={BUY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
+          >
+            Get the season pass — $4.99
+            <ArrowRight className="size-4" strokeWidth={3} />
+          </a>
+        </div>
           <Link
             to="/analyzer"
             className="flex items-center justify-center rounded border border-depth-foreground/25 px-4 py-3 text-sm font-bold uppercase tracking-tight text-depth-foreground"
