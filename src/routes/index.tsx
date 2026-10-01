@@ -151,7 +151,7 @@ function WaiverBrowser() {
               key={player.id}
               player={player}
               rank={i + 1}
-              format={format}
+              format={activeFormat}
               isNew={newIds.has(player.id)}
             />
           ))}
