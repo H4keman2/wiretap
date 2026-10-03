@@ -73,9 +73,9 @@ function WaiverBrowser() {
     <Page format={activeFormat}>
       <SosWarning />
 
-      <Hero week={week} poolSize={data?.length ?? null} updatedAt={dataUpdatedAt} />
+      <Hero week={week} poolSize={data?.length ?? null} updatedAt={dataUpdatedAt} connected={!!cred} />
 
-      <HowItWorks />
+      <HowItWorks connected={!!cred} />
 
 
       <section className="space-y-5">
