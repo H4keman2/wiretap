@@ -22,10 +22,12 @@ export function Hero({
   week,
   poolSize,
   updatedAt,
+  connected,
 }: {
   week: number | null;
   poolSize: number | null;
   updatedAt?: number;
+  connected: boolean;
 }) {
   const fresh = freshLabel(updatedAt);
 
@@ -42,8 +44,9 @@ export function Hero({
         </h1>
 
         <p className="text-sm leading-relaxed text-depth-foreground/75">
-          Ranked waiver targets at every position, scored for your format and filtered to players
-          who are still widely available. No account, no league login.
+          {connected
+            ? "Scored with your league's settings, filtered to players still free in your league."
+            : "Ranked waiver targets at every position, scored for your format and filtered to players who are still widely available. No account, no league login."}
         </p>
 
         <dl className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] font-bold uppercase tracking-tight text-depth-foreground/70">
@@ -99,10 +102,16 @@ const STEPS = [
   { n: 3, title: "Grab the top card", body: "Each target explains itself in a line, no table reading." },
 ] as const;
 
-export function HowItWorks() {
+const LEAGUE_STEP_1 = {
+  n: 1,
+  title: "Your league's format",
+  body: "Your league's scoring settings apply — rankings shift with them.",
+} as const;
+
+export function HowItWorks({ connected }: { connected: boolean }) {
   return (
     <section className="grid gap-3 sm:grid-cols-3">
-      {STEPS.map((s) => (
+      {(connected ? [LEAGUE_STEP_1, ...STEPS.slice(1)] : STEPS).map((s) => (
         <div key={s.n} className="rounded-xl border border-border bg-card p-4">
           <span className="flex size-6 items-center justify-center rounded-full bg-action/15 text-[11px] font-black text-action">
             {s.n}
