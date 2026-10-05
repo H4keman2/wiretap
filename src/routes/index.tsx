@@ -48,7 +48,7 @@ function WaiverBrowser() {
   const leagueFormat = cred ? connection.summary?.format : null;
   const activeFormat = leagueFormat ?? format;
 
-  const { data, isPending, isError, isFetching, dataUpdatedAt } = useQuery({
+  const { data, isPending, isError, isFetching, dataUpdatedAt, refetch } = useQuery({
     queryKey: ["waivers", activeFormat, slot, maxOwnership, cred?.leagueId ?? "national"],
     queryFn: () =>
       getRecommendations({
@@ -123,11 +123,21 @@ function WaiverBrowser() {
         )}
 
         {isError && (
-          <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-            {cred
-              ? "Couldn't read your league just now — check your league details in Settings, or try again in a moment."
-              : "Player data is unavailable right now. Try again in a moment."}
-          </p>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-xs text-muted-foreground">
+              {cred
+                ? "Couldn't read your league just now — check your league details in Settings, or try again in a moment."
+                : "Player data is unavailable right now. Try again in a moment."}
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="mt-3 rounded bg-action px-4 py-2 text-xs font-bold uppercase text-action-foreground disabled:opacity-50"
+            >
+              Try again
+            </button>
+          </div>
         )}
 
         {data?.length === 0 && (
