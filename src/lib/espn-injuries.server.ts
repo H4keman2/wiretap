@@ -10,6 +10,7 @@
  */
 
 import type { RealPosition } from "./ranking";
+import { fetchWithTimeout } from "./fetch-timeout.server";
 
 const TTL_MS = 1000 * 45;
 

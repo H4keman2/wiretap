@@ -12,6 +12,7 @@
  */
 
 import type { SosHealth, SosMatchup, TeamSos } from "./sos";
+import { fetchWithTimeout } from "./fetch-timeout.server";
 
 export type { SosHealth, SosMatchup, TeamSos };
 

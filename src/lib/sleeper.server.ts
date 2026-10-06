@@ -7,6 +7,7 @@
  */
 
 import type { PlayerStat, RealPosition } from "./ranking";
+import { fetchWithTimeout } from "./fetch-timeout.server";
 
 const PLAYERS_URL = "https://api.sleeper.app/v1/players/nfl";
 const TRENDING = (kind: "add" | "drop") =>

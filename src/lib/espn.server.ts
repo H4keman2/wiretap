@@ -8,6 +8,7 @@
 
 import type { RealPosition } from "./ranking";
 import type { SeasonStats } from "./season-stats";
+import { fetchWithTimeout } from "./fetch-timeout.server";
 
 export interface EspnPlayer {
   name: string;
