@@ -96,26 +96,34 @@ async function verifyAgainstGumroad(
 export const verifyLicense = createServerFn({ method: "POST" })
   .inputValidator((data: { licenseKey: string }) => data)
   .handler(async ({ data }): Promise<LicenseCheckResult> => {
-    let guard: {
-      isRateLimited: () => boolean;
-      rememberVerified: (k: string) => void;
-      isRecentlyVerified: (k: string) => boolean;
-    } | null = null;
     try {
-      guard = await import("./license-guard.server");
-    } catch {
-      // Degrade gracefully: no rate limiting or verified-key cache, but the
-      // license check itself still runs instead of failing the request.
+      let guard: {
+        isRateLimited: () => boolean;
+        rememberVerified: (k: string) => void;
+        isRecentlyVerified: (k: string) => boolean;
+      } | null = null;
+      try {
+        guard = await import("./license-guard.server");
+      } catch {
+        // Degrade gracefully: no rate limiting or verified-key cache, but the
+        // license check itself still runs instead of failing the request.
+      }
+      if (guard ? guard.isRateLimited() : false) {
+        return { valid: false, reason: "Too many attempts. Wait a few minutes and try again." };
+      }
+      if (!looksLikeKey(data.licenseKey)) {
+        return { valid: false, reason: "That key doesn't look right." };
+      }
+      const result = await verifyAgainstGumroad(data.licenseKey, true);
+      if (result.valid) guard?.rememberVerified(data.licenseKey.trim());
+      return result;
+    } catch (err) {
+      return {
+        valid: false,
+        reason:
+          "License check failed (" + (err instanceof Error ? err.name : "error") + ").",
+      };
     }
-    if (guard ? guard.isRateLimited() : false) {
-      return { valid: false, reason: "Too many attempts. Wait a few minutes and try again." };
-    }
-    if (!looksLikeKey(data.licenseKey)) {
-      return { valid: false, reason: "That key doesn't look right." };
-    }
-    const result = await verifyAgainstGumroad(data.licenseKey, true);
-    if (result.valid) guard?.rememberVerified(data.licenseKey.trim());
-    return result;
   });
 
 /**
