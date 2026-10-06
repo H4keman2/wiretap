@@ -40,7 +40,7 @@ const SLOTS: SlotPosition[] = ["QB", "RB", "WR", "TE", "FLEX", "DST", "K"];
 
 function SettingsPage() {
   const { profile, update } = useLeagueProfile();
-  const { isPro, activate, deactivate, checking } = usePro();
+  const { isPro, activate, deactivate, checking, error } = usePro();
   const { theme, setTheme } = useTheme();
   const { enabled: liveUpdates, setEnabled: setLiveUpdates } = useLiveUpdates();
   const [license, setLicense] = useState("");
@@ -155,7 +155,7 @@ function SettingsPage() {
                   id="license"
                   value={license}
                   onChange={(e) => setLicense(e.target.value)}
-                  placeholder="WT-XXXX-XXXX"
+                  placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
                   className="h-9 text-sm uppercase"
                 />
                 <Button
@@ -165,12 +165,14 @@ function SettingsPage() {
                   onClick={async () => {
                     const ok = await activate(license);
                     if (ok) toast.success("Team Analyzer unlocked");
-                    else toast.error("That key doesn't look right");
                   }}
                 >
                   {checking ? "Checking…" : "Activate"}
                 </Button>
               </div>
+              {error && (
+                <p className="mt-2 text-[11px] font-bold text-red-500">{error}</p>
+              )}
               <p className="mt-2 text-[11px] text-muted-foreground">
                 Your key is verified against your purchase, not just checked for the right shape. Don't
                 have one yet?{" "}
