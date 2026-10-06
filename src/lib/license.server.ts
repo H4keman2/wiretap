@@ -81,8 +81,14 @@ async function verifyAgainstGumroad(
     }
 
     return { valid: true };
-  } catch {
-    return { valid: false, reason: "Could not reach the license server, try again shortly." };
+  } catch (err) {
+    return {
+      valid: false,
+      reason:
+        "Could not reach the license server (" +
+        (err instanceof Error ? err.name : "error") +
+        ").",
+    };
   }
 }
 
@@ -90,15 +96,25 @@ async function verifyAgainstGumroad(
 export const verifyLicense = createServerFn({ method: "POST" })
   .inputValidator((data: { licenseKey: string }) => data)
   .handler(async ({ data }): Promise<LicenseCheckResult> => {
-    const { isRateLimited, rememberVerified } = await import("./license-guard.server");
-    if (isRateLimited()) {
+    let guard: {
+      isRateLimited: () => boolean;
+      rememberVerified: (k: string) => void;
+      isRecentlyVerified: (k: string) => boolean;
+    } | null = null;
+    try {
+      guard = await import("./license-guard.server");
+    } catch {
+      // Degrade gracefully: no rate limiting or verified-key cache, but the
+      // license check itself still runs instead of failing the request.
+    }
+    if (guard ? guard.isRateLimited() : false) {
       return { valid: false, reason: "Too many attempts. Wait a few minutes and try again." };
     }
     if (!looksLikeKey(data.licenseKey)) {
       return { valid: false, reason: "That key doesn't look right." };
     }
     const result = await verifyAgainstGumroad(data.licenseKey, true);
-    if (result.valid) rememberVerified(data.licenseKey.trim());
+    if (result.valid) guard?.rememberVerified(data.licenseKey.trim());
     return result;
   });
 
@@ -111,11 +127,19 @@ export async function requireValidLicense(licenseKey: string | null | undefined)
     throw new Error("PRO_REQUIRED");
   }
   const key = licenseKey.trim();
-  const { isRateLimited, isRecentlyVerified, rememberVerified } =
-    await import("./license-guard.server");
-  if (isRecentlyVerified(key)) return;
+  let guard: {
+    isRateLimited: () => boolean;
+    rememberVerified: (k: string) => void;
+    isRecentlyVerified: (k: string) => boolean;
+  } | null = null;
+  try {
+    guard = await import("./license-guard.server");
+  } catch {
+    // Degrade gracefully: skip cache/rate-limit checks rather than blocking Pro.
+  }
+  if (guard ? guard.isRecentlyVerified(key) : false) return;
 
-  if (isRateLimited()) {
+  if (guard && guard.isRateLimited()) {
     // A real Pro user re-verifying mid-session should never hit this: the
     // cache above absorbs that traffic. Landing here means either a burst
     // of distinct/invalid keys from one IP, or the cache TTL just lapsed
@@ -127,5 +151,5 @@ export async function requireValidLicense(licenseKey: string | null | undefined)
   if (!result.valid) {
     throw new Error("PRO_REQUIRED");
   }
-  rememberVerified(key);
+  guard?.rememberVerified(key);
 }
