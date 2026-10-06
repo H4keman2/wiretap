@@ -48,6 +48,11 @@ async function verifyAgainstGumroad(
     return { valid: false, reason: "License verification is not configured." };
   }
 
+  // Fail fast: if the server can't reach Gumroad, abort after 10s instead of
+  // hanging the request until the client gives up with a generic error.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+
   try {
     const res = await fetch(GUMROAD_VERIFY_URL, {
       method: "POST",
@@ -57,6 +62,7 @@ async function verifyAgainstGumroad(
         license_key: licenseKey.trim(),
         increment_uses_count: incrementUses ? "true" : "false",
       }),
+      signal: controller.signal,
     });
 
     const data = (await res.json()) as GumroadVerifyResponse;
@@ -82,6 +88,9 @@ async function verifyAgainstGumroad(
 
     return { valid: true };
   } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      return { valid: false, reason: "License server timed out." };
+    }
     return {
       valid: false,
       reason:
@@ -89,6 +98,8 @@ async function verifyAgainstGumroad(
         (err instanceof Error ? err.name : "error") +
         ").",
     };
+  } finally {
+    clearTimeout(timer);
   }
 }
 
