@@ -69,7 +69,7 @@ function seasonYear(): number {
 
 async function json<T>(url: string): Promise<T | null> {
   try {
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       headers: {
         accept: "application/json",
         "user-agent": "WireTap/1.0 (fantasy football schedule analysis)",

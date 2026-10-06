@@ -78,7 +78,7 @@ async function build(): Promise<InjuryFeed> {
   const year = seasonYear();
   for (const y of [year, year - 1]) {
     try {
-      const res = await fetch(endpoint(y), {
+      const res = await fetchWithTimeout(endpoint(y), {
         headers: { accept: "application/json", "x-fantasy-filter": FILTER },
       });
       if (!res.ok) continue;

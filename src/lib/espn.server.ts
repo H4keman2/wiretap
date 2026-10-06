@@ -176,7 +176,7 @@ export async function fetchEspnPlayers(): Promise<EspnPlayer[]> {
 
   for (const y of years) {
     try {
-      const res = await fetch(endpoint(y), {
+      const res = await fetchWithTimeout(endpoint(y), {
         headers: {
           accept: "application/json",
           "x-fantasy-filter": filterFor(y),
