@@ -35,7 +35,14 @@ const rateLimitState = new Map<string, { count: number; windowStart: number }>()
 
 /** Rate-limits by the caller's IP, resolved from the current request. */
 export function isRateLimited(): boolean {
-  const ip = getRequestIP({ xForwardedFor: true }) ?? "unknown";
+  let ip: string;
+  try {
+    ip = getRequestIP({ xForwardedFor: true }) ?? "unknown";
+  } catch {
+    // If the request context isn't available, don't let it break the
+    // license check — fall back to a shared bucket.
+    ip = "unknown";
+  }
   const now = Date.now();
   const entry = rateLimitState.get(ip);
   if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
