@@ -10,6 +10,7 @@
  */
 
 import type { RealPosition } from "./ranking";
+import { fetchWithTimeout } from "./fetch-timeout.server";
 
 const TTL_MS = 1000 * 45;
 
@@ -77,7 +78,7 @@ async function build(): Promise<InjuryFeed> {
   const year = seasonYear();
   for (const y of [year, year - 1]) {
     try {
-      const res = await fetch(endpoint(y), {
+      const res = await fetchWithTimeout(endpoint(y), {
         headers: { accept: "application/json", "x-fantasy-filter": FILTER },
       });
       if (!res.ok) continue;

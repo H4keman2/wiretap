@@ -7,6 +7,7 @@
  */
 
 import type { PlayerStat, RealPosition } from "./ranking";
+import { fetchWithTimeout } from "./fetch-timeout.server";
 
 const PLAYERS_URL = "https://api.sleeper.app/v1/players/nfl";
 const TRENDING = (kind: "add" | "drop") =>
@@ -44,7 +45,7 @@ function estimateOwnership(searchRank: number | null | undefined, addCount: numb
 
 async function fetchTrending(kind: "add" | "drop"): Promise<Map<string, number>> {
   try {
-    const res = await fetch(TRENDING(kind));
+    const res = await fetchWithTimeout(TRENDING(kind));
     if (!res.ok) return new Map();
     const rows = (await res.json()) as Array<{ player_id: string; count: number }>;
     return new Map(rows.map((r) => [r.player_id, r.count ?? 0]));
@@ -53,9 +54,21 @@ async function fetchTrending(kind: "add" | "drop"): Promise<Map<string, number>>
   }
 }
 
+/** Times out with a clear message so getSleeperPool callers degrade gracefully. */
+async function fetchPlayers(): Promise<Response> {
+  try {
+    return await fetchWithTimeout(PLAYERS_URL);
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error("Sleeper player fetch timed out after 10s");
+    }
+    throw err;
+  }
+}
+
 async function build(): Promise<PlayerStat[]> {
   const [res, adds, drops] = await Promise.all([
-    fetch(PLAYERS_URL),
+    fetchPlayers(),
     fetchTrending("add"),
     fetchTrending("drop"),
   ]);
