@@ -44,6 +44,7 @@ export function PlayerRow({
         aria-label={`Open ${player.name} details`}
         onClick={() => setOpen(true)}
         onKeyDown={(e) => {
+          if (e.target !== e.currentTarget) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             setOpen(true);
