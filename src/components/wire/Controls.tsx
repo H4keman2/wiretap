@@ -17,6 +17,7 @@ export function FormatSelector({
         <button
           key={f}
           type="button"
+          aria-pressed={value === f}
           onClick={() => onChange(f)}
           className={cn(
             "flex-1 rounded-lg border px-4 py-3 text-xs font-bold uppercase tracking-tight transition-colors",
@@ -45,6 +46,7 @@ export function PositionSelector({
         <button
           key={p}
           type="button"
+          aria-pressed={value === p}
           onClick={() => onChange(p)}
           className={cn(
             "min-w-[3.5rem] flex-1 shrink-0 rounded-lg border px-4 py-3 text-center text-xs font-bold transition-colors",
