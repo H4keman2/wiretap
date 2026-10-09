@@ -64,7 +64,7 @@ export function PlayerDetail({
         </DialogHeader>
 
         <div className="space-y-4 p-4">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <Stat label="Score" value={`${player.score.toFixed(1)}/10`} />
             <Stat label="Proj" value={`${player.projection.toFixed(1)} pts`} />
             <Stat
