@@ -79,7 +79,7 @@ export function OwnershipSlider({
       </div>
       <Slider
         min={10}
-        max={80}
+        max={100}
         step={5}
         value={[value]}
         onValueChange={([v]) => onChange(v ?? 40)}
