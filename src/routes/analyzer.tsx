@@ -550,6 +550,16 @@ function RosterEditor({
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                query.trim() &&
+                  add({
+                    id: `manual-${query.trim().toLowerCase()}`,
+                    name: query.trim(),
+                    position,
+                  });
+              }}
               placeholder="Add player by name"
               className="h-9 text-sm"
             />
