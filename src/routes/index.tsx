@@ -11,7 +11,7 @@ import { OwnershipCompare } from "@/components/wire/OwnershipCompare";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEspnConnection } from "@/lib/league-store";
+import { useEspnConnection, usePro } from "@/lib/league-store";
 import { useLiveUpdates } from "@/lib/live-updates-store";
 
 import type { ScoringFormat, SlotPosition } from "@/lib/ranking";
@@ -43,6 +43,7 @@ function WaiverBrowser() {
   const [maxOwnership, setMaxOwnership] = useState(40);
   const { enabled: live } = useLiveUpdates();
   const { connection, cred } = useEspnConnection();
+  const { isPro, loaded: proLoaded } = usePro();
 
   // A connected league dictates scoring — its own settings beat a guess.
   const leagueFormat = cred ? connection.summary?.format : null;
@@ -193,12 +194,18 @@ function WaiverBrowser() {
             shown — plus injury alerts and a suggested lineup.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Link
-              to="/pro"
-              className="block rounded bg-action px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
-            >
-              See plans — $4.99
-            </Link>
+            {proLoaded && isPro ? (
+              <span className="block rounded border border-depth-foreground/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-depth-foreground/70">
+                Pro active
+              </span>
+            ) : (
+              <Link
+                to="/pro"
+                className="block rounded bg-action px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
+              >
+                See plans — $4.99
+              </Link>
+            )}
             <Link
               to="/analyzer"
               className="block rounded border border-depth-foreground/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-depth-foreground"
