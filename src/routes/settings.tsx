@@ -163,7 +163,7 @@ function SettingsPage() {
                   className="h-9"
                   disabled={checking || !license.trim()}
                   onClick={async () => {
-                    const ok = await activate(license);
+                    const ok = await activate(license.trim().toUpperCase());
                     if (ok) toast.success("Team Analyzer unlocked");
                   }}
                 >
