@@ -573,6 +573,7 @@ function RosterEditor({
                   });
               }}
               placeholder="Add player by name"
+              inputMode="search"
               className="h-9 text-sm"
             />
             <select
