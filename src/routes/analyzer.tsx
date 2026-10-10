@@ -386,11 +386,23 @@ function Analyzer() {
       {analysis.isFetching && !result && <Skeleton className="h-28 rounded-xl" />}
 
       {analysis.isError && (
-        <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-xs text-destructive">
-          {String(analysis.error).includes("PRO_REQUIRED")
-            ? "Your license couldn't be verified. Check your key in League settings."
-            : "Something went wrong running the analysis. Try again in a moment."}
-        </p>
+        <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+          <p className="text-xs text-destructive">
+            {String(analysis.error).includes("PRO_REQUIRED")
+              ? "Your license couldn't be verified. Check your key in League settings."
+              : "Something went wrong running the analysis. Try again in a moment."}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-3 h-7 text-[11px]"
+            disabled={analysis.isFetching}
+            onClick={() => analysis.refetch()}
+          >
+            Try again
+          </Button>
+        </div>
       )}
     </Page>
   );
