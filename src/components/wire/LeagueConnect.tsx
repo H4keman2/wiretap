@@ -214,6 +214,10 @@ export function LeagueConnect() {
                   value={espnS2}
                   onChange={(e) => setEspnS2(e.target.value)}
                   placeholder="espn_s2 — AEB..."
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   className="h-9 text-sm"
                 />
                 <Input
@@ -222,6 +226,10 @@ export function LeagueConnect() {
                   value={swid}
                   onChange={(e) => setSwid(e.target.value)}
                   placeholder="SWID — {XXXXXXXX-XXXX-...}"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   className="h-9 text-sm"
                 />
               </div>
