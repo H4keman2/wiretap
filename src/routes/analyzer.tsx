@@ -592,6 +592,7 @@ function RosterEditor({
             </select>
             <Button
               size="sm"
+              aria-label="Add player"
               className="h-9 shrink-0"
               onClick={() =>
                 query.trim() &&
