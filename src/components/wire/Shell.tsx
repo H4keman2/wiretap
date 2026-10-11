@@ -88,7 +88,7 @@ export function Page({
         <AppHeader />
         <TopNav />
       </div>
-      <main id="main" className="mx-auto max-w-2xl space-y-8 p-5 sm:p-6">{children}</main>
+      <main id="main" tabIndex={-1} className="mx-auto max-w-2xl space-y-8 p-5 sm:p-6">{children}</main>
     </div>
   );
 }
