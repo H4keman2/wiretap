@@ -35,7 +35,7 @@ export function Hero({
     <section className="relative isolate overflow-hidden rounded-xl bg-depth px-5 py-7 text-depth-foreground">
       <div className="relative z-10 space-y-4">
         <p className="inline-flex items-center gap-1.5 rounded-full bg-action/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-action">
-          <Radar className="size-3" strokeWidth={3} />
+          <Radar className="size-3" strokeWidth={3} aria-hidden="true" />
           Waiver intel
         </p>
 
@@ -52,14 +52,14 @@ export function Hero({
         <dl className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] font-bold uppercase tracking-tight text-depth-foreground/70">
           {week !== null && (
             <div className="flex items-center gap-1.5">
-              <Activity className="size-3.5 text-action" strokeWidth={3} />
+              <Activity className="size-3.5 text-action" strokeWidth={3} aria-hidden="true" />
               <dt className="sr-only">Schedule week</dt>
               <dd>Week {week}</dd>
             </div>
           )}
           {poolSize !== null && (
             <div className="flex items-center gap-1.5">
-              <Users className="size-3.5 text-action" strokeWidth={3} />
+              <Users className="size-3.5 text-action" strokeWidth={3} aria-hidden="true" />
               <dt className="sr-only">Targets listed</dt>
               <dd>{poolSize} targets</dd>
             </div>
@@ -78,7 +78,7 @@ export function Hero({
             href="#targets"
             className="flex items-center justify-center gap-2 rounded bg-action px-4 py-3 text-sm font-bold uppercase tracking-tight text-action-foreground"
           >
-            <ListFilter className="size-4" strokeWidth={3} />
+            <ListFilter className="size-4" strokeWidth={3} aria-hidden="true" />
             See this week&apos;s targets
           </a>
           <Link
