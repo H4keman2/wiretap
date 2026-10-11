@@ -527,6 +527,7 @@ function RosterEditor({
         <SectionLabel>Your roster</SectionLabel>
         <button
           type="button"
+          aria-pressed={bulkOpen}
           onClick={() => setBulkOpen((v) => !v)}
           className="text-[11px] font-bold text-turf underline"
         >
@@ -537,6 +538,7 @@ function RosterEditor({
       {bulkOpen ? (
         <div className="space-y-2 rounded-xl border border-border bg-card p-3">
           <Textarea
+            aria-label="Roster names, one per line"
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
             placeholder={"One player per line, e.g.\nBo Nix\nKenneth Walker RB\nAmon-Ra St. Brown"}
