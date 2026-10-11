@@ -83,11 +83,16 @@ export function LiveStatusNote({
           {enabled ? "Live" : "Live updates are off"}
         </p>
         <p className="truncate text-[11px] text-muted-foreground">
-          {enabled
-            ? `Refreshing every 60s · ${ago(lastUpdate)}${
-                newCount > 0 ? ` · ${newCount} new under threshold` : ""
-              }`
-            : "Turn this back on in Settings to auto-refresh and flag new availability."}
+          {enabled ? (
+            <>
+              {`Refreshing every 60s · ${ago(lastUpdate)}`}
+              {newCount > 0 ? (
+                <span role="status"> · {newCount} new under threshold</span>
+              ) : null}
+            </>
+          ) : (
+            "Turn this back on in Settings to auto-refresh and flag new availability."
+          )}
         </p>
       </div>
 
