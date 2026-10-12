@@ -94,6 +94,12 @@ function WatchlistPage() {
           Players you saved, refreshed with live ownership, projections and matchups. Stored on this
           device — no account needed.
         </p>
+        <Link
+          to="/analyzer"
+          className="inline-flex w-fit items-center gap-1 pt-1 text-[11px] font-black uppercase tracking-wider text-action underline underline-offset-4"
+        >
+          Analyze my roster
+        </Link>
       </section>
 
       <FormatSelector value={format} onChange={setFormat} />
