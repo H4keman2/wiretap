@@ -368,9 +368,20 @@ function Analyzer() {
               All {result.targetSlot} targets under {maxOwnership}% owned
             </SectionLabel>
             {result.recommendations.length === 0 ? (
-              <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-                Nothing under {maxOwnership}% rostered at {result.targetSlot}. Raise the threshold.
-              </p>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <p className="text-xs text-muted-foreground">
+                  Nothing under {maxOwnership}% rostered at {result.targetSlot}. Raise the threshold.
+                </p>
+                {maxOwnership < 100 && (
+                  <button
+                    type="button"
+                    onClick={() => setMaxOwnership((v) => Math.min(100, v + 20))}
+                    className="mt-3 rounded bg-action px-4 py-2 text-xs font-bold uppercase text-action-foreground"
+                  >
+                    Widen pool
+                  </button>
+                )}
+              </div>
             ) : (
               <div className="space-y-4">
                 {result.recommendations.map((p, i) => (
