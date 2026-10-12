@@ -59,6 +59,7 @@ function SettingsPage() {
           ].map((opt) => (
             <button
               key={opt.value}
+              type="button"
               aria-pressed={theme === opt.value}
               onClick={() => setTheme(opt.value)}
               className={cn(
