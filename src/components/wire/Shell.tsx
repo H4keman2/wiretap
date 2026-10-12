@@ -61,7 +61,7 @@ export function TopNav() {
           className="flex flex-col items-center gap-1 rounded-lg px-1.5 py-1.5 text-muted-foreground transition-colors sm:px-3"
           activeProps={{ className: "bg-action/15 text-action" }}
         >
-          <Icon className="size-5" strokeWidth={2.5} />
+          <Icon aria-hidden="true" className="size-5" strokeWidth={2.5} />
           <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
         </Link>
       ))}
