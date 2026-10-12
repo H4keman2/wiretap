@@ -96,7 +96,7 @@ function WatchlistPage() {
         </p>
         <Link
           to="/analyzer"
-          className="inline-flex w-fit items-center gap-1 pt-1 text-[11px] font-black uppercase tracking-wider text-action underline underline-offset-4"
+          className="inline-flex w-fit items-center gap-1 pt-1 text-[10px] font-black uppercase tracking-wider text-muted-foreground underline underline-offset-4 transition-colors hover:text-action"
         >
           Analyze my roster
         </Link>
