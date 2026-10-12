@@ -61,7 +61,7 @@ function WatchlistPage() {
   const { entries, loaded, clear } = useWatchlist();
   const ids = entries.map((e) => e.id);
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, isFetching, refetch } = useQuery({
     queryKey: ["watchlist", format, ids.join(",")],
     queryFn: () => getWatchlistPlayers({ data: { ids, format } }),
     enabled: loaded && ids.length > 0,
@@ -259,9 +259,19 @@ function WatchlistPage() {
         )}
 
         {isError && (
-          <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-            Player data is unavailable right now. Try again in a moment.
-          </p>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-xs text-muted-foreground">
+              Player data is unavailable right now. Try again in a moment.
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="mt-3 rounded bg-action px-4 py-2 text-xs font-bold uppercase text-action-foreground disabled:opacity-50"
+            >
+              Try again
+            </button>
+          </div>
         )}
 
         {(data?.length ?? 0) > 0 && visible.length === 0 && (
