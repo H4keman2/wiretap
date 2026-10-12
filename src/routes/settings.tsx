@@ -59,7 +59,7 @@ function SettingsPage() {
           ].map((opt) => (
             <button
               key={opt.value}
-              type="button"
+              aria-pressed={theme === opt.value}
               onClick={() => setTheme(opt.value)}
               className={cn(
                 "flex-1 rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-tight transition-colors",
