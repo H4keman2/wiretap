@@ -712,6 +712,7 @@ function RosterEditor({
                 )}
                 <button
                   type="button"
+                  aria-pressed={r.starter}
                   onClick={() =>
                     onChange(roster.map((x) => (x.id === r.id ? { ...x, starter: !x.starter } : x)))
                   }
