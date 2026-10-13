@@ -122,9 +122,19 @@ function BidsPage() {
         ) : budget.isLoading ? (
           <Skeleton className="col-span-3 h-20" />
         ) : budget.isError ? (
-          <p className="col-span-3 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">
-            {(budget.error as Error).message}
-          </p>
+          <div className="col-span-3 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">
+            <p>{(budget.error as Error).message}</p>
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-2 border-destructive/40 text-destructive"
+              onClick={() => budget.refetch()}
+              disabled={budget.isFetching}
+            >
+              Try again
+            </Button>
+          </div>
+
         ) : total === null ? (
           <p className="col-span-3 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
             Your league doesn't use a waiver budget — waivers run by priority order. The best pickup
@@ -216,8 +226,22 @@ function BidsPage() {
         <SectionLabel>Available in your league</SectionLabel>
         {players.isLoading ? (
           <Skeleton className="h-60 w-full" />
+        ) : players.isError ? (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-sm text-muted-foreground">
+              Player data is unavailable right now. Try again in a moment.
+            </p>
+            <button
+              className="mt-2 rounded bg-action px-4 py-2 text-xs font-bold uppercase text-action-foreground disabled:opacity-50"
+              onClick={() => players.refetch()}
+              disabled={players.isFetching}
+            >
+              Try again
+            </button>
+          </div>
         ) : list.length === 0 ? (
           <p className="text-sm text-muted-foreground">No free agents found at this position.</p>
+
         ) : (
           <ul className="space-y-2">
             {list.slice(1).map((p) => (
