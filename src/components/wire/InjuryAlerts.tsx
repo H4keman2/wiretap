@@ -116,7 +116,8 @@ export function InjuryAlerts({
                         {a.best.source === "bench"
                           ? "Already on your bench"
                           : `Free agent · ${a.best.ownership}% owned`}{" "}
-                        · {a.best.projection} proj pts
+                        · {a.best.projection.toFixed(1)} proj pts
+
                       </p>
                     </div>
                   </div>
@@ -135,7 +136,7 @@ export function InjuryAlerts({
                                 {o.position} · {o.source === "bench" ? "bench" : "wire"}
                               </span>
                             </span>
-                            <span className="shrink-0 tabular-nums">{o.projection} pts</span>
+                            <span className="shrink-0 tabular-nums">{o.projection.toFixed(1)} pts</span>
                           </li>
                         ))}
                       </ul>
