@@ -2,7 +2,19 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { LeagueConnect } from "@/components/wire/LeagueConnect";
@@ -139,9 +151,27 @@ function SettingsPage() {
           {isPro ? (
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-bold">Team Analyzer unlocked</p>
-              <Button variant="outline" size="sm" onClick={deactivate}>
-                Remove key
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Remove key
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remove your license key?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      You will lose Team Analyzer, league sync, and the live budget until you enter
+                      the key again.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={deactivate}>Remove key</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
             </div>
           ) : (
             <>
