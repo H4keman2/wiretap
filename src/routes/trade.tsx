@@ -165,7 +165,7 @@ function TradePage() {
   const ids = [...a, ...b].map((p) => p.id);
   const both = a.length > 0 && b.length > 0;
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, refetch, isFetching } = useQuery({
     queryKey: ["trade", format, ids.join(",")],
     queryFn: () => getWatchlistPlayers({ data: { ids, format } }),
     enabled: both,
@@ -217,10 +217,20 @@ function TradePage() {
       )}
 
       {both && isError && (
-        <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-          Player data is unavailable right now. Try again in a moment.
-        </p>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-xs text-muted-foreground">
+            Player data is unavailable right now. Try again in a moment.
+          </p>
+          <button
+            className="mt-2 rounded bg-action px-4 py-2 text-xs font-bold uppercase text-action-foreground disabled:opacity-50"
+            onClick={() => refetch()}
+            disabled={isFetching}
+          >
+            Try again
+          </button>
+        </div>
       )}
+
 
       {both && data && !ready && (
         <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
