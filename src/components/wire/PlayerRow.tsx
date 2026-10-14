@@ -92,6 +92,7 @@ export function PlayerRow({
                   title="Newly dropped under your ownership threshold"
                 >
                   New
+                  <span className="sr-only">, newly dropped under your ownership threshold</span>
                 </span>
               )}
               {player.handcuffOf && (
@@ -100,6 +101,7 @@ export function PlayerRow({
                   title={`Direct backup to your ${player.handcuffOf} — insurance if he's hurt or benched`}
                 >
                   Handcuff
+                  <span className="sr-only">, direct backup insurance for your starter</span>
                 </span>
               )}
               <span className="ml-auto flex shrink-0 items-center gap-1.5 self-center">
