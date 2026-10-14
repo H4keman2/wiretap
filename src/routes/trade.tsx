@@ -61,6 +61,7 @@ function PlayerSearch({
     <div className="space-y-2">
       <input
         type="search"
+        inputMode="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Add a player by name…"
