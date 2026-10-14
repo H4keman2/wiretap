@@ -57,6 +57,12 @@ function PlayerSearch({
 
   const visible = results?.filter((r) => !exclude.includes(r.id));
 
+  const select = (p: NonNullable<typeof visible>[number]) => {
+    onAdd(p);
+    setQuery("");
+  };
+
+
   return (
     <div className="space-y-2">
       <input
@@ -64,6 +70,12 @@ function PlayerSearch({
         inputMode="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key !== "Enter" || query.trim().length === 0) return;
+          const first = visible?.[0];
+          if (first) select(first);
+        }}
+
         placeholder="Add a player by name…"
         aria-label={`${slotLabel} — add a player`}
         className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium outline-none placeholder:text-muted-foreground/70 focus:border-action"
@@ -78,10 +90,8 @@ function PlayerSearch({
             <button
               key={r.id}
               type="button"
-              onClick={() => {
-                onAdd(r);
-                setQuery("");
-              }}
+              onClick={() => select(r)}
+
               className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-background px-2.5 py-2 text-left"
             >
               <span className="flex min-w-0 items-center gap-1.5">
