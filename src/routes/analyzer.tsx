@@ -136,7 +136,7 @@ function Analyzer() {
       const count = data.injuryAlerts.length;
       toast.warning(`${alert.playerName} — ${alert.injury}`, {
         description: alert.best
-          ? `Start ${alert.best.name} instead (${alert.best.projection} proj pts).${count > 1 ? ` ${count - 1} more starter${count > 2 ? "s" : ""} tagged.` : ""}`
+          ? `Start ${alert.best.name} instead (${alert.best.projection.toFixed(1)} proj pts).${count > 1 ? ` ${count - 1} more starter${count > 2 ? "s" : ""} tagged.` : ""}`
           : `No healthy replacement found at ${alert.position}.`,
       });
       return;
@@ -146,7 +146,7 @@ function Analyzer() {
       if (prev.get(alert.playerId) === alert.injury) continue;
       toast.warning(`${alert.playerName} — ${alert.injury}`, {
         description: alert.best
-          ? `Start ${alert.best.name} instead (${alert.best.projection} proj pts).`
+          ? `Start ${alert.best.name} instead (${alert.best.projection.toFixed(1)} proj pts).`
           : `No healthy replacement found at ${alert.position}.`,
       });
     }
