@@ -4,7 +4,6 @@ import { Loader2, Sparkle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-
 import { FormatSelector, OwnershipSlider } from "@/components/wire/Controls";
 import { Page, SectionLabel } from "@/components/wire/Shell";
 import { Button } from "@/components/ui/button";
@@ -98,8 +97,11 @@ function AskPage() {
     queryKey: ["ask-history"],
     queryFn: () => getAskHistory(),
   });
-  const { isError: historyIsError, refetch: refetchHistory, isFetching: historyIsFetching } = history;
-
+  const {
+    isError: historyIsError,
+    refetch: refetchHistory,
+    isFetching: historyIsFetching,
+  } = history;
 
   const ask = useMutation({
     mutationFn: () =>
@@ -121,7 +123,6 @@ function AskPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["ask-history"] }),
     onError: () => toast.error("Couldn't delete that question — try again."),
   });
-
 
   const previous = (history.data ?? []).filter((h) => h.id !== latest?.id);
 
@@ -232,17 +233,12 @@ function AskPage() {
             <SectionLabel>Saved questions</SectionLabel>
             <div className="space-y-4">
               {previous.map((entry) => (
-                <AnswerCard
-                  key={entry.id}
-                  entry={entry}
-                  onDelete={() => remove.mutate(entry.id)}
-                />
+                <AnswerCard key={entry.id} entry={entry} onDelete={() => remove.mutate(entry.id)} />
               ))}
             </div>
           </section>
         )
       )}
-
 
       <p className="px-1 text-[10px] leading-relaxed text-muted-foreground">
         Answers come from an AI model reading only your roster and Wire Tap's current available
