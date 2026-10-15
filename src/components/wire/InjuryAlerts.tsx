@@ -115,7 +115,7 @@ export function InjuryAlerts({
                       <p className="text-[10px] text-muted-foreground">
                         {a.best.source === "bench"
                           ? "Already on your bench"
-                          : `Free agent · ${a.best.ownership}% owned`}{" "}
+                          : `Free agent · ${Math.round(a.best.ownership)}% owned`}{" "}
                         · {a.best.projection.toFixed(1)} proj pts
 
                       </p>
