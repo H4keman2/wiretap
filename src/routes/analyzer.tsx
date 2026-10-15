@@ -744,7 +744,7 @@ function Paywall({ format }: { format: "std" | "half" | "ppr" }) {
   return (
     <Page format={format}>
       <section className="relative overflow-hidden rounded-xl border-b-4 border-action bg-depth p-5 text-depth-foreground">
-        <Lock className="mb-3 size-6 text-action" />
+        <Lock aria-hidden="true" className="mb-3 size-6 text-action" />
         <p className="font-display text-3xl uppercase leading-none">Team Analyzer is Pro</p>
         <p className="mt-2 text-xs text-depth-foreground/75">
           Roster entry, positional weakness scoring, auto-flagged weak spots, and live injury alerts

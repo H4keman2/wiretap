@@ -335,7 +335,7 @@ function GrabBookmark() {
           }}
           className="inline-flex h-9 cursor-grab items-center gap-1.5 rounded-md bg-action px-3 text-xs font-black uppercase text-action-foreground"
         >
-          <Bookmark className="size-3.5" /> Grab my ESPN login
+          <Bookmark aria-hidden="true" className="size-3.5" /> Grab my ESPN login
         </a>
         <button
           type="button"
@@ -349,7 +349,7 @@ function GrabBookmark() {
           }}
           className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-bold"
         >
-          <Copy className="size-3.5" /> Copy instead
+          <Copy aria-hidden="true" className="size-3.5" /> Copy instead
         </button>
       </div>
       <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">

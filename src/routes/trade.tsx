@@ -95,7 +95,7 @@ function PlayerSearch({
               className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-background px-2.5 py-2 text-left"
             >
               <span className="flex min-w-0 items-center gap-1.5">
-                <Plus className="size-3 shrink-0 text-action" strokeWidth={3} />
+                <Plus aria-hidden="true" className="size-3 shrink-0 text-action" strokeWidth={3} />
                 <span className="truncate text-xs font-bold">{r.name}</span>
               </span>
               <span className="shrink-0 text-[10px] font-bold uppercase text-muted-foreground">
@@ -153,7 +153,7 @@ function SidePicker({
               aria-label={`Remove ${p.name}`}
               className="shrink-0 rounded-lg border border-border p-1.5 text-muted-foreground"
             >
-              <X className="size-4" strokeWidth={3} />
+              <X aria-hidden="true" className="size-4" strokeWidth={3} />
             </button>
           </div>
         );
@@ -208,7 +208,7 @@ function TradePage() {
         <SidePicker slotLabel="You give up" players={a} exclude={ids} onChange={setA} />
         <div className="flex items-center justify-center">
           <span className="rounded-full border border-border bg-card p-2 text-muted-foreground">
-            <ArrowLeftRight className="size-4" strokeWidth={3} />
+            <ArrowLeftRight aria-hidden="true" className="size-4" strokeWidth={3} />
           </span>
         </div>
         <SidePicker slotLabel="You get back" players={b} exclude={ids} onChange={setB} />

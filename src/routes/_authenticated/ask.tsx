@@ -51,7 +51,7 @@ function AnswerCard({ entry, onDelete }: { entry: AskAnswer; onDelete?: () => vo
             aria-label="Delete this question"
             className="shrink-0 rounded p-1 text-muted-foreground hover:text-destructive"
           >
-            <Trash2 className="size-4" />
+            <Trash2 aria-hidden="true" className="size-4" />
           </button>
         )}
       </div>
@@ -130,7 +130,7 @@ function AskPage() {
     <Page format={format}>
       <section className="space-y-3">
         <div className="flex items-center gap-2">
-          <Sparkle className="size-5 text-action" strokeWidth={2.5} />
+          <Sparkle aria-hidden="true" className="size-5 text-action" strokeWidth={2.5} />
           <h1 className="font-display text-2xl uppercase leading-none">Ask the advisor</h1>
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground">
@@ -189,7 +189,7 @@ function AskPage() {
         >
           {ask.isPending ? (
             <>
-              <Loader2 className="mr-2 size-4 animate-spin" /> Thinking…
+              <Loader2 aria-hidden="true" className="mr-2 size-4 animate-spin" /> Thinking…
             </>
           ) : (
             "Get my answer"

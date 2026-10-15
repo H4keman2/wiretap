@@ -40,7 +40,7 @@ export function SosWarning() {
       aria-busy={probing}
       className="flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-[11px] text-foreground"
     >
-      <AlertTriangle className="mt-px size-3.5 shrink-0 text-destructive" />
+      <AlertTriangle aria-hidden="true" className="mt-px size-3.5 shrink-0 text-destructive" />
       <div className="min-w-0">
         <p className="font-bold uppercase tracking-wide text-destructive">
           Schedule data incomplete
@@ -54,7 +54,7 @@ export function SosWarning() {
           <span className="flex items-center gap-1 font-bold">
             {probing ? (
               <>
-                <Loader2 className="size-3 animate-spin text-destructive" />
+                <Loader2 aria-hidden="true" className="size-3 animate-spin text-destructive" />
                 <span className="text-destructive">Re-probing schedule feed…</span>
               </>
             ) : (

@@ -170,7 +170,7 @@ function BidsPage() {
           aria-label="Best pickup"
         >
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-action">
-            <Trophy className="size-4" /> Best pickup
+            <Trophy aria-hidden="true" className="size-4" /> Best pickup
           </div>
           <p className="mt-2 font-display text-2xl uppercase">{best.name}</p>
           <p className="text-sm text-muted-foreground">
@@ -196,7 +196,7 @@ function BidsPage() {
             <SectionLabel>Your planned bids</SectionLabel>
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={copyAll}>
-                <Copy className="size-4" /> Copy
+                <Copy aria-hidden="true" className="size-4" /> Copy
               </Button>
               <Button size="sm" variant="ghost" onClick={clear}>Clear</Button>
             </div>
@@ -210,7 +210,7 @@ function BidsPage() {
                 <span className="flex items-center gap-3">
                   <span className="font-display text-lg">${x.amount}</span>
                   <button aria-label={`Remove bid on ${x.name}`} onClick={() => remove(x.id)} className="text-muted-foreground">
-                    <X className="size-4" />
+                    <X aria-hidden="true" className="size-4" />
                   </button>
                 </span>
               </li>
@@ -280,7 +280,7 @@ function Header() {
   return (
     <div>
       <h1 className="flex items-center gap-2 font-display text-3xl uppercase">
-        <Gavel className="size-7 text-action" /> Waiver bids
+        <Gavel aria-hidden="true" className="size-7 text-action" /> Waiver bids
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Your budget, who's free in your league, and what to bid.

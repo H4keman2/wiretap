@@ -133,7 +133,7 @@ export function PlayerRow({
                   )}
                   title="Net roster adds vs. drops across Sleeper leagues in the last 24 hours"
                 >
-                  <TrendIcon className="size-3" strokeWidth={3} />
+                  <TrendIcon aria-hidden="true" className="size-3" strokeWidth={3} />
                   {player.trendLabel === "stable"
                     ? "Flat"
                     : `${player.trendDelta > 0 ? "+" : ""}${compact(player.trendDelta)} adds`}
