@@ -233,7 +233,7 @@ function Stepper({
   onChange: (v: number) => void;
 }) {
   return (
-    <div className="flex items-center justify-between px-3 py-2">
+    <div role="group" aria-label={label} className="flex items-center justify-between px-3 py-2">
       <span className="font-display text-lg uppercase">{label}</span>
       <div className="flex items-center gap-3">
         <button
