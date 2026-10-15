@@ -92,7 +92,12 @@ function AskPage() {
   const leagueFormat = cred ? connection.summary?.format : null;
   const format = leagueFormat ?? profile.format;
 
-  const history = useQuery({ queryKey: ["ask-history"], queryFn: () => getAskHistory() });
+  const history = useQuery({
+    queryKey: ["ask-history"],
+    queryFn: () => getAskHistory(),
+  });
+  const { isError: historyIsError, refetch: refetchHistory, isFetching: historyIsFetching } = history;
+
 
   const ask = useMutation({
     mutationFn: () =>
@@ -112,7 +117,9 @@ function AskPage() {
   const remove = useMutation({
     mutationFn: (id: string) => deleteAskEntry({ data: { id } }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["ask-history"] }),
+    onError: () => toast.error("Couldn't delete that question — try again."),
   });
+
 
   const previous = (history.data ?? []).filter((h) => h.id !== latest?.id);
 
@@ -144,6 +151,7 @@ function AskPage() {
 
       <section className="space-y-4">
         <Textarea
+          aria-label="Your waiver question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="e.g. My RB2 is out this week — who's the best replacement on the wire?"
@@ -151,6 +159,7 @@ function AskPage() {
           maxLength={600}
           className="text-sm"
         />
+
         <div className="flex flex-wrap gap-2">
           {EXAMPLES.map((ex) => (
             <button
@@ -198,20 +207,40 @@ function AskPage() {
         </section>
       )}
 
-      {previous.length > 0 && (
+      {historyIsError ? (
         <section className="space-y-3">
           <SectionLabel>Saved questions</SectionLabel>
-          <div className="space-y-4">
-            {previous.map((entry) => (
-              <AnswerCard
-                key={entry.id}
-                entry={entry}
-                onDelete={() => remove.mutate(entry.id)}
-              />
-            ))}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-xs text-muted-foreground">
+              Your saved questions didn't load. Your connection may have dropped.
+            </p>
+            <button
+              type="button"
+              onClick={() => refetchHistory()}
+              disabled={historyIsFetching}
+              className="mt-3 rounded bg-action px-4 py-2 text-xs font-bold uppercase text-action-foreground disabled:opacity-50"
+            >
+              Try again
+            </button>
           </div>
         </section>
+      ) : (
+        previous.length > 0 && (
+          <section className="space-y-3">
+            <SectionLabel>Saved questions</SectionLabel>
+            <div className="space-y-4">
+              {previous.map((entry) => (
+                <AnswerCard
+                  key={entry.id}
+                  entry={entry}
+                  onDelete={() => remove.mutate(entry.id)}
+                />
+              ))}
+            </div>
+          </section>
+        )
       )}
+
 
       <p className="px-1 text-[10px] leading-relaxed text-muted-foreground">
         Answers come from an AI model reading only your roster and Wire Tap's current available
