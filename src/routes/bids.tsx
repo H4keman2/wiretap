@@ -198,7 +198,16 @@ function BidsPage() {
               <Button size="sm" variant="outline" onClick={copyAll}>
                 <Copy aria-hidden="true" className="size-4" /> Copy
               </Button>
-              <Button size="sm" variant="ghost" onClick={clear}>Clear</Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  clear();
+                  toast.info("Planned bids cleared.");
+                }}
+              >
+                Clear
+              </Button>
             </div>
           </div>
           <ul className="space-y-2">
