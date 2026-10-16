@@ -294,7 +294,11 @@ function Step({
         {done ? <Check className="size-3.5" /> : n}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold uppercase tracking-tight">{title}</p>
+        <p className="text-xs font-bold uppercase tracking-tight">
+          <span className="sr-only">Step {n}: </span>
+          {title}
+          {done && <span className="sr-only"> (done)</span>}
+        </p>
         <div className="mt-2">{children}</div>
       </div>
     </div>

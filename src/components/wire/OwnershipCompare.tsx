@@ -99,6 +99,9 @@ export function OwnershipCompare({
                     title="Widely rostered elsewhere, still free in your league"
                   >
                     Value
+                    <span className="sr-only">
+                      , widely rostered elsewhere, still free in your league
+                    </span>
                   </span>
                 )}
               </div>
