@@ -459,7 +459,10 @@ function RosterEditor({
   }, [query]);
 
   const add = (entry: Omit<RosterEntry, "starter">) => {
-    if (roster.some((r) => r.id === entry.id)) return;
+    if (roster.some((r) => r.id === entry.id)) {
+      toast.error("Already on your roster.");
+      return;
+    }
     const starter = suggestStarterDefault(roster, entry.position, config);
     onChange([...roster, { ...entry, starter }]);
     setQuery("");
