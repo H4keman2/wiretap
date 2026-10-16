@@ -614,7 +614,7 @@ function RosterEditor({
                 })
               }
             >
-              <Plus className="size-4" />
+              <Plus aria-hidden="true" className="size-4" />
             </Button>
           </div>
 
@@ -729,7 +729,7 @@ function RosterEditor({
                   onClick={() => onChange(roster.filter((x) => x.id !== r.id))}
                   className="text-muted-foreground"
                 >
-                  <Trash2 className="size-4" />
+                  <Trash2 aria-hidden="true" className="size-4" />
                 </button>
               </div>
             );

@@ -72,9 +72,9 @@ export function LiveStatusNote({
         )}
       >
         {enabled && isFetching ? (
-          <RefreshCw className="size-4 animate-spin" strokeWidth={3} />
+          <RefreshCw aria-hidden="true" className="size-4 animate-spin" strokeWidth={3} />
         ) : (
-          <Radio className={cn("size-4", enabled && "animate-pulse")} strokeWidth={3} />
+          <Radio aria-hidden="true" className={cn("size-4", enabled && "animate-pulse")} strokeWidth={3} />
         )}
       </span>
 
