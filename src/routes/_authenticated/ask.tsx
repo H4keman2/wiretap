@@ -197,7 +197,10 @@ function AskPage() {
         </Button>
 
         {error && (
-          <p className="rounded-xl border border-destructive/50 bg-card p-4 text-xs font-bold text-destructive">
+          <p
+            role="alert"
+            className="rounded-xl border border-destructive/50 bg-card p-4 text-xs font-bold text-destructive"
+          >
             {error}
           </p>
         )}
