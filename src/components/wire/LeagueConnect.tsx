@@ -95,10 +95,12 @@ export function LeagueConnect() {
       <section className="space-y-3">
         <SectionLabel>Your ESPN league</SectionLabel>
         <div className="space-y-3 rounded-xl border border-action/50 bg-card p-4">
-          <p className="font-display text-xl uppercase leading-none">League sync is a Pro feature</p>
+          <p className="font-display text-xl uppercase leading-none">
+            League sync is a Pro feature
+          </p>
           <p className="text-sm text-muted-foreground">
-            Connecting your ESPN league unlocks real-ownership waiver data, roster sync and your live
-            FAAB budget.
+            Connecting your ESPN league unlocks real-ownership waiver data, roster sync and your
+            live FAAB budget.
           </p>
           <Button asChild className="h-9 w-full">
             <Link to="/pro">Get Pro — $4.99</Link>
@@ -149,7 +151,9 @@ export function LeagueConnect() {
               id="my-team"
               aria-label="Which team is yours?"
               value={connection.teamId ?? ""}
-              onChange={(e) => save({ teamId: e.target.value === "" ? null : Number(e.target.value) })}
+              onChange={(e) =>
+                save({ teamId: e.target.value === "" ? null : Number(e.target.value) })
+              }
               className="h-9 w-full rounded-md border border-input bg-card px-2 text-sm font-bold"
             >
               <option value="">Choose your team…</option>
@@ -165,7 +169,9 @@ export function LeagueConnect() {
               disabled={connection.teamId === null || sync.isPending || !cred}
               onClick={() => {
                 if (!cred || connection.teamId === null) return;
-                sync.mutate({ data: { ...cred, teamId: connection.teamId, licenseKey: key ?? "" } });
+                sync.mutate({
+                  data: { ...cred, teamId: connection.teamId, licenseKey: key ?? "" },
+                });
               }}
             >
               {sync.isPending ? "Syncing your roster…" : "Sync my roster into Wire Tap"}
@@ -196,7 +202,11 @@ export function LeagueConnect() {
             </p>
           </Step>
 
-          <Step n={2} title="Private league? Add your sign-in values" done={Boolean(espnS2 && swid)}>
+          <Step
+            n={2}
+            title="Private league? Add your sign-in values"
+            done={Boolean(espnS2 && swid)}
+          >
             {showCookies ? (
               <div className="space-y-3">
                 <ol className="space-y-1 text-[11px] leading-relaxed text-muted-foreground">
@@ -287,7 +297,9 @@ function Step({
       <span
         className={cn(
           "mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border text-[11px] font-black",
-          done ? "border-action bg-action text-action-foreground" : "border-border text-muted-foreground",
+          done
+            ? "border-action bg-action text-action-foreground"
+            : "border-border text-muted-foreground",
         )}
         aria-hidden
       >
