@@ -163,7 +163,6 @@ function Analyzer() {
   }, [analysis.data]);
 
   if (!proLoaded || !loaded) {
-
     return (
       <Page format={profile.format}>
         <Skeleton className="h-40 rounded-xl" />
@@ -186,8 +185,8 @@ function Analyzer() {
           <Link to="/settings" className="font-bold text-turf underline">
             League settings
           </Link>{" "}
-          — every league's slots are different (3 starting WR, 2 FLEX, whatever yours runs), so
-          set it there once and it applies here automatically.
+          — every league's slots are different (3 starting WR, 2 FLEX, whatever yours runs), so set
+          it there once and it applies here automatically.
         </p>
         <div className="flex flex-wrap gap-1.5">
           {fill.map((f) => (
@@ -237,7 +236,6 @@ function Analyzer() {
           )}
         </section>
       )}
-
 
       <RosterEditor
         roster={roster}
@@ -324,13 +322,12 @@ function Analyzer() {
             checking={analysis.isFetching}
           />
 
-
           {result.handcuffs.length > 0 && (
             <section className="space-y-2">
               <SectionLabel>Handcuffs available</SectionLabel>
               <p className="px-1 text-[11px] text-muted-foreground">
-                The direct backup behind one of your starters — cheap insurance if that starter
-                gets hurt, and often only valuable to whoever owns the starter.
+                The direct backup behind one of your starters — cheap insurance if that starter gets
+                hurt, and often only valuable to whoever owns the starter.
               </p>
               <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
                 {result.handcuffs.map((h) => (
@@ -370,7 +367,8 @@ function Analyzer() {
             {result.recommendations.length === 0 ? (
               <div className="rounded-xl border border-border bg-card p-4">
                 <p className="text-xs text-muted-foreground">
-                  Nothing under {maxOwnership}% rostered at {result.targetSlot}. Raise the threshold.
+                  Nothing under {maxOwnership}% rostered at {result.targetSlot}. Raise the
+                  threshold.
                 </p>
                 {maxOwnership < 100 && (
                   <button

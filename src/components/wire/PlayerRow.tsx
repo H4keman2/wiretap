@@ -106,7 +106,10 @@ export function PlayerRow({
               )}
               <span className="ml-auto flex shrink-0 items-center gap-1.5 self-center">
                 <WatchButton player={player} />
-                <ChevronRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                <ChevronRight
+                  aria-hidden="true"
+                  className="size-4 shrink-0 text-muted-foreground"
+                />
               </span>
             </div>
 
