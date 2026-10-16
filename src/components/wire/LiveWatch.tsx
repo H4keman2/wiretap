@@ -72,9 +72,13 @@ export function LiveStatusNote({
         )}
       >
         {enabled && isFetching ? (
-          <RefreshCw className="size-4 animate-spin" strokeWidth={3} />
+          <RefreshCw aria-hidden="true" className="size-4 animate-spin" strokeWidth={3} />
         ) : (
-          <Radio className={cn("size-4", enabled && "animate-pulse")} strokeWidth={3} />
+          <Radio
+            aria-hidden="true"
+            className={cn("size-4", enabled && "animate-pulse")}
+            strokeWidth={3}
+          />
         )}
       </span>
 
@@ -86,9 +90,7 @@ export function LiveStatusNote({
           {enabled ? (
             <>
               {`Refreshing every 60s · ${ago(lastUpdate)}`}
-              {newCount > 0 ? (
-                <span role="status"> · {newCount} new under threshold</span>
-              ) : null}
+              {newCount > 0 ? <span role="status"> · {newCount} new under threshold</span> : null}
             </>
           ) : (
             "Turn this back on in Settings to auto-refresh and flag new availability."

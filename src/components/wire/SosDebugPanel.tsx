@@ -24,7 +24,7 @@ export function SosDebugPanel() {
           onClick={() => refetch()}
           disabled={isFetching}
         >
-          <RefreshCw className={cn("size-3", isFetching && "animate-spin")} />
+          <RefreshCw aria-hidden="true" className={cn("size-3", isFetching && "animate-spin")} />
           {isFetching ? "Probing" : "Re-probe"}
         </Button>
       </div>
