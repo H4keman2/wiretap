@@ -245,10 +245,7 @@ function Stepper({
         >
           −
         </button>
-        <span
-          aria-live="polite"
-          className="w-5 text-center text-sm font-black tabular-nums"
-        >
+        <span aria-live="polite" className="w-5 text-center text-sm font-black tabular-nums">
           {value}
         </span>
         <button
