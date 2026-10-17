@@ -152,6 +152,11 @@ function BidsPage() {
           </>
         )}
       </section>
+      {left !== null && left < 0 && (
+        <p className="px-1 text-xs font-bold text-destructive">
+          You're ${Math.abs(left)} over budget — lower some planned bids before waivers run.
+        </p>
+      )}
       {b && total !== null && (
         <p className="-mt-5 px-1 text-xs text-muted-foreground">
           {b.teamName} · spent ${b.spent} of ${total} this season
