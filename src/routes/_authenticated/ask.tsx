@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Loader2, Sparkle, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { FormatSelector, OwnershipSlider } from "@/components/wire/Controls";
@@ -89,6 +89,7 @@ function AskPage() {
   const [maxOwnership, setMaxOwnership] = useState(50);
   const [latest, setLatest] = useState<AskAnswer | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const answerRef = useRef<HTMLElement>(null);
 
   const leagueFormat = cred ? connection.summary?.format : null;
   const format = leagueFormat ?? profile.format;
@@ -110,6 +111,9 @@ function AskPage() {
       }),
     onSuccess: (answer) => {
       setLatest(answer);
+      requestAnimationFrame(() =>
+        answerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
       setQuestion("");
       setError(null);
       queryClient.invalidateQueries({ queryKey: ["ask-history"] });
@@ -207,7 +211,7 @@ function AskPage() {
       </section>
 
       {latest && (
-        <section className="space-y-3">
+        <section ref={answerRef} className="space-y-3">
           <SectionLabel>Your answer</SectionLabel>
           <AnswerCard entry={latest} />
         </section>
