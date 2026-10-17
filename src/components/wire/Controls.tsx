@@ -12,7 +12,7 @@ export function FormatSelector({
   onChange: (v: ScoringFormat) => void;
 }) {
   return (
-    <div className="flex gap-3">
+    <div role="group" aria-label="Scoring format" className="flex gap-3">
       {FORMATS.map((f) => (
         <button
           key={f}
@@ -41,7 +41,7 @@ export function PositionSelector({
   onChange: (v: SlotPosition) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div role="group" aria-label="Position" className="flex flex-wrap gap-3">
       {SLOT_POSITIONS.map((p) => (
         <button
           key={p}
