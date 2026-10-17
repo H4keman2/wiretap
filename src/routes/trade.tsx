@@ -48,7 +48,12 @@ function PlayerSearch({
 }) {
   const [query, setQuery] = useState("");
 
-  const { data: results, isFetching, isError, refetch } = useQuery({
+  const {
+    data: results,
+    isFetching,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["player-search", query],
     queryFn: () => searchPlayers({ data: { query } }),
     enabled: query.trim().length >= 2,
@@ -61,7 +66,6 @@ function PlayerSearch({
     onAdd(p);
     setQuery("");
   };
-
 
   return (
     <div className="space-y-2">
@@ -256,7 +260,6 @@ function TradePage() {
           </button>
         </div>
       )}
-
 
       {both && data && !ready && (
         <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
