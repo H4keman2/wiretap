@@ -39,6 +39,10 @@ const EXAMPLES = [
   "I have one waiver claim left. Who has the best rest-of-season upside?",
 ];
 
+/** The Ask button stays disabled until the question has this many characters. */
+const MIN_QUESTION = 5;
+
+
 function AnswerCard({ entry, onDelete }: { entry: AskAnswer; onDelete?: () => void }) {
   return (
     <article className="space-y-3 rounded-xl border border-border bg-card p-4">
@@ -167,6 +171,13 @@ function AskPage() {
           className="text-sm"
         />
 
+        {question.trim().length < MIN_QUESTION && (
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            {MIN_QUESTION - question.trim().length} more characters needed
+          </p>
+        )}
+
+
         <div className="flex flex-wrap gap-2">
           {EXAMPLES.map((ex) => (
             <button
@@ -187,7 +198,7 @@ function AskPage() {
 
         <Button
           type="button"
-          disabled={ask.isPending || question.trim().length < 5}
+          disabled={ask.isPending || question.trim().length < MIN_QUESTION}
           onClick={() => ask.mutate()}
           className="w-full font-bold uppercase tracking-tight"
         >
