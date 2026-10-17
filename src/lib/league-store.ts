@@ -84,13 +84,23 @@ export function usePro() {
     try {
       const result = await verifyLicense({ data: { licenseKey: candidate } });
       if (result.valid) {
-        window.localStorage.setItem(LICENSE_KEY, candidate.trim());
-        window.localStorage.setItem(PRO_CACHE_KEY, String(Date.now()));
+        // A throwing localStorage (private browsing, quota) must not undo a
+        // server-verified key: keep Pro for this session, just unsaved.
+        try {
+          window.localStorage.setItem(LICENSE_KEY, candidate.trim());
+          window.localStorage.setItem(PRO_CACHE_KEY, String(Date.now()));
+        } catch (err) {
+          console.warn("wiretap: could not save the license locally", err);
+        }
         setKey(candidate.trim());
         setIsPro(true);
       } else {
-        window.localStorage.removeItem(LICENSE_KEY);
-        window.localStorage.removeItem(PRO_CACHE_KEY);
+        try {
+          window.localStorage.removeItem(LICENSE_KEY);
+          window.localStorage.removeItem(PRO_CACHE_KEY);
+        } catch (err) {
+          console.warn("wiretap: could not clear the license locally", err);
+        }
         setKey(null);
         setIsPro(false);
         setError(result.reason ?? "That key doesn't look right.");
@@ -104,10 +114,18 @@ export function usePro() {
     }
   }, []);
 
+
   useEffect(() => {
-    const stored = window.localStorage.getItem(LICENSE_KEY);
-    const verifiedAt = Number(window.localStorage.getItem(PRO_CACHE_KEY) ?? 0);
+    let stored: string | null = null;
+    let verifiedAt = 0;
+    try {
+      stored = window.localStorage.getItem(LICENSE_KEY);
+      verifiedAt = Number(window.localStorage.getItem(PRO_CACHE_KEY) ?? 0);
+    } catch (err) {
+      console.warn("wiretap: license storage unavailable", err);
+    }
     const fresh = Date.now() - verifiedAt < PRO_CACHE_MS;
+
 
     if (!stored) {
       setLoaded(true);
@@ -130,11 +148,16 @@ export function usePro() {
   const activate = useCallback((candidate: string) => recheck(candidate), [recheck]);
 
   const deactivate = useCallback(() => {
-    window.localStorage.removeItem(LICENSE_KEY);
-    window.localStorage.removeItem(PRO_CACHE_KEY);
+    try {
+      window.localStorage.removeItem(LICENSE_KEY);
+      window.localStorage.removeItem(PRO_CACHE_KEY);
+    } catch (err) {
+      console.warn("wiretap: could not clear the license locally", err);
+    }
     setKey(null);
     setIsPro(false);
   }, []);
+
 
   return { isPro, key, activate, deactivate, loaded, checking, error };
 }
