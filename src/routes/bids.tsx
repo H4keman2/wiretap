@@ -28,7 +28,8 @@ export const Route = createFileRoute("/bids")({
       { property: "og:title", content: "Wire Tap Waiver Bid Planner" },
       {
         property: "og:description",
-        content: "Plan FAAB bids against your real league budget with a suggested amount for every free agent.",
+        content:
+          "Plan FAAB bids against your real league budget with a suggested amount for every free agent.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -63,7 +64,12 @@ function BidsPage() {
     staleTime: 1000 * 60,
   });
 
-  if (!loaded) return <Page format={format}><Skeleton className="h-40 w-full" /></Page>;
+  if (!loaded)
+    return (
+      <Page format={format}>
+        <Skeleton className="h-40 w-full" />
+      </Page>
+    );
 
   if (!cred || teamId === null) {
     return (
@@ -134,7 +140,6 @@ function BidsPage() {
               Try again
             </Button>
           </div>
-
         ) : total === null ? (
           <p className="col-span-3 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
             Your league doesn't use a waiver budget — waivers run by priority order. The best pickup
@@ -144,14 +149,15 @@ function BidsPage() {
           <>
             <Stat label="Remaining" value={`$${remaining}`} strong />
             <Stat label="Planned" value={`$${planned}`} />
-            <Stat
-              label="After bids"
-              value={`$${left}`}
-              warn={left !== null && left < 0}
-            />
+            <Stat label="After bids" value={`$${left}`} warn={left !== null && left < 0} />
           </>
         )}
       </section>
+      {left !== null && left < 0 && (
+        <p className="px-1 text-xs font-bold text-destructive">
+          You're ${Math.abs(left)} over budget — lower some planned bids before waivers run.
+        </p>
+      )}
       {b && total !== null && (
         <p className="-mt-5 px-1 text-xs text-muted-foreground">
           {b.teamName} · spent ${b.spent} of ${total} this season
@@ -183,7 +189,15 @@ function BidsPage() {
             suggested={suggest(best)}
             hasBudget={total !== null}
             onSave={(amount) => {
-              upsert({ id: best.id, name: best.name, position: best.position, team: best.team, amount, suggested: suggest(best), at: Date.now() });
+              upsert({
+                id: best.id,
+                name: best.name,
+                position: best.position,
+                team: best.team,
+                amount,
+                suggested: suggest(best),
+                at: Date.now(),
+              });
               toast.success(`Planned $${amount} on ${best.name}`);
             }}
           />
@@ -212,13 +226,20 @@ function BidsPage() {
           </div>
           <ul className="space-y-2">
             {bids.map((x) => (
-              <li key={x.id} className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3">
+              <li
+                key={x.id}
+                className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3"
+              >
                 <span className="text-sm font-bold">
                   {x.name} <span className="font-normal text-muted-foreground">{x.position}</span>
                 </span>
                 <span className="flex items-center gap-3">
                   <span className="font-display text-lg">${x.amount}</span>
-                  <button aria-label={`Remove bid on ${x.name}`} onClick={() => remove(x.id)} className="text-muted-foreground">
+                  <button
+                    aria-label={`Remove bid on ${x.name}`}
+                    onClick={() => remove(x.id)}
+                    className="text-muted-foreground"
+                  >
                     <X aria-hidden="true" className="size-4" />
                   </button>
                 </span>
@@ -226,7 +247,8 @@ function BidsPage() {
             ))}
           </ul>
           <p className="px-1 text-xs text-muted-foreground">
-            Wire Tap can't place bids for you — copy these and enter them on ESPN before waivers run.
+            Wire Tap can't place bids for you — copy these and enter them on ESPN before waivers
+            run.
           </p>
         </section>
       )}
@@ -250,7 +272,6 @@ function BidsPage() {
           </div>
         ) : list.length === 0 ? (
           <p className="text-sm text-muted-foreground">No free agents found at this position.</p>
-
         ) : (
           <ul className="space-y-2">
             {list.slice(1).map((p) => (
@@ -272,7 +293,15 @@ function BidsPage() {
                   suggested={suggest(p)}
                   hasBudget={total !== null}
                   onSave={(amount) => {
-                    upsert({ id: p.id, name: p.name, position: p.position, team: p.team, amount, suggested: suggest(p), at: Date.now() });
+                    upsert({
+                      id: p.id,
+                      name: p.name,
+                      position: p.position,
+                      team: p.team,
+                      amount,
+                      suggested: suggest(p),
+                      at: Date.now(),
+                    });
                     toast.success(`Planned $${amount} on ${p.name}`);
                   }}
                 />
@@ -298,11 +327,27 @@ function Header() {
   );
 }
 
-function Stat({ label, value, strong, warn }: { label: string; value: string; strong?: boolean; warn?: boolean }) {
+function Stat({
+  label,
+  value,
+  strong,
+  warn,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+  warn?: boolean;
+}) {
   return (
     <div className="rounded-xl border border-border bg-card p-3 text-center">
-      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{label}</p>
-      <p className={`font-display text-2xl ${warn ? "text-destructive" : strong ? "text-action" : ""}`}>{value}</p>
+      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={`font-display text-2xl ${warn ? "text-destructive" : strong ? "text-action" : ""}`}
+      >
+        {value}
+      </p>
     </div>
   );
 }
@@ -331,7 +376,9 @@ function BidForm({
     >
       {hasBudget && (
         <div className="relative w-24">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+            $
+          </span>
           <Input
             aria-label={`Bid on ${player.name}`}
             inputMode="numeric"
@@ -342,7 +389,9 @@ function BidForm({
           />
         </div>
       )}
-      <Button type="submit" size="sm">{hasBudget ? "Plan bid" : "Add to list"}</Button>
+      <Button type="submit" size="sm">
+        {hasBudget ? "Plan bid" : "Add to list"}
+      </Button>
       {hasBudget && <span className="text-xs text-muted-foreground">Suggested ${suggested}</span>}
     </form>
   );
