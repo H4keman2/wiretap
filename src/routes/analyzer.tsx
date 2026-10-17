@@ -710,6 +710,9 @@ function RosterEditor({
                     title="Not matched to a real player record — scored with a generic replacement-level baseline instead of this player's actual stats. Pick a name from the search suggestions above, or re-import with the position included, for an accurate score."
                   >
                     Unmatched
+                    <span className="sr-only">
+                      , not matched to a real player — scored with a generic baseline
+                    </span>
                   </span>
                 )}
                 <button

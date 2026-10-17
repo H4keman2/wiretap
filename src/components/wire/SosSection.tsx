@@ -55,6 +55,9 @@ export function SosSection({ sos }: { sos: TeamSos | null | undefined }) {
             title={`Average matchup difficulty ${sos.rating.toFixed(1)} out of 10`}
           >
             {sos.grade}
+            <span className="sr-only">
+              , average matchup difficulty {sos.rating.toFixed(1)} out of 10
+            </span>
           </span>
         </div>
       </div>
