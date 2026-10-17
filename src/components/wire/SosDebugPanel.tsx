@@ -30,7 +30,11 @@ export function SosDebugPanel() {
       </div>
 
       <div className="space-y-4 rounded-xl border border-border bg-card p-4 text-[11px]">
-        {isError && <p className="text-destructive">Diagnostics call failed.</p>}
+        {isError && (
+          <p role="alert" className="text-destructive">
+            Diagnostics call failed — press Re-probe above to try again.
+          </p>
+        )}
         {!data && !isError && <p className="text-muted-foreground">Probing ESPN endpoints…</p>}
 
         {data && (
