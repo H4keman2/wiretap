@@ -48,7 +48,12 @@ function PlayerSearch({
 }) {
   const [query, setQuery] = useState("");
 
-  const { data: results, isFetching } = useQuery({
+  const {
+    data: results,
+    isFetching,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["player-search", query],
     queryFn: () => searchPlayers({ data: { query } }),
     enabled: query.trim().length >= 2,
@@ -61,7 +66,6 @@ function PlayerSearch({
     onAdd(p);
     setQuery("");
   };
-
 
   return (
     <div className="space-y-2">
@@ -83,6 +87,21 @@ function PlayerSearch({
       {query.trim().length >= 2 && (
         <div className="space-y-1">
           {isFetching && !results && <Skeleton className="h-8 rounded-lg" />}
+          {isError && !isFetching && (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs text-muted-foreground">
+                Couldn't search players — check your connection.
+              </p>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="mt-3 rounded bg-action px-4 py-2 text-xs font-bold uppercase text-action-foreground disabled:opacity-50"
+              >
+                Try again
+              </button>
+            </div>
+          )}
           {visible?.length === 0 && (
             <p className="text-[11px] text-muted-foreground">No player matches that name.</p>
           )}
@@ -241,7 +260,6 @@ function TradePage() {
           </button>
         </div>
       )}
-
 
       {both && data && !ready && (
         <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
