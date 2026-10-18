@@ -126,6 +126,7 @@ function WatchlistPage() {
             </span>
             <input
               type="search"
+              inputMode="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search saved players by name, team or position…"
