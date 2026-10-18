@@ -28,7 +28,6 @@ const TREND_TEXT = {
 
 export function PlayerDetail({
   player,
-
   rank,
   format,
   open,
