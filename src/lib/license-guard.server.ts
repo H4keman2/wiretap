@@ -64,8 +64,39 @@ export function isRateLimited(): boolean {
 }
 
 /**
- * Once a key has verified as valid, trust that for a few minutes instead of
- * round-tripping to Gumroad on every `analyzeTeam` call. The Team Analyzer
+ * A separate, generous throttle for the free read endpoints
+ * (`getRecommendations`, `getWatchlistPlayers`, `searchPlayers`,
+ * `getSosHealthStatus`). The license limiter above (8/10min) would break
+ * normal browsing — the waiver page alone refetches every 60 seconds. This
+ * bucket allows 120 requests/minute per IP: plenty for real use, enough to
+ * stop someone scripting this app as a free ESPN/Sleeper proxy.
+ */
+const READ_WINDOW_MS = 60 * 1000;
+const READ_MAX_REQUESTS = 120;
+const readLimitState = new Map<string, { count: number; windowStart: number }>();
+
+export function isReadRateLimited(): boolean {
+  if (readLimitState.size >= 1000) {
+    const now = Date.now();
+    for (const [ip, entry] of readLimitState) {
+      if (now - entry.windowStart > READ_WINDOW_MS) readLimitState.delete(ip);
+    }
+  }
+  let ip: string;
+  try {
+    ip = getRequestIP({ xForwardedFor: true }) ?? "unknown";
+  } catch {
+    ip = "unknown";
+  }
+  const now = Date.now();
+  const entry = readLimitState.get(ip);
+  if (!entry || now - entry.windowStart > READ_WINDOW_MS) {
+    readLimitState.set(ip, { count: 1, windowStart: now });
+    return false;
+  }
+  entry.count += 1;
+  return entry.count > READ_MAX_REQUESTS;
+}
  * re-runs this check on every roster edit, config change, and slider tweak
  * (see analyzer.tsx's effect) — without this cache every keystroke-driven
  * update was blocking on an external HTTP call to Gumroad, and a busy

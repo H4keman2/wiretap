@@ -27,6 +27,10 @@ export const getSosDiagnostics = createServerFn({ method: "GET" }).handler(
  */
 export const getSosHealthStatus = createServerFn({ method: "GET" }).handler(
   async (): Promise<SosHealth> => {
+    const { isReadRateLimited } = await import("./license-guard.server");
+    if (isReadRateLimited()) {
+      throw new Error("Too many requests — slow down and try again in a minute.");
+    }
     const { getPlayerPool } = await import("./players.server");
     const { getSosHealth } = await import("./sos.server");
     await getPlayerPool();

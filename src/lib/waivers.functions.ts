@@ -81,9 +81,18 @@ async function withLiveInjuries(
   return { pool: fresh, injuryUpdatedAt: f.fetchedAt };
 }
 
+/** Throttle the free read endpoints so this app can't be scripted as a free ESPN/Sleeper proxy. */
+async function checkReadRateLimit(): Promise<void> {
+  const { isReadRateLimited } = await import("./license-guard.server");
+  if (isReadRateLimited()) {
+    throw new Error("Too many requests — slow down and try again in a minute.");
+  }
+}
+
 export const getRecommendations = createServerFn({ method: "GET" })
   .inputValidator((data: RecommendationInput) => data)
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
+    await checkReadRateLimit();
     // League-scoped availability is a Pro feature — anonymous callers only get
     // the national pool.
     if (data.league?.leagueId) await requireValidLicense(data.licenseKey ?? "");
@@ -118,6 +127,7 @@ export const getWatchlistPlayers = createServerFn({ method: "GET" })
       data,
   )
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
+    await checkReadRateLimit();
     if (data.requirePro) await requireValidLicense(data.licenseKey ?? "");
     if (data.ids.length === 0) return [];
     const { getPlayerPool } = await import("./players.server");
@@ -137,6 +147,7 @@ export const searchPlayers = createServerFn({ method: "GET" })
     async ({
       data,
     }): Promise<Array<{ id: string; name: string; team: string | null; position: string }>> => {
+      await checkReadRateLimit();
       // Player search powers the Pro-only trade analyzer and team analyzer.
       await requireValidLicense(data.licenseKey ?? "");
       const q = data.query.trim().toLowerCase();
