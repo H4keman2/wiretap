@@ -172,7 +172,7 @@ export function analyzeTrade(
       label: "24h adds",
       aText: A.adds.toLocaleString(),
       bText: B.adds.toLocaleString(),
-      winner: cmp(A.trendDelta, B.trendDelta, 50),
+      winner: cmp(A.adds, B.adds, 50),
       hint: "Momentum right now. A spike means their price is about to go up.",
     },
     {
