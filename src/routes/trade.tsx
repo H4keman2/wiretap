@@ -57,7 +57,7 @@ function PlayerSearch({
     refetch,
   } = useQuery({
     queryKey: ["player-search", query],
-    queryFn: () => searchPlayers({ data: { query } }),
+    queryFn: () => searchPlayers({ data: { query, licenseKey: key ?? "" } }),
     enabled: query.trim().length >= 2,
     staleTime: 1000 * 60 * 5,
   });
@@ -193,14 +193,15 @@ function TradePage() {
   const [format, setFormat] = useState<ScoringFormat>("ppr");
   const [a, setA] = useState<Pick[]>([]);
   const [b, setB] = useState<Pick[]>([]);
-  const { isPro, loaded: proLoaded } = usePro();
+  const { isPro, key, loaded: proLoaded } = usePro();
 
   const ids = [...a, ...b].map((p) => p.id);
   const both = a.length > 0 && b.length > 0;
 
   const { data, isPending, isError, refetch, isFetching } = useQuery({
     queryKey: ["trade", format, ids.join(",")],
-    queryFn: () => getWatchlistPlayers({ data: { ids, format } }),
+    queryFn: () =>
+      getWatchlistPlayers({ data: { ids, format, licenseKey: key ?? "", requirePro: true } }),
     enabled: both && isPro,
     staleTime: 1000 * 60 * 10,
   });

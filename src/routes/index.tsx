@@ -43,7 +43,7 @@ function WaiverBrowser() {
   const [maxOwnership, setMaxOwnership] = useState(40);
   const { enabled: live } = useLiveUpdates();
   const { connection, cred } = useEspnConnection();
-  const { isPro, loaded: proLoaded } = usePro();
+  const { isPro, key, loaded: proLoaded } = usePro();
 
   // A connected league dictates scoring — its own settings beat a guess.
   const leagueFormat = cred ? connection.summary?.format : null;
@@ -53,7 +53,7 @@ function WaiverBrowser() {
     queryKey: ["waivers", activeFormat, slot, maxOwnership, cred?.leagueId ?? "national"],
     queryFn: () =>
       getRecommendations({
-        data: { format: activeFormat, slot, maxOwnership, league: cred },
+        data: { format: activeFormat, slot, maxOwnership, league: cred, licenseKey: key ?? "" },
       }),
     staleTime: live ? 0 : 1000 * 60 * 10,
     refetchInterval: live ? LIVE_REFRESH_MS : false,

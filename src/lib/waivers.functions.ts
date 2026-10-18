@@ -29,6 +29,8 @@ export interface RecommendationInput {
   maxOwnership: number;
   /** When present, availability comes from this ESPN league instead of national ownership. */
   league?: LeagueCred | null;
+  /** Required when `league` is set — league-scoped filtering is a Pro feature. */
+  licenseKey?: string;
 }
 
 /**
@@ -76,6 +78,9 @@ async function withLiveInjuries(
 export const getRecommendations = createServerFn({ method: "GET" })
   .inputValidator((data: RecommendationInput) => data)
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
+    // League-scoped availability is a Pro feature — anonymous callers only get
+    // the national pool.
+    if (data.league?.leagueId) await requireValidLicense(data.licenseKey ?? "");
     const { getPlayerPool } = await import("./players.server");
     const { pool: base } = await withLiveInjuries(await getPlayerPool());
     const pool = data.league?.leagueId ? await applyLeagueAvailability(base, data.league) : base;
@@ -90,8 +95,12 @@ export const getRecommendations = createServerFn({ method: "GET" })
 
 
 export const getWatchlistPlayers = createServerFn({ method: "GET" })
-  .inputValidator((data: { ids: string[]; format: ScoringFormat }) => data)
+  .inputValidator(
+    (data: { ids: string[]; format: ScoringFormat; licenseKey?: string; requirePro?: boolean }) =>
+      data,
+  )
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
+    if (data.requirePro) await requireValidLicense(data.licenseKey ?? "");
     if (data.ids.length === 0) return [];
     const { getPlayerPool } = await import("./players.server");
     const { scorePlayer } = await import("./ranking");
@@ -105,11 +114,13 @@ export const getWatchlistPlayers = createServerFn({ method: "GET" })
   });
 
 export const searchPlayers = createServerFn({ method: "GET" })
-  .inputValidator((data: { query: string }) => data)
+  .inputValidator((data: { query: string; licenseKey: string }) => data)
   .handler(
     async ({
       data,
     }): Promise<Array<{ id: string; name: string; team: string | null; position: string }>> => {
+      // Player search powers the Pro-only trade analyzer and team analyzer.
+      await requireValidLicense(data.licenseKey ?? "");
       const q = data.query.trim().toLowerCase();
       if (q.length < 2) return [];
       const { getPlayerPool } = await import("./players.server");

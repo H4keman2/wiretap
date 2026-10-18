@@ -451,7 +451,7 @@ function RosterEditor({
     let cancelled = false;
     setSearchError(false);
     const t = setTimeout(() => {
-      searchPlayers({ data: { query } })
+      searchPlayers({ data: { query, licenseKey: key ?? "" } })
         .then((rows) => {
           if (cancelled) return;
           setOptions(rows);
