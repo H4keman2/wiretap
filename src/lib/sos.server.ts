@@ -13,6 +13,7 @@
 
 import type { SosHealth, SosMatchup, TeamSos } from "./sos";
 import { fetchWithTimeout } from "./fetch-timeout.server";
+import { seasonYear } from "./espn-ids";
 import standingsSnapshot2025 from "./sos-standings-2025.json";
 import schedule2026 from "./sos-schedule-2026.json";
 
@@ -118,11 +119,6 @@ interface ScoreboardResponse {
   }>;
   season?: { year?: number; type?: number };
   week?: { number?: number };
-}
-
-function seasonYear(): number {
-  const now = new Date();
-  return now.getUTCMonth() < 2 ? now.getUTCFullYear() - 1 : now.getUTCFullYear();
 }
 
 async function json<T>(url: string): Promise<T | null> {

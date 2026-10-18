@@ -11,18 +11,10 @@
 
 import type { RealPosition } from "./ranking";
 import { fetchWithTimeout } from "./fetch-timeout.server";
+import { POSITION_BY_ID, seasonYear } from "./espn-ids";
 import { playerNameKey as injuryKey } from "./names";
 
 const TTL_MS = 1000 * 45;
-
-const POSITION_BY_ID: Record<number, RealPosition> = {
-  1: "QB",
-  2: "RB",
-  3: "WR",
-  4: "TE",
-  5: "K",
-  16: "DEF",
-};
 
 /** Same normalization the pool merge uses, so overlays line up by name+position. */
 export { injuryKey };
@@ -37,11 +29,6 @@ const EMPTY: InjuryFeed = { byKey: new Map(), fetchedAt: 0 };
 
 let cache: InjuryFeed | null = null;
 let inflight: Promise<InjuryFeed> | null = null;
-
-function seasonYear(): number {
-  const now = new Date();
-  return now.getUTCMonth() < 2 ? now.getUTCFullYear() - 1 : now.getUTCFullYear();
-}
 
 function endpoint(year: number) {
   return `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/players?scoringPeriodId=0&view=kona_player_info`;
