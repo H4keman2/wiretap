@@ -630,6 +630,21 @@ function RosterEditor({
             </Button>
           </div>
 
+          {searchError && (
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-destructive/40 bg-background px-3 py-2">
+              <p role="alert" className="text-[11px] text-destructive">
+                Couldn't search players — check your connection.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSearchRetry((n) => n + 1)}
+                className="rounded bg-action px-3 py-1 text-[10px] font-bold uppercase text-action-foreground"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
           {options.length > 0 && (
             <ul className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border">
               {options.map((o) => (
