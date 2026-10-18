@@ -435,6 +435,8 @@ function RosterEditor({
   const [options, setOptions] = useState<
     Array<{ id: string; name: string; team: string | null; position: string }>
   >([]);
+  const [searchError, setSearchError] = useState(false);
+  const [searchRetry, setSearchRetry] = useState(0);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkText, setBulkText] = useState("");
   const [importing, setImporting] = useState(false);
@@ -442,21 +444,29 @@ function RosterEditor({
   useEffect(() => {
     if (query.trim().length < 2) {
       setOptions([]);
+      setSearchError(false);
       return;
     }
     let cancelled = false;
+    setSearchError(false);
     const t = setTimeout(() => {
       searchPlayers({ data: { query } })
         .then((rows) => {
-          if (!cancelled) setOptions(rows);
+          if (cancelled) return;
+          setOptions(rows);
+          setSearchError(false);
         })
-        .catch(() => setOptions([]));
+        .catch(() => {
+          if (cancelled) return;
+          setOptions([]);
+          setSearchError(true);
+        });
     }, 200);
     return () => {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [query]);
+  }, [query, searchRetry]);
 
   const add = (entry: Omit<RosterEntry, "starter">) => {
     if (roster.some((r) => r.id === entry.id)) {
