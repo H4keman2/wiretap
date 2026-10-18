@@ -13,6 +13,7 @@
 import type { RealPosition, ScoringFormat } from "./ranking";
 import type { LeagueConfig } from "./weakness";
 import { fetchWithTimeout } from "./fetch-timeout.server";
+import { playerNameKey as playerKey } from "./names";
 
 export interface EspnLeagueCred {
   leagueId: string;
@@ -102,18 +103,8 @@ const TEAM_BY_ID: Record<number, string> = {
 /** Lineup slot ids that mean "not a starter". */
 const NON_STARTER_SLOTS = new Set([20, 21, 24]);
 
-const SUFFIX = /\s+(jr|sr|ii|iii|iv|v)\.?$/i;
-
 /** Same normalisation the ESPN/Sleeper merge uses, so keys line up. */
-export function playerKey(name: string, position: string): string {
-  const clean = name
-    .toLowerCase()
-    .replace(/[.'`’-]/g, "")
-    .replace(SUFFIX, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  return `${clean}|${position}`;
-}
+export { playerKey };
 
 interface RawRosterEntry {
   lineupSlotId?: number;

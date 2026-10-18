@@ -31,6 +31,7 @@ import {
   searchInput,
   watchlistInput,
 } from "./validation";
+import { normalizePlayerName as normalizeName } from "./names";
 
 export interface RecommendationInput {
   format: ScoringFormat;
@@ -165,17 +166,6 @@ export const searchPlayers = createServerFn({ method: "GET" })
         .map((p) => ({ id: p.id, name: p.name, team: p.team, position: p.position }));
     },
   );
-
-const SUFFIX = /\s+(jr|sr|ii|iii|iv|v)\.?$/i;
-
-function normalizeName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[.'`’-]/g, "")
-    .replace(SUFFIX, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 /** Recognized trailing position hints a pasted roster line might carry (e.g. "David Montgomery RB"). */
 const POSITION_HINTS: Record<string, RealPosition> = {

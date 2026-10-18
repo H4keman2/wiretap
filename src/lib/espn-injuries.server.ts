@@ -11,6 +11,7 @@
 
 import type { RealPosition } from "./ranking";
 import { fetchWithTimeout } from "./fetch-timeout.server";
+import { playerNameKey as injuryKey } from "./names";
 
 const TTL_MS = 1000 * 45;
 
@@ -23,18 +24,8 @@ const POSITION_BY_ID: Record<number, RealPosition> = {
   16: "DEF",
 };
 
-const SUFFIX = /\s+(jr|sr|ii|iii|iv|v)\.?$/i;
-
 /** Same normalization the pool merge uses, so overlays line up by name+position. */
-export function injuryKey(name: string, position: string): string {
-  const clean = name
-    .toLowerCase()
-    .replace(/[.'`’-]/g, "")
-    .replace(SUFFIX, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  return `${clean}|${position}`;
-}
+export { injuryKey };
 
 export interface InjuryFeed {
   /** name|position -> injury tag, or null when the player is currently active. */

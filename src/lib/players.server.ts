@@ -12,6 +12,7 @@
  */
 
 import { fetchEspnPlayers, type EspnPlayer } from "./espn.server";
+import { playerNameKey as key } from "./names";
 import type { PlayerStat } from "./ranking";
 import { getSleeperPool } from "./sleeper.server";
 import { getSosHealth, getSosMap } from "./sos.server";
@@ -22,18 +23,6 @@ const DEGRADED_TTL_MS = 1000 * 60;
 
 let cache: { at: number; pool: PlayerStat[]; sosDegraded: boolean } | null = null;
 let inflight: Promise<PlayerStat[]> | null = null;
-
-const SUFFIX = /\s+(jr|sr|ii|iii|iv|v)\.?$/i;
-
-function key(name: string, position: string): string {
-  const clean = name
-    .toLowerCase()
-    .replace(/[.'`’-]/g, "")
-    .replace(SUFFIX, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  return `${clean}|${position}`;
-}
 
 async function build(): Promise<PlayerStat[]> {
   const [sleeper, espn, sos] = await Promise.all([
