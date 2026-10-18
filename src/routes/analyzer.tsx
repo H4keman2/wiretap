@@ -435,6 +435,8 @@ function RosterEditor({
   const [options, setOptions] = useState<
     Array<{ id: string; name: string; team: string | null; position: string }>
   >([]);
+  const [searchError, setSearchError] = useState(false);
+  const [searchRetry, setSearchRetry] = useState(0);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkText, setBulkText] = useState("");
   const [importing, setImporting] = useState(false);
@@ -442,21 +444,29 @@ function RosterEditor({
   useEffect(() => {
     if (query.trim().length < 2) {
       setOptions([]);
+      setSearchError(false);
       return;
     }
     let cancelled = false;
+    setSearchError(false);
     const t = setTimeout(() => {
       searchPlayers({ data: { query } })
         .then((rows) => {
-          if (!cancelled) setOptions(rows);
+          if (cancelled) return;
+          setOptions(rows);
+          setSearchError(false);
         })
-        .catch(() => setOptions([]));
+        .catch(() => {
+          if (cancelled) return;
+          setOptions([]);
+          setSearchError(true);
+        });
     }, 200);
     return () => {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [query]);
+  }, [query, searchRetry]);
 
   const add = (entry: Omit<RosterEntry, "starter">) => {
     if (roster.some((r) => r.id === entry.id)) {
@@ -619,6 +629,21 @@ function RosterEditor({
               <Plus aria-hidden="true" className="size-4" />
             </Button>
           </div>
+
+          {searchError && (
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-destructive/40 bg-background px-3 py-2">
+              <p role="alert" className="text-[11px] text-destructive">
+                Couldn't search players — check your connection.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSearchRetry((n) => n + 1)}
+                className="rounded bg-action px-3 py-1 text-[10px] font-bold uppercase text-action-foreground"
+              >
+                Try again
+              </button>
+            </div>
+          )}
 
           {options.length > 0 && (
             <ul className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border">
