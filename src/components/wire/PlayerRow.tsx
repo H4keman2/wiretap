@@ -151,13 +151,15 @@ export function PlayerRow({
         </div>
       </article>
 
-      <PlayerDetail
-        player={player}
-        rank={rank}
-        format={format}
-        open={open}
-        onOpenChange={setOpen}
-      />
+      {open && (
+        <PlayerDetail
+          player={player}
+          rank={rank}
+          format={format}
+          open={open}
+          onOpenChange={setOpen}
+        />
+      )}
     </>
   );
 }
