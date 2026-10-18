@@ -26,8 +26,8 @@ const TREND_TEXT = {
   stable: "text-muted-foreground",
 } as const;
 
-
 export function PlayerDetail({
+
   player,
   rank,
   format,
@@ -98,8 +98,8 @@ export function PlayerDetail({
               className={`size-4 shrink-0 ${TREND_TEXT[player.trendLabel]}`}
               strokeWidth={3}
             />
-
             <p className="text-[11px] font-bold uppercase tracking-tight">
+
               {player.addCount.toLocaleString()} adds / {player.dropCount.toLocaleString()} drops in
               24h
               {player.ownershipChange
