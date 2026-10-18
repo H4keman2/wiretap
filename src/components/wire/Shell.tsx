@@ -70,7 +70,7 @@ export function Page({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
+    <div className="flex min-h-screen flex-col bg-background font-sans text-foreground">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-action focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-action-foreground"
@@ -81,7 +81,7 @@ export function Page({
         <AppHeader />
         <TopNav />
       </div>
-      <main id="main" tabIndex={-1} className="mx-auto max-w-2xl space-y-8 p-5 sm:p-6">
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-2xl flex-1 space-y-8 p-5 sm:p-6">
         {children}
       </main>
       <footer className="border-t border-border bg-card/50 px-4 py-6">
