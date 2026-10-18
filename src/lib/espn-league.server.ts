@@ -12,6 +12,7 @@
 
 import type { RealPosition, ScoringFormat } from "./ranking";
 import type { LeagueConfig } from "./weakness";
+import { fetchWithTimeout } from "./fetch-timeout.server";
 
 export interface EspnLeagueCred {
   leagueId: string;
@@ -210,7 +211,7 @@ async function fetchLeague(cred: EspnLeagueCred, season: number): Promise<League
   const cookie = cookieHeader(cred);
   let res: Response;
   try {
-    res = await fetch(url, {
+    res = await fetchWithTimeout(url, {
       headers: {
         accept: "application/json",
         "user-agent": "Mozilla/5.0 (compatible; WireTap/1.0)",

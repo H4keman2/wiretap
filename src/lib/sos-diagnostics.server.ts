@@ -7,6 +7,7 @@
  */
 
 import type { ProbeResult, SosDiagnostics, UnmappedPlayer } from "./sos-diagnostics";
+import { fetchWithTimeout } from "./fetch-timeout.server";
 
 export type { ProbeResult, SosDiagnostics, UnmappedPlayer };
 
@@ -21,7 +22,7 @@ function seasonYear(): number {
 async function probe(label: string, url: string): Promise<{ result: ProbeResult; body: unknown }> {
   const started = Date.now();
   try {
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       headers: {
         accept: "application/json",
         "user-agent": "WireTap/1.0 (fantasy football schedule analysis)",
