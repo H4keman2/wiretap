@@ -97,6 +97,10 @@ export function isReadRateLimited(): boolean {
   entry.count += 1;
   return entry.count > READ_MAX_REQUESTS;
 }
+
+/**
+ * Once a key has verified as valid, trust that for a few minutes instead of
+ * round-tripping to Gumroad on every `analyzeTeam` call. The Team Analyzer
  * re-runs this check on every roster edit, config change, and slider tweak
  * (see analyzer.tsx's effect) — without this cache every keystroke-driven
  * update was blocking on an external HTTP call to Gumroad, and a busy

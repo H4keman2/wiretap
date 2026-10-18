@@ -49,6 +49,7 @@ function PlayerSearch({
   onAdd: (p: Pick) => void;
 }) {
   const [query, setQuery] = useState("");
+  const { key } = usePro();
 
   const {
     data: results,

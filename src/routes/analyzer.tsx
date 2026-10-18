@@ -432,6 +432,7 @@ function RosterEditor({
   onChange: (next: RosterEntry[]) => void;
 }) {
   const [query, setQuery] = useState("");
+  const { key } = usePro();
   const [position, setPosition] = useState<RealPosition>("RB");
   const [options, setOptions] = useState<
     Array<{ id: string; name: string; team: string | null; position: string }>

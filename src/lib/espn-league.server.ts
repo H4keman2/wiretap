@@ -16,10 +16,10 @@ import { fetchWithTimeout } from "./fetch-timeout.server";
 
 export interface EspnLeagueCred {
   leagueId: string;
-  espnS2?: string | null;
-  swid?: string | null;
+  espnS2?: string | null | undefined;
+  swid?: string | null | undefined;
   /** Optional season override; defaults to the current fantasy season. */
-  season?: number | null;
+  season?: number | null | undefined;
 }
 
 export interface LeagueRosterPlayer {

@@ -2,11 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 
 import type { RealPosition, ScoringFormat } from "./ranking";
 import type { LeagueConfig, RosterEntry } from "./weakness";
+import { connectLeagueInput, teamLeagueInput } from "./validation";
 
 export interface LeagueCred {
   leagueId: string;
-  espnS2?: string | null;
-  swid?: string | null;
+  espnS2?: string | null | undefined;
+  swid?: string | null | undefined;
 }
 
 export interface LeagueTeamSummary {
@@ -41,7 +42,7 @@ function friendly(err: unknown): Error {
 
 /** Read a league's settings, size, and team list so the user can pick their team. */
 export const connectLeague = createServerFn({ method: "POST" })
-  .inputValidator((data: LeagueCred & { licenseKey: string }) => data)
+  .inputValidator((data: unknown) => connectLeagueInput.parse(data))
   .handler(async ({ data }): Promise<LeagueSummary> => {
     await requireLicense(data.licenseKey);
     const { getLeagueSnapshot } = await import("./espn-league.server");
@@ -69,7 +70,7 @@ export const connectLeague = createServerFn({ method: "POST" })
 
 /** Pull one team's roster out of the league, ready to drop into the analyzer. */
 export const importLeagueRoster = createServerFn({ method: "POST" })
-  .inputValidator((data: LeagueCred & { teamId: number; licenseKey: string }) => data)
+  .inputValidator((data: unknown) => teamLeagueInput.parse(data))
   .handler(async ({ data }): Promise<{ entries: RosterEntry[]; unmatched: string[] }> => {
     await requireLicense(data.licenseKey);
     const { getLeagueSnapshot, playerKey } = await import("./espn-league.server");
@@ -113,7 +114,7 @@ export interface LeagueBudget {
 
 /** Read your team's live FAAB budget from ESPN. */
 export const getLeagueBudget = createServerFn({ method: "POST" })
-  .inputValidator((data: LeagueCred & { teamId: number; licenseKey: string }) => data)
+  .inputValidator((data: unknown) => teamLeagueInput.parse(data))
   .handler(async ({ data }): Promise<LeagueBudget> => {
     await requireLicense(data.licenseKey);
     const { getLeagueSnapshot } = await import("./espn-league.server");

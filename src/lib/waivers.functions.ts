@@ -24,6 +24,13 @@ import type { LeagueCred } from "./league.functions";
 import type { PlayerStat } from "./ranking";
 import type { InjuryFeed } from "./espn-injuries.server";
 import type { LeagueSnapshot } from "./espn-league.server";
+import {
+  analyzeInput,
+  matchRosterInput,
+  recommendationInput,
+  searchInput,
+  watchlistInput,
+} from "./validation";
 
 export interface RecommendationInput {
   format: ScoringFormat;
@@ -90,7 +97,7 @@ async function checkReadRateLimit(): Promise<void> {
 }
 
 export const getRecommendations = createServerFn({ method: "GET" })
-  .inputValidator((data: RecommendationInput) => data)
+  .inputValidator((data: unknown) => recommendationInput.parse(data))
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
     await checkReadRateLimit();
     // League-scoped availability is a Pro feature — anonymous callers only get
@@ -122,10 +129,7 @@ export const getRecommendations = createServerFn({ method: "GET" })
 
 
 export const getWatchlistPlayers = createServerFn({ method: "GET" })
-  .inputValidator(
-    (data: { ids: string[]; format: ScoringFormat; licenseKey?: string; requirePro?: boolean }) =>
-      data,
-  )
+  .inputValidator((data: unknown) => watchlistInput.parse(data))
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
     await checkReadRateLimit();
     if (data.requirePro) await requireValidLicense(data.licenseKey ?? "");
@@ -142,7 +146,7 @@ export const getWatchlistPlayers = createServerFn({ method: "GET" })
   });
 
 export const searchPlayers = createServerFn({ method: "GET" })
-  .inputValidator((data: { query: string; licenseKey: string }) => data)
+  .inputValidator((data: unknown) => searchInput.parse(data))
   .handler(
     async ({
       data,
@@ -221,7 +225,7 @@ export interface RosterMatchResult {
  * caller can add it (flagged for review) instead of silently dropping it.
  */
 export const matchRosterPlayers = createServerFn({ method: "POST" })
-  .inputValidator((data: { lines: string[] }) => data)
+  .inputValidator((data: unknown) => matchRosterInput.parse(data))
   .handler(async ({ data }): Promise<RosterMatchResult[]> => {
     const { getPlayerPool } = await import("./players.server");
     const pool = await getPlayerPool();
@@ -305,7 +309,7 @@ export interface AnalyzeOutput {
 }
 
 export const analyzeTeam = createServerFn({ method: "POST" })
-  .inputValidator((data: AnalyzeInput) => data)
+  .inputValidator((data: unknown) => analyzeInput.parse(data))
   .handler(async ({ data }): Promise<AnalyzeOutput> => {
     // Gate here, not just in the UI. A direct call to this function with no
     // or bad license bypassed the paywall entirely before this check existed.
