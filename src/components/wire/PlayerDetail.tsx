@@ -27,8 +27,8 @@ const TREND_TEXT = {
 } as const;
 
 export function PlayerDetail({
-
   player,
+
   rank,
   format,
   open,
@@ -99,8 +99,8 @@ export function PlayerDetail({
               strokeWidth={3}
             />
             <p className="text-[11px] font-bold uppercase tracking-tight">
-
               {player.addCount.toLocaleString()} adds / {player.dropCount.toLocaleString()} drops in
+
               24h
               {player.ownershipChange
                 ? ` • ${player.ownershipChange > 0 ? "+" : ""}${player.ownershipChange.toFixed(1)}% rostered wk/wk`
