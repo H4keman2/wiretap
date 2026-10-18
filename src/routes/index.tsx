@@ -74,10 +74,14 @@ function WaiverBrowser() {
     <Page format={activeFormat}>
       <SosWarning />
 
-      <Hero week={week} poolSize={data?.length ?? null} updatedAt={dataUpdatedAt} connected={!!cred} />
+      <Hero
+        week={week}
+        poolSize={data?.length ?? null}
+        updatedAt={dataUpdatedAt}
+        connected={!!cred}
+      />
 
       <HowItWorks connected={!!cred} />
-
 
       <section className="space-y-5">
         {cred && connection.summary ? (
@@ -113,7 +117,6 @@ function WaiverBrowser() {
             ? `${slot} free agents in your league`
             : `All ${slot} targets under ${maxOwnership}% owned`}
         </SectionLabel>
-
 
         {isPending && (
           <div className="space-y-4">
@@ -160,14 +163,13 @@ function WaiverBrowser() {
           </div>
         )}
 
-
         <OwnershipCompare
           players={data}
           connected={!!cred}
           leagueName={connection.summary?.name ?? null}
         />
 
-        <div className="space-y-4">
+        <div className="max-h-[640px] space-y-4 overflow-y-auto pr-1">
           {data?.map((player, i) => (
             <PlayerRow
               key={player.id}

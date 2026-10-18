@@ -40,7 +40,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/ask" });
+      if (data.session) navigate({ to: "/" });
     });
   }, [navigate]);
 
@@ -54,7 +54,7 @@ function AuthPage() {
         const { data, error: err } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/ask` },
+          options: { emailRedirectTo: `${window.location.origin}/` },
         });
         if (err) throw err;
         if (!data.session) {
@@ -65,7 +65,7 @@ function AuthPage() {
         const { error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) throw err;
       }
-      navigate({ to: "/ask" });
+      navigate({ to: "/" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "That didn't work — try again.");
     } finally {
@@ -85,7 +85,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/ask" });
+    navigate({ to: "/" });
   }
 
   return (

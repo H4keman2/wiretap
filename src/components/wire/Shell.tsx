@@ -1,13 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import {
-  ArrowLeftRight,
-  ClipboardList,
-  Gavel,
-  ListFilter,
-  MessageCircleQuestion,
-  Settings2,
-  Star,
-} from "lucide-react";
+import { ArrowLeftRight, ClipboardList, Gavel, ListFilter, Settings2, Star } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { ScoringFormat } from "@/lib/ranking";
@@ -37,7 +29,6 @@ export function AppHeader() {
 const TABS = [
   { to: "/", label: "Waiver", icon: ListFilter },
   { to: "/bids", label: "Bids", icon: Gavel },
-  { to: "/ask", label: "Ask", icon: MessageCircleQuestion },
   { to: "/watchlist", label: "Saved", icon: Star },
   { to: "/trade", label: "Trade", icon: ArrowLeftRight },
   { to: "/analyzer", label: "Roster", icon: ClipboardList },
@@ -52,14 +43,14 @@ const TABS = [
  */
 export function TopNav() {
   return (
-    <nav className="flex items-center justify-around border-b border-border bg-card px-1 py-2.5">
+    <nav className="flex items-center justify-around gap-1 border-b border-border bg-card px-2 py-2.5">
       {TABS.map(({ to, label, icon: Icon }) => (
         <Link
           key={to}
           to={to}
           activeOptions={{ exact: to === "/" }}
-          className="flex flex-col items-center gap-1 rounded-lg px-1.5 py-1.5 text-muted-foreground transition-colors sm:px-3"
-          activeProps={{ className: "bg-action/15 text-action" }}
+          className="flex flex-col items-center gap-1 rounded-xl border border-transparent px-2 py-2 text-muted-foreground transition-all hover:border-border hover:bg-muted/50 hover:text-foreground sm:px-4"
+          activeProps={{ className: "border-action/40 bg-action/15 text-action shadow-sm" }}
         >
           <Icon aria-hidden="true" className="size-5" strokeWidth={2.5} />
           <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
@@ -88,7 +79,9 @@ export function Page({
         <AppHeader />
         <TopNav />
       </div>
-      <main id="main" tabIndex={-1} className="mx-auto max-w-2xl space-y-8 p-5 sm:p-6">{children}</main>
+      <main id="main" tabIndex={-1} className="mx-auto max-w-2xl space-y-8 p-5 sm:p-6">
+        {children}
+      </main>
     </div>
   );
 }
