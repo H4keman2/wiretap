@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, Lock, Plus, Shield, Trash2 } from "lucide-react";
+import { ChevronRight, ClipboardList, Plus, Shield, Trash2 } from "lucide-react";
 
 import { InjuryAlerts } from "@/components/wire/InjuryAlerts";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/wire/Controls";
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, PromoCard, ProxyNote, SectionLabel } from "@/components/wire/Shell";
+import { ProFeatureSection } from "@/components/wire/ProFeatureSection";
 import { SosWarning } from "@/components/wire/SosWarning";
 import { LIVE_REFRESH_MS } from "@/components/wire/LiveWatch";
 import { importLeagueRoster } from "@/lib/league.functions";
@@ -773,41 +774,60 @@ function RosterEditor({
 function Paywall({ format }: { format: "std" | "half" | "ppr" }) {
   return (
     <Page format={format}>
-      <PromoCard>
-        <Lock aria-hidden="true" className="mb-3 size-6 text-action" />
-        <p className="font-display text-3xl uppercase leading-none">Team Analyzer is Pro</p>
-        <p className="mt-2 text-xs text-depth-foreground/75">
-          Roster entry, positional weakness scoring, auto-flagged weak spots, and live injury alerts
-          with named replacements. One $4.99 season pass, unlimited re-runs.
-        </p>
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          <Link
-            to="/pro"
-            className="block rounded bg-action px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
-          >
-            See plans — $4.99
-          </Link>
-          <Link
-            to="/settings"
-            className="block rounded border border-depth-foreground/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-depth-foreground"
-          >
-            Enter license key
-          </Link>
-        </div>
-      </PromoCard>
-      <section className="space-y-2 rounded-xl border border-border bg-card p-4">
-        <SectionLabel>What you get</SectionLabel>
-        <ul className="space-y-1.5 text-xs text-muted-foreground">
-          <li>• Reusable league profile — lineup slots and bench size saved.</li>
-          <li>• Every position scored against replacement level, math shown.</li>
-          <li>• Ranked list: "Your weakest positions are RB, then TE".</li>
-          <li>• Live injury alerts with the best legal replacement named.</li>
-          <li>• Manual position override inside the analysis.</li>
-        </ul>
-        <Link to="/" className="block pt-2 text-xs font-bold text-turf underline">
+      <ProFeatureSection
+        icon={<ClipboardList aria-hidden="true" className="size-7" strokeWidth={2.5} />}
+        title="Team Analyzer"
+        description="Enter your roster once and Wire Tap flags your weakest spots every week, with the math shown — plus injury alerts and a suggested lineup."
+        benefits={[
+          {
+            title: "Weakness scoring",
+            body: "Every position scored against replacement level, math shown.",
+          },
+          {
+            title: "Ranked verdict",
+            body: "\u201cYour weakest positions are RB, then TE\u201d — prioritized for you.",
+          },
+          {
+            title: "Injury alerts",
+            body: "Live alerts with the best legal replacement named.",
+          },
+          {
+            title: "Reusable profile",
+            body: "Lineup slots and bench size saved — set once, use all season.",
+          },
+        ]}
+        preview={
+          <>
+            <p className="text-[10px] font-black uppercase tracking-wider">Verdict</p>
+            <p className="font-display text-2xl uppercase leading-none">
+              Weakest: RB, then WR (42)
+            </p>
+            <p className="text-xs opacity-80">
+              Your RB room scores 18 points below replacement level over the next 4 weeks.
+            </p>
+            <div className="space-y-1.5 pt-1">
+              {[
+                ["RB", "42%"],
+                ["WR", "58%"],
+                ["TE", "71%"],
+              ].map(([slot, width]) => (
+                <div key={slot} className="flex items-center gap-2 text-xs">
+                  <span className="w-8 font-bold">{slot}</span>
+                  <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
+                    <span className="block h-full rounded-full bg-chart-4" style={{ width }} />
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        }
+        feature="Team Analyzer"
+      />
+      <p className="px-1 text-xs">
+        <Link to="/" className="font-bold text-turf underline">
           Keep browsing free waiver targets
         </Link>
-      </section>
+      </p>
     </Page>
   );
 }

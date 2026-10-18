@@ -5,9 +5,11 @@ import { useState } from "react";
 
 import { FormatSelector } from "@/components/wire/Controls";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
+import { ProFeatureSection } from "@/components/wire/ProFeatureSection";
 import { SosSection } from "@/components/wire/SosSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FORMAT_LABEL, type ScoringFormat } from "@/lib/ranking";
+import { usePro } from "@/lib/league-store";
 import { teamColor } from "@/lib/team-colors";
 import { analyzeTrade } from "@/lib/trade";
 import { cn } from "@/lib/utils";
@@ -191,6 +193,7 @@ function TradePage() {
   const [format, setFormat] = useState<ScoringFormat>("ppr");
   const [a, setA] = useState<Pick[]>([]);
   const [b, setB] = useState<Pick[]>([]);
+  const { isPro, loaded: proLoaded } = usePro();
 
   const ids = [...a, ...b].map((p) => p.id);
   const both = a.length > 0 && b.length > 0;
@@ -198,7 +201,7 @@ function TradePage() {
   const { data, isPending, isError, refetch, isFetching } = useQuery({
     queryKey: ["trade", format, ids.join(",")],
     queryFn: () => getWatchlistPlayers({ data: { ids, format } }),
-    enabled: both,
+    enabled: both && isPro,
     staleTime: 1000 * 60 * 10,
   });
 
@@ -209,6 +212,63 @@ function TradePage() {
 
   const colorA = teamColor(a[0]?.team ?? null);
   const colorB = teamColor(b[0]?.team ?? null);
+
+  if (!proLoaded) {
+    return (
+      <Page format={format}>
+        <Skeleton className="h-64 w-full" />
+      </Page>
+    );
+  }
+
+  if (!isPro) {
+    return (
+      <Page format={format}>
+        <ProFeatureSection
+          icon={<ArrowLeftRight aria-hidden="true" className="size-7" strokeWidth={2.5} />}
+          title="Trade Analyzer"
+          description="Stack players on each side and get a data-backed verdict on any trade — projections, rostered %, proven production, momentum, and upcoming matchups compared side by side."
+          benefits={[
+            {
+              title: "Verdict up front",
+              body: "Win, lose, or even — with the math shown, not a gut feel.",
+            },
+            {
+              title: "Side-by-side metrics",
+              body: "Projections, rostered %, production, and momentum compared line by line.",
+            },
+            {
+              title: "Schedule-aware",
+              body: "Upcoming matchups factor into every comparison.",
+            },
+            {
+              title: "Any package size",
+              body: "1-for-1 swaps or full multi-player blockbusters.",
+            },
+          ]}
+          preview={
+            <>
+              <p className="text-[10px] font-black uppercase tracking-wider">Verdict</p>
+              <p className="font-display text-2xl uppercase leading-none">You win this trade</p>
+              <p className="text-xs opacity-80">
+                Your side outscores theirs by 4.2 pts/week on projections with the softer upcoming
+                schedule.
+              </p>
+              <div className="space-y-1.5 pt-1">
+                {["Projections", "Rostered %", "Momentum"].map((label) => (
+                  <div key={label} className="flex items-center justify-between text-xs">
+                    <span className="font-bold">{label}</span>
+                    <span className="h-1.5 w-24 rounded-full bg-secondary" />
+                  </div>
+                ))}
+              </div>
+            </>
+          }
+          feature="Trade Analyzer"
+        />
+      </Page>
+    );
+  }
 
   return (
     <Page format={format}>
