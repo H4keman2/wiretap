@@ -165,10 +165,10 @@ export function usePro() {
 /* ------------------------------------------------------------------ *
  * Connected ESPN league
  *
- * Stores the league id and the user's own ESPN session cookies on this
- * device only, plus the last league snapshot summary and which team is
- * theirs. Every server call passes the cookies through per request; they
- * are never persisted server-side.
+ * Stores the league id and the user's own ESPN session cookies in
+ * sessionStorage (they die with the tab), plus the last league snapshot
+ * summary and which team is theirs. Every server call passes the cookies
+ * through per request; they are never persisted server-side.
  * ------------------------------------------------------------------ */
 
 const ESPN_KEY = "wiretap.espn-league.v1";
@@ -195,9 +195,17 @@ export function useEspnConnection() {
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(ESPN_KEY);
+      // ESPN session cookies live in sessionStorage so they die with the tab
+      // (defense in depth against XSS exfiltration). Migrate once from the
+      // older localStorage location.
+      const legacy = window.localStorage.getItem(ESPN_KEY);
+      const raw = window.sessionStorage.getItem(ESPN_KEY) ?? legacy;
       if (raw) {
         setConnection({ ...EMPTY_CONNECTION, ...(JSON.parse(raw) as Partial<EspnConnection>) });
+        if (legacy) {
+          window.sessionStorage.setItem(ESPN_KEY, legacy);
+          window.localStorage.removeItem(ESPN_KEY);
+        }
       }
     } catch {
       /* ignore unreadable storage */
@@ -209,7 +217,7 @@ export function useEspnConnection() {
     setConnection((prev) => {
       const next = { ...prev, ...patch };
       try {
-        window.localStorage.setItem(ESPN_KEY, JSON.stringify(next));
+        window.sessionStorage.setItem(ESPN_KEY, JSON.stringify(next));
       } catch {
         /* storage unavailable */
       }
@@ -219,6 +227,7 @@ export function useEspnConnection() {
 
   const clear = useCallback(() => {
     try {
+      window.sessionStorage.removeItem(ESPN_KEY);
       window.localStorage.removeItem(ESPN_KEY);
     } catch {
       /* storage unavailable */
