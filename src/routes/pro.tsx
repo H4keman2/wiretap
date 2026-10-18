@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  ArrowLeftRight,
   ArrowRight,
   BarChart3,
   Check,
@@ -14,18 +15,18 @@ import {
   X,
 } from "lucide-react";
 
-import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
+import { Page, PromoCard, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 
 export const Route = createFileRoute("/pro")({
   head: () => ({
     meta: [
-      { title: "Team Analyzer — $4.99 Season Pass | Wire Tap" },
+      { title: "Wire Tap Pro — Team & Trade Analyzer, $4.99 Season Pass" },
       {
         name: "description",
         content:
-          "Wire Tap Pro: enter your fantasy football roster once and get positional weakness scoring, auto-flagged weak spots, live injury alerts with substitutions, and ranked waiver targets for the positions your team actually needs. $4.99 for the season.",
+          "Wire Tap Pro: positional weakness scoring, live injury alerts, ranked waiver targets for the positions your team needs, and the Trade Analyzer with a clear verdict on which side wins the deal. $4.99 for the season.",
       },
-      { property: "og:title", content: "Wire Tap Pro — Team Analyzer, $4.99/season" },
+      { property: "og:title", content: "Wire Tap Pro — Team & Trade Analyzer, $4.99/season" },
       {
         property: "og:description",
         content:
@@ -60,6 +61,11 @@ const INCLUDED = [
     body: "Recommendations pull players at your flagged position, scored for your format and filtered by how widely rostered they are — same engine as the free browser.",
   },
   {
+    icon: ArrowLeftRight,
+    title: "Trade Analyzer with clear verdicts",
+    body: "Stack both sides of a deal and get a winner, not a shrug — projection, trend momentum, and schedule strength compared player by player.",
+  },
+  {
     icon: ClipboardList,
     title: "Reusable league profile",
     body: "Set your lineup slots and bench size once. Wire Tap remembers your league every week, so re-running the analysis is one tap, not a re-entry.",
@@ -77,6 +83,7 @@ const COMPARE = [
   { label: "Ownership threshold slider", free: true, pro: true },
   { label: "Live waiver watch + watchlist", free: true, pro: true },
   { label: "Roster entry + positional weakness scoring", free: false, pro: true },
+  { label: "Trade Analyzer with side-by-side verdicts", free: false, pro: true },
   { label: "Auto-flagged weakest positions, with reasoning", free: false, pro: true },
   { label: "Live injury alerts with named substitutions", free: false, pro: true },
   { label: "Connect your ESPN league for real ownership", free: false, pro: true },
@@ -246,7 +253,7 @@ function ProPage() {
       </section>
 
       {/* Bottom CTA ------------------------------------------------ */}
-      <section className="relative overflow-hidden rounded-xl border-b-4 border-action bg-depth p-5 text-depth-foreground">
+      <PromoCard>
         <Lock className="mb-3 size-6 text-action" />
         <p className="font-display text-2xl uppercase leading-none">Stop guessing. Start targeting.</p>
         <p className="mt-2 text-xs leading-relaxed text-depth-foreground/75">
@@ -270,7 +277,7 @@ function ProPage() {
             Try the analyzer
           </Link>
         </div>
-      </section>
+      </PromoCard>
 
       <ProxyNote />
     </Page>
