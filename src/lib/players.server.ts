@@ -89,6 +89,16 @@ export async function getPlayerPool(): Promise<PlayerStat[]> {
         cache = { at: Date.now(), pool, sosDegraded: getSosHealth().degraded };
         return pool;
       })
+      .catch((error) => {
+        // Stale-while-revalidate: a failed rebuild (e.g. Sleeper outage) must
+        // not take down the app. Serve the last good pool, even past TTL,
+        // rather than throwing into every caller.
+        if (cache) {
+          console.warn("[players] Rebuild failed — serving stale pool", error);
+          return cache.pool;
+        }
+        throw error;
+      })
       .finally(() => {
         inflight = null;
       });
