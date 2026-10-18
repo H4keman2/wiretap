@@ -13,6 +13,7 @@
 
 import type { SosHealth, SosMatchup, TeamSos } from "./sos";
 import { fetchWithTimeout } from "./fetch-timeout.server";
+import standingsSnapshot2025 from "./sos-standings-2025.json";
 
 export type { SosHealth, SosMatchup, TeamSos };
 
@@ -29,6 +30,19 @@ const WINDOW = 4;
 const LOOKAHEAD_SLACK = 2;
 
 const ESPN_SITE_API = "https://site.web.api.espn.com/apis";
+
+/**
+ * Frozen 2025 final defensive snapshot (points allowed per game, keyed by team
+ * abbreviation). The 2025 season is complete, so this data cannot change during
+ * the 2026 season — it's the fallback when ESPN's bot mitigation blocks the
+ * live standings feed from the server.
+ */
+const SNAPSHOT_YEAR = 2025;
+const SNAPSHOT_2025: Record<string, number> = standingsSnapshot2025;
+
+/** Why the most recent ESPN fetch failed — surfaced in health errors so the
+ *  next recurrence is diagnosable without server-log access. */
+let lastFetchDetail: string | null = null;
 
 const ABBR_FIX: Record<string, string> = { WSH: "WAS" };
 
@@ -61,7 +75,6 @@ interface ScoreboardResponse {
   week?: { number?: number };
 }
 
-
 function seasonYear(): number {
   const now = new Date();
   return now.getUTCMonth() < 2 ? now.getUTCFullYear() - 1 : now.getUTCFullYear();
@@ -76,11 +89,22 @@ async function json<T>(url: string): Promise<T | null> {
       },
     });
     if (!res.ok) {
+      lastFetchDetail = `HTTP ${res.status}`;
       console.error(`[SOS] ESPN request failed (${res.status})`, url);
       return null;
     }
-    return (await res.json()) as T;
+    try {
+      return (await res.json()) as T;
+    } catch {
+      lastFetchDetail = "non-JSON response (likely a bot-challenge page)";
+      console.error("[SOS] ESPN returned non-JSON", url);
+      return null;
+    }
   } catch (error) {
+    lastFetchDetail =
+      error instanceof Error && error.name === "AbortError"
+        ? "timed out after 10s"
+        : "network error";
     console.error("[SOS] ESPN request failed", url, error);
     return null;
   }
@@ -109,6 +133,13 @@ async function defenseStrength(year: number): Promise<Map<string, number>> {
     const against = stat("pointsAgainst");
     if (!games || !against) continue;
     out.set(team, against / games);
+  }
+
+  if (out.size === 0 && year === SNAPSHOT_YEAR) {
+    console.warn(
+      `[SOS] Live standings unreachable (${lastFetchDetail ?? "unknown cause"}) — using bundled ${SNAPSHOT_YEAR} snapshot.`,
+    );
+    for (const [team, allowed] of Object.entries(SNAPSHOT_2025)) out.set(team, allowed);
   }
   return out;
 }
@@ -151,7 +182,6 @@ async function weekMatchups(year: number, week: number) {
   return pairs;
 }
 
-
 /**
  * Map points allowed per game to a 0-10 difficulty where a stingy defense
  * (low points allowed) scores high.
@@ -175,7 +205,9 @@ async function build(): Promise<Map<string, TeamSos>> {
   const [defense, week] = await Promise.all([defenseStrength(year - 1), currentWeek()]);
 
   if (defense.size === 0) {
-    throw new Error(`[SOS] No defensive standings returned for ${year - 1}`);
+    throw new Error(
+      `[SOS] No defensive standings returned for ${year - 1} (${lastFetchDetail ?? "unknown cause"})`,
+    );
   }
 
   const values = [...defense.values()];
