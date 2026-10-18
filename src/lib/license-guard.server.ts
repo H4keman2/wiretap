@@ -33,8 +33,18 @@ const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_ATTEMPTS = 8;
 const rateLimitState = new Map<string, { count: number; windowStart: number }>();
 
+/** Drop expired buckets so the map can't grow forever on a long-lived server. */
+function pruneRateLimitState(): void {
+  if (rateLimitState.size < 500) return;
+  const now = Date.now();
+  for (const [ip, entry] of rateLimitState) {
+    if (now - entry.windowStart > RATE_LIMIT_WINDOW_MS) rateLimitState.delete(ip);
+  }
+}
+
 /** Rate-limits by the caller's IP, resolved from the current request. */
 export function isRateLimited(): boolean {
+  pruneRateLimitState();
   let ip: string;
   try {
     ip = getRequestIP({ xForwardedFor: true }) ?? "unknown";
@@ -69,9 +79,20 @@ const verifiedCache = new Map<string, number>();
 
 export function isRecentlyVerified(key: string): boolean {
   const validUntil = verifiedCache.get(key);
-  return validUntil !== undefined && validUntil > Date.now();
+  if (validUntil === undefined) return false;
+  if (validUntil <= Date.now()) {
+    verifiedCache.delete(key);
+    return false;
+  }
+  return true;
 }
 
 export function rememberVerified(key: string): void {
+  if (verifiedCache.size >= 500) {
+    const now = Date.now();
+    for (const [k, validUntil] of verifiedCache) {
+      if (validUntil <= now) verifiedCache.delete(k);
+    }
+  }
   verifiedCache.set(key, Date.now() + VERIFIED_CACHE_TTL_MS);
 }

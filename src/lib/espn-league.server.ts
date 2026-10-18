@@ -287,6 +287,13 @@ export async function getLeagueSnapshot(cred: EspnLeagueCred): Promise<LeagueSna
   const ck = `${cred.leagueId}|${season}|${cred.swid ?? ""}`;
   const hit = cache.get(ck);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.snap;
+  // Opportunistic prune so distinct leagueIds can't grow this map forever.
+  if (cache.size >= 200) {
+    const now = Date.now();
+    for (const [k, v] of cache) {
+      if (now - v.at >= TTL_MS) cache.delete(k);
+    }
+  }
 
   let snap: LeagueSnapshot;
   try {
