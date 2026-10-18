@@ -109,6 +109,46 @@ function WaiverBrowser() {
         />
       </section>
 
+      <HowItWorks connected={!!cred} />
+
+      <section aria-label="Go Pro">
+        <PromoCard>
+          <div className="mb-2 flex items-center gap-2">
+            <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
+              PRO
+            </span>
+            <h2 className="text-sm font-bold uppercase tracking-wide text-action">Team Analyzer</h2>
+          </div>
+          <p className="mb-2 font-display text-xl uppercase leading-none">
+            Which position does YOUR team need?
+          </p>
+          <p className="mb-4 text-xs leading-relaxed text-depth-foreground/75">
+            Enter your roster once and Wire Tap flags your weakest spots every week, with the math
+            shown — plus injury alerts and a suggested lineup.
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {proLoaded && isPro ? (
+              <span className="block rounded border border-depth-foreground/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-depth-foreground/70">
+                Pro active
+              </span>
+            ) : (
+              <Link
+                to="/pro"
+                className="block rounded bg-action px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
+              >
+                See plans — $4.99
+              </Link>
+            )}
+            <Link
+              to="/analyzer"
+              className="block rounded border border-depth-foreground/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-depth-foreground"
+            >
+              Analyze my roster
+            </Link>
+          </div>
+        </PromoCard>
+      </section>
+
       <section id="targets" className="scroll-mt-32 space-y-4" aria-label="Waiver targets">
         <SectionLabel>
           {cred
@@ -180,45 +220,6 @@ function WaiverBrowser() {
         />
       </section>
 
-      <HowItWorks connected={!!cred} />
-
-      <section aria-label="Go Pro">
-        <PromoCard>
-          <div className="mb-2 flex items-center gap-2">
-            <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
-              PRO
-            </span>
-            <h2 className="text-sm font-bold uppercase tracking-wide text-action">Team Analyzer</h2>
-          </div>
-          <p className="mb-2 font-display text-xl uppercase leading-none">
-            Which position does YOUR team need?
-          </p>
-          <p className="mb-4 text-xs leading-relaxed text-depth-foreground/75">
-            Enter your roster once and Wire Tap flags your weakest spots every week, with the math
-            shown — plus injury alerts and a suggested lineup.
-          </p>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            {proLoaded && isPro ? (
-              <span className="block rounded border border-depth-foreground/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-depth-foreground/70">
-                Pro active
-              </span>
-            ) : (
-              <Link
-                to="/pro"
-                className="block rounded bg-action px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-action-foreground"
-              >
-                See plans — $4.99
-              </Link>
-            )}
-            <Link
-              to="/analyzer"
-              className="block rounded border border-depth-foreground/25 px-4 py-3 text-center text-sm font-bold uppercase tracking-tight text-depth-foreground"
-            >
-              Analyze my roster
-            </Link>
-          </div>
-        </PromoCard>
-      </section>
 
       <ProxyNote />
     </Page>
