@@ -20,6 +20,13 @@ const TREND_ICON = {
   stable: Minus,
 } as const;
 
+const TREND_TEXT = {
+  rising: "text-turf",
+  falling: "text-destructive",
+  stable: "text-muted-foreground",
+} as const;
+
+
 export function PlayerDetail({
   player,
   rank,
@@ -86,7 +93,12 @@ export function PlayerDetail({
           </div>
 
           <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary/50 px-3 py-2">
-            <TrendIcon aria-hidden="true" className="size-4 shrink-0 text-turf" strokeWidth={3} />
+            <TrendIcon
+              aria-hidden="true"
+              className={`size-4 shrink-0 ${TREND_TEXT[player.trendLabel]}`}
+              strokeWidth={3}
+            />
+
             <p className="text-[11px] font-bold uppercase tracking-tight">
               {player.addCount.toLocaleString()} adds / {player.dropCount.toLocaleString()} drops in
               24h
