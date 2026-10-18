@@ -81,9 +81,7 @@ function WaiverBrowser() {
         connected={!!cred}
       />
 
-      <HowItWorks connected={!!cred} />
-
-      <section className="space-y-5">
+      <section className="space-y-5" aria-label="Filters">
         {cred && connection.summary ? (
           <div className="rounded-xl border border-action/50 bg-card p-4">
             <p className="text-sm font-bold">{connection.summary.name}</p>
@@ -111,7 +109,7 @@ function WaiverBrowser() {
         />
       </section>
 
-      <section id="targets" className="scroll-mt-32 space-y-4">
+      <section id="targets" className="scroll-mt-32 space-y-4" aria-label="Waiver targets">
         <SectionLabel>
           {cred
             ? `${slot} free agents in your league`
@@ -163,12 +161,6 @@ function WaiverBrowser() {
           </div>
         )}
 
-        <OwnershipCompare
-          players={data}
-          connected={!!cred}
-          leagueName={connection.summary?.name ?? null}
-        />
-
         <div className="thin-scroll max-h-[640px] space-y-3 overflow-y-auto rounded-xl border border-border bg-card/40 p-3">
           {data?.map((player, i) => (
             <PlayerRow
@@ -181,6 +173,16 @@ function WaiverBrowser() {
           ))}
         </div>
 
+        <OwnershipCompare
+          players={data}
+          connected={!!cred}
+          leagueName={connection.summary?.name ?? null}
+        />
+      </section>
+
+      <HowItWorks connected={!!cred} />
+
+      <section aria-label="Go Pro">
         <PromoCard>
           <div className="mb-2 flex items-center gap-2">
             <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
@@ -216,9 +218,9 @@ function WaiverBrowser() {
             </Link>
           </div>
         </PromoCard>
-
-        <ProxyNote />
       </section>
+
+      <ProxyNote />
     </Page>
   );
 }

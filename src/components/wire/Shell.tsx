@@ -84,6 +84,36 @@ export function Page({
       <main id="main" tabIndex={-1} className="mx-auto max-w-2xl space-y-8 p-5 sm:p-6">
         {children}
       </main>
+      <footer className="border-t border-border bg-card/50 px-4 py-6">
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
+          <p className="font-display text-lg uppercase tracking-tight text-foreground">Wire Tap</p>
+          <nav
+            aria-label="Footer"
+            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1"
+          >
+            {TABS.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                activeOptions={{ exact: to === "/" }}
+                className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {label}
+              </Link>
+            ))}
+            <Link
+              to="/pro"
+              className="text-[11px] font-black uppercase tracking-tight text-action transition-colors hover:text-action/80"
+            >
+              Pro
+            </Link>
+          </nav>
+          <p className="max-w-md text-[10px] leading-relaxed text-muted-foreground">
+            Rankings from ESPN Fantasy ownership and Sleeper trending data. Strength of schedule
+            from prior-season defensive stats. Not affiliated with the NFL.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
