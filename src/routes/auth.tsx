@@ -14,13 +14,12 @@ export const Route = createFileRoute("/auth")({
       { title: "Sign in — Wire Tap" },
       {
         name: "description",
-        content:
-          "Sign in to Wire Tap to ask the waiver advisor about your roster and keep every answer saved to your account.",
+        content: "Sign in to your Wire Tap account.",
       },
       { property: "og:title", content: "Sign in to Wire Tap" },
       {
         property: "og:description",
-        content: "Save your waiver questions and advisor answers to your Wire Tap account.",
+        content: "Sign in to Wire Tap.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -96,8 +95,7 @@ function AuthPage() {
             {mode === "signin" ? "Sign in" : "Create an account"}
           </h1>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-            Your waiver questions and the advisor's answers are saved to your account, so you can
-            look them up any week from any device.
+            One account for Wire Tap — sign in to get started.
           </p>
         </div>
 
@@ -152,7 +150,11 @@ function AuthPage() {
           </Button>
         </form>
 
-        {error && <p className="text-xs font-bold text-destructive">{error}</p>}
+        {error && (
+          <p role="alert" className="text-xs font-bold text-destructive">
+            {error}
+          </p>
+        )}
         {notice && <p className="text-xs text-muted-foreground">{notice}</p>}
 
         <button
