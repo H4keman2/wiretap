@@ -187,6 +187,10 @@ function SettingsPage() {
                   onChange={(e) => setLicense(e.target.value)}
                   placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
                   className="h-9 text-sm uppercase"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                 />
                 <Button
                   size="sm"
