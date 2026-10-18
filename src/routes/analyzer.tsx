@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { FormatSelector, OwnershipSlider, PositionSelector } from "@/components/wire/Controls";
 import { PlayerRow } from "@/components/wire/PlayerRow";
-import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
+import { Page, PromoCard, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
 import { LIVE_REFRESH_MS } from "@/components/wire/LiveWatch";
 import { importLeagueRoster } from "@/lib/league.functions";
@@ -253,7 +253,7 @@ function Analyzer() {
 
       {result && (
         <>
-          <section className="relative overflow-hidden rounded-xl border-b-4 border-action bg-depth p-4 text-depth-foreground">
+          <PromoCard>
             <div className="mb-1 flex items-center gap-2">
               <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
                 VERDICT
@@ -271,7 +271,7 @@ function Analyzer() {
               ({result.verdicts[0]?.score})
             </p>
             <p className="text-xs text-depth-foreground/75">{result.verdicts[0]?.reasons[0]}</p>
-          </section>
+          </PromoCard>
 
           <section className="space-y-2">
             <SectionLabel>Positional strength</SectionLabel>
@@ -773,7 +773,7 @@ function RosterEditor({
 function Paywall({ format }: { format: "std" | "half" | "ppr" }) {
   return (
     <Page format={format}>
-      <section className="relative overflow-hidden rounded-xl border-b-4 border-action bg-depth p-5 text-depth-foreground">
+      <PromoCard>
         <Lock aria-hidden="true" className="mb-3 size-6 text-action" />
         <p className="font-display text-3xl uppercase leading-none">Team Analyzer is Pro</p>
         <p className="mt-2 text-xs text-depth-foreground/75">
@@ -794,7 +794,7 @@ function Paywall({ format }: { format: "std" | "half" | "ppr" }) {
             Enter license key
           </Link>
         </div>
-      </section>
+      </PromoCard>
       <section className="space-y-2 rounded-xl border border-border bg-card p-4">
         <SectionLabel>What you get</SectionLabel>
         <ul className="space-y-1.5 text-xs text-muted-foreground">

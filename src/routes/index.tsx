@@ -8,7 +8,7 @@ import { PlayerRow } from "@/components/wire/PlayerRow";
 
 import { Hero, HowItWorks } from "@/components/wire/Hero";
 import { OwnershipCompare } from "@/components/wire/OwnershipCompare";
-import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
+import { Page, PromoCard, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { SosWarning } from "@/components/wire/SosWarning";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEspnConnection, usePro } from "@/lib/league-store";
@@ -169,7 +169,7 @@ function WaiverBrowser() {
           leagueName={connection.summary?.name ?? null}
         />
 
-        <div className="max-h-[640px] space-y-4 overflow-y-auto pr-1">
+        <div className="thin-scroll max-h-[640px] space-y-3 overflow-y-auto rounded-xl border border-border bg-card/40 p-3">
           {data?.map((player, i) => (
             <PlayerRow
               key={player.id}
@@ -181,7 +181,7 @@ function WaiverBrowser() {
           ))}
         </div>
 
-        <section className="rounded-xl border-b-4 border-action bg-depth p-5 text-depth-foreground">
+        <PromoCard>
           <div className="mb-2 flex items-center gap-2">
             <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
               PRO
@@ -215,7 +215,7 @@ function WaiverBrowser() {
               Analyze my roster
             </Link>
           </div>
-        </section>
+        </PromoCard>
 
         <ProxyNote />
       </section>

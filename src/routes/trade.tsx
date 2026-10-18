@@ -213,7 +213,10 @@ function TradePage() {
   return (
     <Page format={format}>
       <section className="space-y-1">
-        <h1 className="font-display text-3xl uppercase leading-none">Trade Analyzer</h1>
+        <h1 className="flex items-center gap-2 font-display text-3xl uppercase leading-none">
+          <ArrowLeftRight aria-hidden="true" className="size-7 text-action" strokeWidth={2.5} />
+          Trade Analyzer
+        </h1>
         <p className="text-xs leading-relaxed text-muted-foreground">
           Stack any number of players on each side — 1-for-1 or a full package — and compare
           projections, rostered %, proven production, momentum and upcoming matchups.

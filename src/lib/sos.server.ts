@@ -14,6 +14,7 @@
 import type { SosHealth, SosMatchup, TeamSos } from "./sos";
 import { fetchWithTimeout } from "./fetch-timeout.server";
 import standingsSnapshot2025 from "./sos-standings-2025.json";
+import schedule2026 from "./sos-schedule-2026.json";
 
 export type { SosHealth, SosMatchup, TeamSos };
 
@@ -43,6 +44,50 @@ const SNAPSHOT_2025: Record<string, number> = standingsSnapshot2025;
 /** Why the most recent ESPN fetch failed — surfaced in health errors so the
  *  next recurrence is diagnosable without server-log access. */
 let lastFetchDetail: string | null = null;
+
+/**
+ * Bundled 2026 regular-season schedule (all 272 games with kickoff times).
+ * The season schedule is fixed at release, so this is the fallback when
+ * ESPN's bot mitigation blocks the live scoreboard feed from the server.
+ * Games that have already kicked off are treated as completed.
+ */
+interface StaticGame {
+  date: string;
+  home: string;
+  away: string;
+}
+const STATIC_SCHEDULE: Record<string, StaticGame[]> = (
+  schedule2026 as { season: number; weeks: Record<string, StaticGame[]> }
+).weeks;
+const STATIC_SEASON = (schedule2026 as { season: number }).season;
+
+function staticWeekMatchups(
+  week: number,
+): Array<{ team: string; opponent: string; home: boolean }> {
+  const now = Date.now();
+  const pairs: Array<{ team: string; opponent: string; home: boolean }> = [];
+  for (const game of STATIC_SCHEDULE[String(week)] ?? []) {
+    if (Number.isNaN(Date.parse(game.date)) || Date.parse(game.date) <= now) continue;
+    const home = norm(game.home);
+    const away = norm(game.away);
+    if (!home || !away) continue;
+    pairs.push({ team: home, opponent: away, home: true });
+    pairs.push({ team: away, opponent: home, home: false });
+  }
+  return pairs;
+}
+
+/** Current week from the bundled schedule: first week with a game still to kick off. */
+function staticCurrentWeek(): number | null {
+  const now = Date.now();
+  for (let w = 1; w <= 18; w++) {
+    const games = STATIC_SCHEDULE[String(w)] ?? [];
+    if (games.some((g) => !Number.isNaN(Date.parse(g.date)) && Date.parse(g.date) > now)) {
+      return w;
+    }
+  }
+  return null;
+}
 
 const ABBR_FIX: Record<string, string> = { WSH: "WAS" };
 
@@ -116,23 +161,24 @@ async function defenseStrength(year: number): Promise<Map<string, number>> {
   const data = await json<StandingsNode>(
     `${ESPN_SITE_API}/v2/sports/football/nfl/standings?season=${year}`,
   );
-  if (!data) return out;
 
-  const entries: StandingsEntry[] = [];
-  const walk = (node: StandingsNode) => {
-    node.children?.forEach(walk);
-    entries.push(...(node.standings?.entries ?? []));
-  };
-  walk(data);
+  if (data) {
+    const entries: StandingsEntry[] = [];
+    const walk = (node: StandingsNode) => {
+      node.children?.forEach(walk);
+      entries.push(...(node.standings?.entries ?? []));
+    };
+    walk(data);
 
-  for (const entry of entries) {
-    const team = norm(entry.team?.abbreviation);
-    if (!team) continue;
-    const stat = (name: string) => entry.stats?.find((s) => s.name === name)?.value ?? 0;
-    const games = stat("wins") + stat("losses") + stat("ties");
-    const against = stat("pointsAgainst");
-    if (!games || !against) continue;
-    out.set(team, against / games);
+    for (const entry of entries) {
+      const team = norm(entry.team?.abbreviation);
+      if (!team) continue;
+      const stat = (name: string) => entry.stats?.find((s) => s.name === name)?.value ?? 0;
+      const games = stat("wins") + stat("losses") + stat("ties");
+      const against = stat("pointsAgainst");
+      if (!games || !against) continue;
+      out.set(team, against / games);
+    }
   }
 
   if (out.size === 0 && year === SNAPSHOT_YEAR) {
@@ -150,6 +196,8 @@ async function currentWeek(): Promise<number> {
     `${ESPN_SITE_API}/site/v2/sports/football/nfl/scoreboard`,
   );
   if (board?.season?.type === 2 && board.week?.number) return board.week.number;
+  const fallback = staticCurrentWeek();
+  if (fallback !== null) return fallback;
   return 1; // pre-season or offseason: look ahead from week 1
 }
 
@@ -178,6 +226,15 @@ async function weekMatchups(year: number, week: number) {
     if (!teamA || !teamB) continue;
     pairs.push({ team: teamA, opponent: teamB, home: a.homeAway === "home" });
     pairs.push({ team: teamB, opponent: teamA, home: b.homeAway === "home" });
+  }
+  if (pairs.length === 0 && year === STATIC_SEASON) {
+    const fallback = staticWeekMatchups(week);
+    if (fallback.length > 0) {
+      console.warn(
+        `[SOS] Live scoreboard unreachable for ${year} week ${week} (${lastFetchDetail ?? "unknown cause"}) — using bundled schedule.`,
+      );
+    }
+    return fallback;
   }
   return pairs;
 }

@@ -81,7 +81,7 @@ function BidsPage() {
             Wire Tap reads your budget and your league's free agents from ESPN. Connect your league
             and pick your team in Settings.
           </p>
-          <Button asChild className="mt-4">
+          <Button asChild className="mt-4 bg-action text-action-foreground hover:bg-action/90">
             <Link to="/settings">Go to Settings</Link>
           </Button>
         </div>
@@ -129,7 +129,9 @@ function BidsPage() {
           <Skeleton className="col-span-3 h-20" />
         ) : budget.isError ? (
           <div className="col-span-3 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">
-            <p>Couldn't load your league budget — check your connection, or try again in a moment.</p>
+            <p>
+              Couldn't load your league budget — check your connection, or try again in a moment.
+            </p>
             <Button
               size="sm"
               variant="outline"

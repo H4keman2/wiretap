@@ -115,7 +115,6 @@
   --sidebar-ring: var(--action);
 }
 
-
 .dark {
   --background: oklch(0.129 0.042 264.695);
   --foreground: oklch(0.984 0.003 247.858);
@@ -166,6 +165,21 @@
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@utility thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 999px;
   }
 }
 

@@ -31,7 +31,7 @@ const TABS = [
   { to: "/bids", label: "Bids", icon: Gavel },
   { to: "/watchlist", label: "Saved", icon: Star },
   { to: "/trade", label: "Trade", icon: ArrowLeftRight },
-  { to: "/analyzer", label: "Roster", icon: ClipboardList },
+  { to: "/analyzer", label: "Analyzer", icon: ClipboardList },
   { to: "/settings", label: "Settings", icon: Settings2 },
 ] as const;
 
@@ -43,19 +43,21 @@ const TABS = [
  */
 export function TopNav() {
   return (
-    <nav className="flex items-center justify-around gap-1 border-b border-border bg-card px-2 py-2.5">
-      {TABS.map(({ to, label, icon: Icon }) => (
-        <Link
-          key={to}
-          to={to}
-          activeOptions={{ exact: to === "/" }}
-          className="flex flex-col items-center gap-1 rounded-xl border border-transparent px-2 py-2 text-muted-foreground transition-all hover:border-border hover:bg-muted/50 hover:text-foreground sm:px-4"
-          activeProps={{ className: "border-action/40 bg-action/15 text-action shadow-sm" }}
-        >
-          <Icon aria-hidden="true" className="size-5" strokeWidth={2.5} />
-          <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
-        </Link>
-      ))}
+    <nav className="border-b border-border bg-card px-2 py-2.5">
+      <div className="mx-auto flex max-w-2xl items-center justify-around gap-1">
+        {TABS.map(({ to, label, icon: Icon }) => (
+          <Link
+            key={to}
+            to={to}
+            activeOptions={{ exact: to === "/" }}
+            className="flex flex-col items-center gap-1 rounded-xl border border-transparent px-2 py-2 text-muted-foreground transition-all hover:border-border hover:bg-muted/50 hover:text-foreground sm:px-4"
+            activeProps={{ className: "border-action/40 bg-action/15 text-action shadow-sm" }}
+          >
+            <Icon aria-hidden="true" className="size-5" strokeWidth={2.5} />
+            <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
+          </Link>
+        ))}
+      </div>
     </nav>
   );
 }
@@ -91,6 +93,21 @@ export function SectionLabel({ children }: { children: ReactNode }) {
     <h2 className="px-1 text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">
       {children}
     </h2>
+  );
+}
+
+/**
+ * Dark promo card with a bottom accent bar. The bar is an inner element (not a
+ * border-b) so its corners follow the card's rounding instead of poking out.
+ */
+export function PromoCard({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <section
+      className={`overflow-hidden rounded-xl border border-border bg-depth text-depth-foreground ${className ?? ""}`}
+    >
+      <div className="p-5">{children}</div>
+      <div aria-hidden="true" className="h-1 bg-action" />
+    </section>
   );
 }
 
