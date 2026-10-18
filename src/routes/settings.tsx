@@ -150,7 +150,7 @@ function SettingsPage() {
         <div className="rounded-xl border border-border bg-card p-4">
           {isPro ? (
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-bold">Team Analyzer unlocked</p>
+              <p className="text-sm font-bold">Pro unlocked</p>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm">
@@ -161,8 +161,8 @@ function SettingsPage() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Remove your license key?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      You will lose Team Analyzer, league sync, and the live budget until you enter
-                      the key again.
+                      You will lose the Team Analyzer, Trade Analyzer, league sync, and the live
+                      budget until you enter the key again.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -198,14 +198,14 @@ function SettingsPage() {
                   disabled={checking || !license.trim()}
                   onClick={async () => {
                     const ok = await activate(license.trim().toUpperCase());
-                    if (ok) toast.success("Team Analyzer unlocked");
+                    if (ok) toast.success("Pro unlocked");
                   }}
                 >
                   {checking ? "Checking…" : "Activate"}
                 </Button>
               </div>
               {error && (
-                <p role="alert" className="mt-2 text-[11px] font-bold text-red-500">
+                <p role="alert" className="mt-2 text-[11px] font-bold text-destructive">
                   {error}
                 </p>
               )}
