@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { Search, X } from "lucide-react";
 
 import {
   AlertDialog,
@@ -108,21 +109,7 @@ function WatchlistPage() {
         <section className="space-y-2 rounded-xl border border-border bg-card p-3">
           <div className="relative">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
+              <Search className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
             </span>
             <input
               type="search"
@@ -140,21 +127,7 @@ function WatchlistPage() {
                 aria-label="Clear search"
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M18 6 6 18" />
-                  <path d="m6 6 12 12" />
-                </svg>
+                <X className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
               </button>
             )}
           </div>
