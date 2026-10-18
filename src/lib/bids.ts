@@ -7,13 +7,27 @@ import type { RankedPlayer } from "./ranking";
  * score, nudged up for rising players and down for injured ones, and never
  * more than what's left.
  */
+const MIN_BID = 1;
+/** Score -> budget share. Higher-scored targets are worth a bigger slice. */
+const SHARE_BY_SCORE: Array<[minScore: number, share: number]> = [
+  [8.5, 0.2], // elite target: a fifth of the budget
+  [7.5, 0.13], // strong target
+  [6.5, 0.08], // solid starter-quality
+  [5.5, 0.04], // streamer / upside stash
+  [4.5, 0.02], // deep dart throw
+  [0, 0.01], // everyone else: token bid
+];
+/** Rising players get bid up; injured ones get discounted. */
+const RISING_MULTIPLIER = 1.25;
+const INJURED_MULTIPLIER = 0.6;
+
 export function suggestBid(p: RankedPlayer, total: number, remaining: number): number {
   if (remaining <= 0) return 0;
-  const s = p.score;
-  let share = s >= 8.5 ? 0.2 : s >= 7.5 ? 0.13 : s >= 6.5 ? 0.08 : s >= 5.5 ? 0.04 : s >= 4.5 ? 0.02 : 0.01;
-  if (p.trendLabel === "rising") share *= 1.25;
-  if (p.injury) share *= 0.6;
-  return Math.max(1, Math.min(remaining, Math.round(total * share)));
+  const share = SHARE_BY_SCORE.find(([min]) => p.score >= min)?.[1] ?? 0.01;
+  let adjusted = share;
+  if (p.trendLabel === "rising") adjusted *= RISING_MULTIPLIER;
+  if (p.injury) adjusted *= INJURED_MULTIPLIER;
+  return Math.max(MIN_BID, Math.min(remaining, Math.round(total * adjusted)));
 }
 
 export interface PlannedBid {
@@ -66,8 +80,18 @@ export function useBids() {
   );
 
   const remove = useCallback(
-    (id: string) => persist(bids.filter((b) => b.id !== id)),
-    [bids, persist],
+    (id: string) => {
+      setBids((prev) => {
+        const next = prev.filter((b) => b.id !== id);
+        try {
+          window.localStorage.setItem(KEY, JSON.stringify(next));
+        } catch {
+          /* ignore */
+        }
+        return next;
+      });
+    },
+    [],
   );
 
   const clear = useCallback(() => persist([]), [persist]);
