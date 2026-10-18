@@ -100,7 +100,6 @@ export function PlayerDetail({
             />
             <p className="text-[11px] font-bold uppercase tracking-tight">
               {player.addCount.toLocaleString()} adds / {player.dropCount.toLocaleString()} drops in
-
               24h
               {player.ownershipChange
                 ? ` • ${player.ownershipChange > 0 ? "+" : ""}${player.ownershipChange.toFixed(1)}% rostered wk/wk`
