@@ -129,7 +129,7 @@ function BidsPage() {
           <Skeleton className="col-span-3 h-20" />
         ) : budget.isError ? (
           <div className="col-span-3 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">
-            <p>{(budget.error as Error).message}</p>
+            <p>Couldn't load your league budget — check your connection, or try again in a moment.</p>
             <Button
               size="sm"
               variant="outline"
@@ -237,7 +237,10 @@ function BidsPage() {
                   <span className="font-display text-lg">${x.amount}</span>
                   <button
                     aria-label={`Remove bid on ${x.name}`}
-                    onClick={() => remove(x.id)}
+                    onClick={() => {
+                      remove(x.id);
+                      toast.info(`Removed bid on ${x.name}.`);
+                    }}
                     className="text-muted-foreground"
                   >
                     <X aria-hidden="true" className="size-4" />
