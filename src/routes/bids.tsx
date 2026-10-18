@@ -137,8 +137,7 @@ function BidsPage() {
             </p>
             <Button
               size="sm"
-              variant="outline"
-              className="mt-2 border-destructive/40 text-destructive"
+              className="mt-2 bg-action font-bold uppercase tracking-tight text-action-foreground"
               onClick={() => budget.refetch()}
               disabled={budget.isFetching}
             >
@@ -176,7 +175,7 @@ function BidsPage() {
 
       {best && (
         <section
-          className="rounded-2xl border-2 bg-card p-5"
+          className="rounded-xl border-2 bg-card p-5"
           style={{ borderColor: teamColor(best.team) }}
           aria-label="Best pickup"
         >
