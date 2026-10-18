@@ -103,22 +103,27 @@ async function verifyAgainstGumroad(
   }
 }
 
+/** The guard's surface, loaded dynamically so it never enters the client graph. */
+type LicenseGuard = typeof import("./license-guard.server");
+
+/**
+ * Best-effort load of the rate-limit/verified-key cache. Degrades gracefully:
+ * if the guard can't load, callers skip throttling rather than blocking Pro.
+ */
+async function getGuard(): Promise<LicenseGuard | null> {
+  try {
+    return await import("./license-guard.server");
+  } catch {
+    return null;
+  }
+}
+
 /** Public server function the client calls to activate/re-check Pro status. */
 export const verifyLicense = createServerFn({ method: "POST" })
   .inputValidator((data: { licenseKey: string }) => data)
   .handler(async ({ data }): Promise<LicenseCheckResult> => {
     try {
-      let guard: {
-        isRateLimited: () => boolean;
-        rememberVerified: (k: string) => void;
-        isRecentlyVerified: (k: string) => boolean;
-      } | null = null;
-      try {
-        guard = await import("./license-guard.server");
-      } catch {
-        // Degrade gracefully: no rate limiting or verified-key cache, but the
-        // license check itself still runs instead of failing the request.
-      }
+      const guard = await getGuard();
       if (guard ? guard.isRateLimited() : false) {
         return { valid: false, reason: "Too many attempts. Wait a few minutes and try again." };
       }
@@ -146,16 +151,7 @@ export async function requireValidLicense(licenseKey: string | null | undefined)
     throw new Error("PRO_REQUIRED");
   }
   const key = licenseKey.trim();
-  let guard: {
-    isRateLimited: () => boolean;
-    rememberVerified: (k: string) => void;
-    isRecentlyVerified: (k: string) => boolean;
-  } | null = null;
-  try {
-    guard = await import("./license-guard.server");
-  } catch {
-    // Degrade gracefully: skip cache/rate-limit checks rather than blocking Pro.
-  }
+  const guard = await getGuard();
   if (guard ? guard.isRecentlyVerified(key) : false) return;
 
   if (guard && guard.isRateLimited()) {

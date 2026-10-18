@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
 import type { LeagueCred, LeagueSummary } from "./league.functions";
-import { verifyLicense } from "./license.server";
 
 import type { ScoringFormat } from "./ranking";
 import { DEFAULT_LEAGUE, type LeagueConfig, type RosterEntry } from "./weakness";
@@ -82,6 +81,9 @@ export function usePro() {
     setChecking(true);
     setError(null);
     try {
+      // Dynamic import keeps license.server (and its raw process.env access)
+      // out of the client bundle — see license-guard.server.ts's header.
+      const { verifyLicense } = await import("./license.server");
       const result = await verifyLicense({ data: { licenseKey: candidate } });
       if (result.valid) {
         // A throwing localStorage (private browsing, quota) must not undo a
