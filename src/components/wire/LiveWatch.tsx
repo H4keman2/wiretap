@@ -59,7 +59,10 @@ export function LiveStatusNote({
   const [, tick] = useState(0);
   useEffect(() => {
     if (!enabled) return;
-    const t = setInterval(() => tick((n) => n + 1), 5000);
+    const t = setInterval(() => {
+      // No point re-rendering the "updated Xs ago" label while backgrounded.
+      if (!document.hidden) tick((n) => n + 1);
+    }, 5000);
     return () => clearInterval(t);
   }, [enabled]);
 

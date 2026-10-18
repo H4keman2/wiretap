@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Activity, ListFilter, Radar, Users } from "lucide-react";
+import { Activity, ListFilter, Radar, Sparkles, Users } from "lucide-react";
 
 /**
  * First-impression block. A visitor landing cold used to see nothing but
@@ -88,6 +88,14 @@ export function Hero({
             Analyze my roster
           </Link>
         </div>
+
+        <Link
+          to="/pro"
+          className="inline-flex items-center gap-1.5 pt-1 text-[11px] font-black uppercase tracking-widest text-action"
+        >
+          <Sparkles className="size-3.5" strokeWidth={3} aria-hidden="true" />
+          Go Pro — Team &amp; Trade Analyzer, $4.99/season
+        </Link>
       </div>
 
       <div className="pointer-events-none absolute -right-8 -top-10 -z-10 size-40 rounded-full border border-depth-foreground/10" />
