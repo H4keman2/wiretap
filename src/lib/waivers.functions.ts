@@ -22,6 +22,8 @@ import {
 
 import type { LeagueCred } from "./league.functions";
 import type { PlayerStat } from "./ranking";
+import type { InjuryFeed } from "./espn-injuries.server";
+import type { LeagueSnapshot } from "./espn-league.server";
 
 export interface RecommendationInput {
   format: ScoringFormat;
@@ -41,10 +43,12 @@ export interface RecommendationInput {
 async function applyLeagueAvailability(
   pool: PlayerStat[],
   league: LeagueCred,
+  /** Pre-fetched snapshot — pass it when the caller already fetched in parallel. */
+  snap?: LeagueSnapshot,
 ): Promise<PlayerStat[]> {
   const { getLeagueSnapshot, playerKey } = await import("./espn-league.server");
-  const snap = await getLeagueSnapshot(league);
-  const rostered = new Set(snap.rosteredKeys);
+  const s = snap ?? (await getLeagueSnapshot(league));
+  const rostered = new Set(s.rosteredKeys);
   return pool
     .filter((p) => !rostered.has(playerKey(p.name, p.position)))
     .map((p) => ({
@@ -62,17 +66,19 @@ async function applyLeagueAvailability(
  */
 async function withLiveInjuries(
   pool: PlayerStat[],
+  /** Pre-fetched feed — pass it when the caller already fetched in parallel. */
+  feed?: InjuryFeed,
 ): Promise<{ pool: PlayerStat[]; injuryUpdatedAt: number }> {
   const { getInjuryFeed, injuryKey } = await import("./espn-injuries.server");
-  const feed = await getInjuryFeed();
-  if (feed.byKey.size === 0) return { pool, injuryUpdatedAt: feed.fetchedAt };
+  const f = feed ?? (await getInjuryFeed());
+  if (f.byKey.size === 0) return { pool, injuryUpdatedAt: f.fetchedAt };
   const fresh = pool.map((p) => {
     const k = injuryKey(p.name, p.position);
-    if (!feed.byKey.has(k)) return p;
-    const injury = feed.byKey.get(k) ?? null;
+    if (!f.byKey.has(k)) return p;
+    const injury = f.byKey.get(k) ?? null;
     return injury === p.injury ? p : { ...p, injury };
   });
-  return { pool: fresh, injuryUpdatedAt: feed.fetchedAt };
+  return { pool: fresh, injuryUpdatedAt: f.fetchedAt };
 }
 
 export const getRecommendations = createServerFn({ method: "GET" })
@@ -81,12 +87,24 @@ export const getRecommendations = createServerFn({ method: "GET" })
     // League-scoped availability is a Pro feature — anonymous callers only get
     // the national pool.
     if (data.league?.leagueId) await requireValidLicense(data.licenseKey ?? "");
+    const league = data.league?.leagueId ? data.league : null;
     const { getPlayerPool } = await import("./players.server");
-    const { pool: base } = await withLiveInjuries(await getPlayerPool());
-    const pool = data.league?.leagueId ? await applyLeagueAvailability(base, data.league) : base;
+    const { getInjuryFeed } = await import("./espn-injuries.server");
+    // Pool, injury feed, and league snapshot are independent — fetch them in
+    // parallel, then overlay synchronously. A cold cache costs the max of the
+    // three latencies, not the sum.
+    const [pool, feed, snap] = await Promise.all([
+      getPlayerPool(),
+      getInjuryFeed(),
+      league
+        ? import("./espn-league.server").then((m) => m.getLeagueSnapshot(league))
+        : Promise.resolve(null),
+    ]);
+    const { pool: base } = await withLiveInjuries(pool, feed);
+    const finalPool = snap && league ? await applyLeagueAvailability(base, league, snap) : base;
     // No `limit` here — show every eligible player under the threshold, not
     // just a top handful. rankWaiverPool still applies its own hard ceiling.
-    return rankWaiverPool(pool, {
+    return rankWaiverPool(finalPool, {
       format: data.format,
       slot: data.slot,
       maxOwnership: data.league?.leagueId ? 101 : data.maxOwnership,
@@ -283,7 +301,9 @@ export const analyzeTeam = createServerFn({ method: "POST" })
     await requireValidLicense(data.licenseKey);
 
     const { getPlayerPool } = await import("./players.server");
-    const { pool, injuryUpdatedAt } = await withLiveInjuries(await getPlayerPool());
+    const { getInjuryFeed } = await import("./espn-injuries.server");
+    const [freshPool, feed] = await Promise.all([getPlayerPool(), getInjuryFeed()]);
+    const { pool, injuryUpdatedAt } = await withLiveInjuries(freshPool, feed);
     const stats = new Map(pool.map((p) => [p.id, p]));
 
     const verdicts = analyzeRoster(data.roster, stats, data.config, data.format);
