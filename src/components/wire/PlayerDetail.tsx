@@ -73,10 +73,17 @@ export function PlayerDetail({
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <Stat label="Score" value={`${player.score.toFixed(1)}/10`} />
             <Stat label="Proj" value={`${player.projection.toFixed(1)} pts`} />
-            <Stat
-              label={player.ownershipSource === "espn" ? "Owned · ESPN" : "Owned · est"}
-              value={`${Math.round(player.ownership)}%`}
-            />
+            {player.ownershipSource === "league" ? (
+              <Stat
+                label="Your league"
+                value={player.ownership >= 100 ? "Rostered" : "Free agent"}
+              />
+            ) : (
+              <Stat
+                label={player.ownershipSource === "espn" ? "Owned · ESPN" : "Owned · est"}
+                value={`${Math.round(player.ownership)}%`}
+              />
+            )}
             <Stat
               label="Started"
               value={
