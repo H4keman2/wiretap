@@ -201,17 +201,19 @@ function WaiverBrowser() {
           </div>
         )}
 
-        <div className="thin-scroll max-h-[640px] space-y-3 overflow-y-auto rounded-xl border border-border bg-card/40 p-3">
-          {data?.map((player, i) => (
-            <PlayerRow
-              key={player.id}
-              player={player}
-              rank={i + 1}
-              format={activeFormat}
-              isNew={newIds.has(player.id)}
-            />
-          ))}
-        </div>
+        {data && data.length > 0 && (
+          <div className="thin-scroll max-h-[640px] space-y-3 overflow-y-auto rounded-xl border border-border bg-card/40 p-3">
+            {data.map((player, i) => (
+              <PlayerRow
+                key={player.id}
+                player={player}
+                rank={i + 1}
+                format={activeFormat}
+                isNew={newIds.has(player.id)}
+              />
+            ))}
+          </div>
+        )}
 
         <OwnershipCompare
           players={data}
