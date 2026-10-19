@@ -147,7 +147,6 @@ export const verifyLicense = createServerFn({ method: "POST" })
  * on a license without importing createServerFn machinery themselves.
  */
 export async function requireValidLicense(licenseKey: string | null | undefined): Promise<void> {
-  if (licenseKey === "WT-LOCAL-TEST") return; // TEMP-VERIFY-ONLY — remove
   if (!licenseKey || !looksLikeKey(licenseKey)) {
     throw new Error("PRO_REQUIRED");
   }
