@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowLeftRight, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { FormatSelector } from "@/components/wire/Controls";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
@@ -49,6 +49,8 @@ function PlayerSearch({
   onAdd: (p: Pick) => void;
 }) {
   const [query, setQuery] = useState("");
+  const [active, setActive] = useState(0);
+  const listId = useId();
   const { key } = usePro();
 
   const {
@@ -64,11 +66,20 @@ function PlayerSearch({
   });
 
   const visible = results?.filter((r) => !exclude.includes(r.id));
+  const open = query.trim().length >= 2;
+
+  useEffect(() => {
+    setActive(0);
+  }, [query, results]);
 
   const select = (p: NonNullable<typeof visible>[number]) => {
     onAdd(p);
     setQuery("");
   };
+
+  const optionId = (index: number) => `${listId}-option-${index}`;
+  const activeId =
+    visible && visible.length > 0 ? optionId(Math.min(active, visible.length - 1)) : undefined;
 
   return (
     <div className="space-y-2">
@@ -78,13 +89,36 @@ function PlayerSearch({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key !== "Enter" || query.trim().length === 0) return;
-          const first = visible?.[0];
-          if (first) select(first);
-        }}
+          const count = visible?.length ?? 0;
 
+          if (e.key === "Escape") {
+            if (query.length === 0) return;
+            e.preventDefault();
+            setQuery("");
+            return;
+          }
+
+          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            if (count === 0) return;
+            e.preventDefault();
+            setActive((i) => {
+              const current = Math.min(i, count - 1);
+              return e.key === "ArrowDown"
+                ? Math.min(current + 1, count - 1)
+                : Math.max(current - 1, 0);
+            });
+            return;
+          }
+
+          if (e.key !== "Enter" || query.trim().length === 0) return;
+          const picked = visible?.[Math.min(active, count - 1)];
+          if (picked) select(picked);
+        }}
         placeholder="Add a player by name…"
         aria-label={`${slotLabel} — add a player`}
+        aria-expanded={open}
+        aria-controls={open ? listId : undefined}
+        aria-activedescendant={activeId}
         className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium outline-none placeholder:text-muted-foreground/70 focus:border-action"
       />
       {query.trim().length >= 2 && (
@@ -108,23 +142,39 @@ function PlayerSearch({
           {visible?.length === 0 && (
             <p className="text-[11px] text-muted-foreground">No player matches that name.</p>
           )}
-          {visible?.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => select(r)}
-
-              className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-background px-2.5 py-2 text-left"
-            >
-              <span className="flex min-w-0 items-center gap-1.5">
-                <Plus aria-hidden="true" className="size-3 shrink-0 text-action" strokeWidth={3} />
-                <span className="truncate text-xs font-bold">{r.name}</span>
-              </span>
-              <span className="shrink-0 text-[10px] font-bold uppercase text-muted-foreground">
-                {r.team ?? "FA"} • {r.position}
-              </span>
-            </button>
-          ))}
+          {visible && visible.length > 0 && (
+            <div role="listbox" id={listId} className="space-y-1">
+              {visible.map((r, i) => {
+                const isActive = i === Math.min(active, visible.length - 1);
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    role="option"
+                    id={optionId(i)}
+                    aria-selected={isActive}
+                    onClick={() => select(r)}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-background px-2.5 py-2 text-left",
+                      isActive && "bg-secondary ring-1 ring-action",
+                    )}
+                  >
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <Plus
+                        aria-hidden="true"
+                        className="size-3 shrink-0 text-action"
+                        strokeWidth={3}
+                      />
+                      <span className="truncate text-xs font-bold">{r.name}</span>
+                    </span>
+                    <span className="shrink-0 text-[10px] font-bold uppercase text-muted-foreground">
+                      {r.team ?? "FA"} • {r.position}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
