@@ -745,6 +745,7 @@ function RosterEditor({
                 <button
                   type="button"
                   aria-pressed={r.starter}
+                  aria-label={`Set ${r.name} as ${r.starter ? "a bench player" : "a starter"}`}
                   onClick={() =>
                     onChange(roster.map((x) => (x.id === r.id ? { ...x, starter: !x.starter } : x)))
                   }
