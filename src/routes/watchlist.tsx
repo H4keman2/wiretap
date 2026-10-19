@@ -209,7 +209,14 @@ function WatchlistPage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={clear}>Clear all</AlertDialogAction>
+                  <AlertDialogAction
+                    onClick={() => {
+                      clear();
+                      toast.info("Watchlist cleared.");
+                    }}
+                  >
+                    Clear all
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
