@@ -123,7 +123,12 @@ function PlayerSearch({
       />
       {query.trim().length >= 2 && (
         <div className="space-y-1">
-          {isFetching && !results && <Skeleton className="h-8 rounded-lg" />}
+          {isFetching && !results && (
+            <>
+              <span className="sr-only" role="status">Searching players…</span>
+              <Skeleton className="h-8 rounded-lg" aria-hidden="true" />
+            </>
+          )}
           {isError && !isFetching && (
             <div className="rounded-xl border border-border bg-card p-4">
               <p className="text-xs text-muted-foreground">
@@ -283,7 +288,8 @@ function TradePage() {
   if (!proLoaded) {
     return (
       <Page format={format}>
-        <Skeleton className="h-64 w-full" />
+        <span className="sr-only" role="status">Loading trade analyzer…</span>
+        <Skeleton className="h-64 w-full" aria-hidden="true" />
       </Page>
     );
   }
@@ -377,8 +383,9 @@ function TradePage() {
 
       {both && isPending && (
         <div className="space-y-3">
-          <Skeleton className="h-24 rounded-xl" />
-          <Skeleton className="h-64 rounded-xl" />
+          <span className="sr-only" role="status">Loading comparison…</span>
+          <Skeleton className="h-24 rounded-xl" aria-hidden="true" />
+          <Skeleton className="h-64 rounded-xl" aria-hidden="true" />
         </div>
       )}
 
@@ -406,6 +413,7 @@ function TradePage() {
       {analysis && (
         <>
           <section
+            role="status"
             className={cn(
               "rounded-xl border-2 p-4",
               analysis.verdict.side === "even"
@@ -450,6 +458,7 @@ function TradePage() {
                       )}
                     >
                       {m.aText}
+                      {m.winner === -1 && <span className="sr-only">, wins this matchup</span>}
                     </p>
                     <p className="text-center text-[9px] font-black uppercase tracking-wider text-muted-foreground">
                       {m.label}
@@ -461,6 +470,7 @@ function TradePage() {
                       )}
                     >
                       {m.bText}
+                      {m.winner === 1 && <span className="sr-only">, wins this matchup</span>}
                     </p>
                   </div>
                   <p className="mt-1 text-center text-[9px] leading-snug text-muted-foreground/80">
