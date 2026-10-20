@@ -42,8 +42,10 @@ export function LeagueConnect() {
       update({ name: summary.name, format: summary.format, config: summary.config });
       toast.success(`Connected to ${summary.name}`);
     },
-    onError: (err: Error) => {
-      toast.error(err.message || "Couldn't read that league.");
+    onError: () => {
+      toast.error(
+        "Could not read that league — double-check the league ID and sign-in values.",
+      );
       setShowCookies(true);
     },
   });

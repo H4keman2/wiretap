@@ -33,6 +33,7 @@ export function WatchButton({
       )}
     >
       <Star
+        aria-hidden="true"
         className={cn(size === "md" ? "size-4" : "size-3.5")}
         strokeWidth={2.5}
         fill={saved ? "currentColor" : "none"}
