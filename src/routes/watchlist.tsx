@@ -65,24 +65,28 @@ function WatchlistPage() {
   const { connection, loaded: connectionLoaded } = useEspnConnection();
   // Once a format is picked in the selector below, that choice wins.
   const [formatChosen, setFormatChosen] = useState(false);
+  // The list waits on this so it never fetches in a format about to change.
+  const [formatReady, setFormatReady] = useState(false);
   const appliedLeagueFormat = useRef(false);
   const ids = entries.map((e) => e.id);
 
   // A connected league dictates scoring, so start from its format rather than
   // the PPR fallback. Applied once as a default only — it never replaces a
-  // format the user has already selected here.
+  // format the user has already selected here. Once the league has been read,
+  // `formatReady` opens the gate on the list below, so it never loads in a
+  // format that is about to be replaced.
   useEffect(() => {
-    if (appliedLeagueFormat.current || formatChosen || !connectionLoaded) return;
-    const leagueFormat = connection.summary?.format;
-    if (!leagueFormat) return;
+    if (!connectionLoaded || appliedLeagueFormat.current) return;
     appliedLeagueFormat.current = true;
-    setFormat(leagueFormat);
+    const leagueFormat = connection.summary?.format;
+    if (leagueFormat && !formatChosen) setFormat(leagueFormat);
+    setFormatReady(true);
   }, [connectionLoaded, connection.summary?.format, formatChosen]);
 
   const { data, isPending, isError, isFetching, refetch } = useQuery({
     queryKey: ["watchlist", format, ids.join(",")],
     queryFn: () => getWatchlistPlayers({ data: { ids, format } }),
-    enabled: loaded && ids.length > 0,
+    enabled: loaded && ids.length > 0 && formatReady,
     staleTime: 1000 * 60 * 10,
   });
 
