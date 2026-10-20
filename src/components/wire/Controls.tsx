@@ -83,7 +83,7 @@ export function OwnershipSlider({
         step={5}
         value={[value]}
         onValueChange={([v]) => onChange(v ?? 40)}
-        aria-label="Ownership threshold"
+        aria-label="Availability threshold"
       />
       <p className="mt-4 text-[11px] text-muted-foreground">
         Show players rostered in fewer than {value}% of leagues.

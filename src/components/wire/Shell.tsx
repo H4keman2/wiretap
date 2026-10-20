@@ -51,7 +51,10 @@ export function TopNav() {
             to={to}
             activeOptions={{ exact: to === "/" }}
             className="flex flex-col items-center gap-1 rounded-xl border border-transparent px-2 py-2 text-muted-foreground transition-all hover:border-border hover:bg-muted/50 hover:text-foreground sm:px-4"
-            activeProps={{ className: "border-action/40 bg-action/15 text-action shadow-sm" }}
+            activeProps={{
+              className: "border-action/40 bg-action/15 text-action shadow-sm",
+              "aria-current": "page",
+            }}
           >
             <Icon aria-hidden="true" className="size-5" strokeWidth={2.5} />
             <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
