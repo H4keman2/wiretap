@@ -177,6 +177,7 @@ function Analyzer() {
 
   return (
     <Page format={profile.format}>
+      <h1 className="font-display text-3xl uppercase leading-none">Team Analyzer</h1>
       <SosWarning />
       <section className="space-y-3">
         <SectionLabel>Scoring format</SectionLabel>

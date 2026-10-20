@@ -160,7 +160,7 @@ function WatchlistPage() {
             )}
           </div>
 
-          <div className="space-y-1.5">
+          <div role="group" aria-label="Sort by" className="space-y-1.5">
             <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
               Sort by
             </p>
@@ -184,7 +184,7 @@ function WatchlistPage() {
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          <div role="group" aria-label="Position" className="space-y-1.5">
             <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
               Position
             </p>

@@ -62,6 +62,7 @@ function SettingsPage() {
 
   return (
     <Page format={profile.format}>
+      <h1 className="font-display text-3xl uppercase leading-none">League settings</h1>
       <section className="space-y-3">
         <SectionLabel>Appearance</SectionLabel>
         <div className="flex gap-2 rounded-xl border border-border bg-card p-3">
