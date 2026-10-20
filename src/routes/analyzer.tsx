@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, ClipboardList, Plus, Shield, Trash2 } from "lucide-react";
 
 import { InjuryAlerts } from "@/components/wire/InjuryAlerts";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -434,6 +434,9 @@ function RosterEditor({
 }) {
   const [query, setQuery] = useState("");
   const { key } = usePro();
+  // Shared by the search input and the suggestions list so assistive tech can
+  // tie the two together (same combobox wiring as the trade page's PlayerSearch).
+  const listId = useId();
   const [position, setPosition] = useState<RealPosition>("RB");
   const [options, setOptions] = useState<
     Array<{ id: string; name: string; team: string | null; position: string }>
@@ -602,6 +605,8 @@ function RosterEditor({
               placeholder="Add player by name"
               aria-label="Add player by name"
               inputMode="search"
+              aria-expanded={options.length > 0}
+              aria-controls={options.length > 0 ? listId : undefined}
               className="h-9 text-sm"
             />
             <select
@@ -649,11 +654,17 @@ function RosterEditor({
           )}
 
           {options.length > 0 && (
-            <ul className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border">
+            <ul
+              id={listId}
+              role="listbox"
+              className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border"
+            >
               {options.map((o) => (
                 <li key={o.id}>
                   <button
                     type="button"
+                    role="option"
+                    aria-selected={false}
                     className="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-bold hover:bg-secondary"
                     onClick={() =>
                       add({
