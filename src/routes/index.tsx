@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEspnConnection, usePro } from "@/lib/league-store";
 import { useLiveUpdates } from "@/lib/live-updates-store";
 
-import type { ScoringFormat, SlotPosition } from "@/lib/ranking";
+import { FORMAT_LABEL, type ScoringFormat, type SlotPosition } from "@/lib/ranking";
 import { getRecommendations } from "@/lib/waivers.functions";
 
 export const Route = createFileRoute("/")({
@@ -87,7 +87,7 @@ function WaiverBrowser() {
             <p className="text-sm font-bold">{connection.summary.name}</p>
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
               Showing only players free in your league, scored with your league's{" "}
-              {connection.summary.size}-team {activeFormat === "std" ? "standard" : activeFormat}{" "}
+              {connection.summary.size}-team {FORMAT_LABEL[activeFormat]}{" "}
               settings.{" "}
               <Link to="/settings" className="font-bold text-turf underline">
                 Change league
