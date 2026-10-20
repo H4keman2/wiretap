@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,6 +19,7 @@ import { FormatSelector } from "@/components/wire/Controls";
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEspnConnection } from "@/lib/league-store";
 import type { ScoringFormat } from "@/lib/ranking";
 import { cn } from "@/lib/utils";
 import { getWatchlistPlayers } from "@/lib/waivers.functions";
@@ -61,7 +62,22 @@ function WatchlistPage() {
   const [posFilter, setPosFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const { entries, loaded, clear } = useWatchlist();
+  const { connection, loaded: connectionLoaded } = useEspnConnection();
+  // Once a format is picked in the selector below, that choice wins.
+  const [formatChosen, setFormatChosen] = useState(false);
+  const appliedLeagueFormat = useRef(false);
   const ids = entries.map((e) => e.id);
+
+  // A connected league dictates scoring, so start from its format rather than
+  // the PPR fallback. Applied once as a default only — it never replaces a
+  // format the user has already selected here.
+  useEffect(() => {
+    if (appliedLeagueFormat.current || formatChosen || !connectionLoaded) return;
+    const leagueFormat = connection.summary?.format;
+    if (!leagueFormat) return;
+    appliedLeagueFormat.current = true;
+    setFormat(leagueFormat);
+  }, [connectionLoaded, connection.summary?.format, formatChosen]);
 
   const { data, isPending, isError, isFetching, refetch } = useQuery({
     queryKey: ["watchlist", format, ids.join(",")],
@@ -104,7 +120,13 @@ function WatchlistPage() {
         </Link>
       </section>
 
-      <FormatSelector value={format} onChange={setFormat} />
+      <FormatSelector
+        value={format}
+        onChange={(v) => {
+          setFormatChosen(true);
+          setFormat(v);
+        }}
+      />
 
       {(data?.length ?? 0) > 0 && (
         <section className="space-y-2 rounded-xl border border-border bg-card p-3">

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowLeftRight, Plus, X } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { FormatSelector } from "@/components/wire/Controls";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
@@ -9,7 +9,7 @@ import { ProFeatureSection } from "@/components/wire/ProFeatureSection";
 import { SosSection } from "@/components/wire/SosSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FORMAT_LABEL, type ScoringFormat } from "@/lib/ranking";
-import { usePro } from "@/lib/league-store";
+import { useEspnConnection, usePro } from "@/lib/league-store";
 import { teamColor } from "@/lib/team-colors";
 import { analyzeTrade } from "@/lib/trade";
 import { cn } from "@/lib/utils";
@@ -245,6 +245,21 @@ function TradePage() {
   const [a, setA] = useState<Pick[]>([]);
   const [b, setB] = useState<Pick[]>([]);
   const { isPro, key, loaded: proLoaded } = usePro();
+  const { connection, loaded: connectionLoaded } = useEspnConnection();
+  // Once a format is picked in the selector below, that choice wins.
+  const [formatChosen, setFormatChosen] = useState(false);
+  const appliedLeagueFormat = useRef(false);
+
+  // A connected league dictates scoring, so start from its format rather than
+  // the PPR fallback. Applied once as a default only — it never replaces a
+  // format the user has already selected here.
+  useEffect(() => {
+    if (appliedLeagueFormat.current || formatChosen || !connectionLoaded) return;
+    const leagueFormat = connection.summary?.format;
+    if (!leagueFormat) return;
+    appliedLeagueFormat.current = true;
+    setFormat(leagueFormat);
+  }, [connectionLoaded, connection.summary?.format, formatChosen]);
 
   const ids = [...a, ...b].map((p) => p.id);
   const both = a.length > 0 && b.length > 0;
@@ -335,7 +350,13 @@ function TradePage() {
         </p>
       </section>
 
-      <FormatSelector value={format} onChange={setFormat} />
+      <FormatSelector
+        value={format}
+        onChange={(v) => {
+          setFormatChosen(true);
+          setFormat(v);
+        }}
+      />
 
       <section className="space-y-3">
         <SectionLabel>The two sides</SectionLabel>
