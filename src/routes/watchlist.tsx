@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,6 +19,7 @@ import { FormatSelector } from "@/components/wire/Controls";
 import { PlayerRow } from "@/components/wire/PlayerRow";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEspnConnection } from "@/lib/league-store";
 import type { ScoringFormat } from "@/lib/ranking";
 import { cn } from "@/lib/utils";
 import { getWatchlistPlayers } from "@/lib/waivers.functions";
@@ -61,12 +62,31 @@ function WatchlistPage() {
   const [posFilter, setPosFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const { entries, loaded, clear } = useWatchlist();
+  const { connection, loaded: connectionLoaded } = useEspnConnection();
+  // Once a format is picked in the selector below, that choice wins.
+  const [formatChosen, setFormatChosen] = useState(false);
+  // The list waits on this so it never fetches in a format about to change.
+  const [formatReady, setFormatReady] = useState(false);
+  const appliedLeagueFormat = useRef(false);
   const ids = entries.map((e) => e.id);
+
+  // A connected league dictates scoring, so start from its format rather than
+  // the PPR fallback. Applied once as a default only — it never replaces a
+  // format the user has already selected here. Once the league has been read,
+  // `formatReady` opens the gate on the list below, so it never loads in a
+  // format that is about to be replaced.
+  useEffect(() => {
+    if (!connectionLoaded || appliedLeagueFormat.current) return;
+    appliedLeagueFormat.current = true;
+    const leagueFormat = connection.summary?.format;
+    if (leagueFormat && !formatChosen) setFormat(leagueFormat);
+    setFormatReady(true);
+  }, [connectionLoaded, connection.summary?.format, formatChosen]);
 
   const { data, isPending, isError, isFetching, refetch } = useQuery({
     queryKey: ["watchlist", format, ids.join(",")],
     queryFn: () => getWatchlistPlayers({ data: { ids, format } }),
-    enabled: loaded && ids.length > 0,
+    enabled: loaded && ids.length > 0 && formatReady,
     staleTime: 1000 * 60 * 10,
   });
 
@@ -104,7 +124,14 @@ function WatchlistPage() {
         </Link>
       </section>
 
-      <FormatSelector value={format} onChange={setFormat} />
+      <FormatSelector
+        value={format}
+        onChange={(v) => {
+          setFormatChosen(true);
+          setFormatReady(true);
+          setFormat(v);
+        }}
+      />
 
       {(data?.length ?? 0) > 0 && (
         <section className="space-y-2 rounded-xl border border-border bg-card p-3">
