@@ -166,7 +166,8 @@ function Analyzer() {
   if (!proLoaded || !loaded) {
     return (
       <Page format={profile.format}>
-        <Skeleton className="h-40 rounded-xl" />
+        <span className="sr-only" role="status">Loading analyzer…</span>
+        <Skeleton className="h-40 rounded-xl" aria-hidden="true" />
       </Page>
     );
   }
@@ -394,7 +395,12 @@ function Analyzer() {
         </>
       )}
 
-      {analysis.isFetching && !result && <Skeleton className="h-28 rounded-xl" />}
+      {analysis.isFetching && !result && (
+        <>
+          <span className="sr-only" role="status">Loading analysis…</span>
+          <Skeleton className="h-28 rounded-xl" aria-hidden="true" />
+        </>
+      )}
 
       {analysis.isError && (
         <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4">

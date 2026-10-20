@@ -158,8 +158,9 @@ function WaiverBrowser() {
 
         {isPending && (
           <div className="space-y-4">
+            <span className="sr-only" role="status">Loading waiver targets…</span>
             {[0, 1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} className="h-28 rounded-xl" />
+              <Skeleton key={i} className="h-28 rounded-xl" aria-hidden="true" />
             ))}
           </div>
         )}

@@ -267,8 +267,9 @@ function WatchlistPage() {
 
         {entries.length > 0 && isPending && (
           <div className="space-y-3">
+            <span className="sr-only" role="status">Loading your watchlist…</span>
             {entries.slice(0, 3).map((e) => (
-              <Skeleton key={e.id} className="h-28 rounded-xl" />
+              <Skeleton key={e.id} className="h-28 rounded-xl" aria-hidden="true" />
             ))}
           </div>
         )}

@@ -70,7 +70,8 @@ function BidsPage() {
   if (!loaded)
     return (
       <Page format={format}>
-        <Skeleton className="h-40 w-full" />
+        <span className="sr-only" role="status">Loading your bids…</span>
+        <Skeleton className="h-40 w-full" aria-hidden="true" />
       </Page>
     );
 
@@ -129,7 +130,10 @@ function BidsPage() {
             </Link>
           </div>
         ) : budget.isLoading ? (
-          <Skeleton className="col-span-3 h-20" />
+          <>
+            <span className="sr-only" role="status">Loading budget…</span>
+            <Skeleton className="col-span-3 h-20" aria-hidden="true" />
+          </>
         ) : budget.isError ? (
           <div className="col-span-3 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">
             <p>
@@ -263,7 +267,10 @@ function BidsPage() {
       <section className="space-y-3">
         <SectionLabel>Available in your league</SectionLabel>
         {players.isLoading ? (
-          <Skeleton className="h-60 w-full" />
+          <>
+            <span className="sr-only" role="status">Loading players…</span>
+            <Skeleton className="h-60 w-full" aria-hidden="true" />
+          </>
         ) : players.isError ? (
           <div className="rounded-xl border border-border bg-card p-4">
             <p className="text-sm text-muted-foreground">
