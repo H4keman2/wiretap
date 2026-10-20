@@ -128,6 +128,7 @@ function WatchlistPage() {
         value={format}
         onChange={(v) => {
           setFormatChosen(true);
+          setFormatReady(true);
           setFormat(v);
         }}
       />
