@@ -660,7 +660,7 @@ function RosterEditor({
               className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border"
             >
               {options.map((o) => (
-                <li key={o.id}>
+                <li key={o.id} role="presentation">
                   <button
                     type="button"
                     role="option"
