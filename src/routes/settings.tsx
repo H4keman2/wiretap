@@ -168,7 +168,14 @@ function SettingsPage() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={deactivate}>Remove key</AlertDialogAction>
+                    <AlertDialogAction
+                      onClick={() => {
+                        deactivate();
+                        toast.info("License key removed.");
+                      }}
+                    >
+                      Remove key
+                    </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>

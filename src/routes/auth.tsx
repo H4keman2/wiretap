@@ -121,6 +121,7 @@ function AuthPage() {
               id="email"
               type="email"
               autoComplete="email"
+              inputMode="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -155,7 +156,11 @@ function AuthPage() {
             {error}
           </p>
         )}
-        {notice && <p className="text-xs text-muted-foreground">{notice}</p>}
+        {notice && (
+          <p role="status" className="text-xs text-muted-foreground">
+            {notice}
+          </p>
+        )}
 
         <button
           type="button"
