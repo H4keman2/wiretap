@@ -53,9 +53,6 @@ function BidsPage() {
     staleTime: 1000 * 60 * 3,
     retry: (count, err) => !(err as Error)?.message?.includes("PRO_REQUIRED") && count < 2,
   });
-  const needsPro =
-    (proLoaded && !isPro) ||
-    (budget.isError && (budget.error as Error).message.includes("PRO_REQUIRED"));
 
   const players = useQuery({
     queryKey: ["bid-players", cred?.leagueId, format, slot],
@@ -66,6 +63,11 @@ function BidsPage() {
     enabled: !!cred,
     staleTime: 1000 * 60,
   });
+
+  const needsPro =
+    (proLoaded && !isPro) ||
+    (budget.isError && (budget.error as Error).message.includes("PRO_REQUIRED")) ||
+    (players.isError && (players.error as Error).message.includes("PRO_REQUIRED"));
 
   if (!loaded)
     return (
@@ -267,7 +269,17 @@ function BidsPage() {
 
       <section className="space-y-3">
         <SectionLabel>Available in your league</SectionLabel>
-        {players.isLoading ? (
+        {needsPro ? (
+          <div className="rounded-xl border border-action/40 bg-action/5 p-4 text-sm">
+            <p className="font-bold">Live league free agents is a Pro feature</p>
+            <p className="mt-1 text-muted-foreground">
+              Upgrade to see who's actually free in your league, with a suggested bid for each.
+            </p>
+            <Link to="/pro" className="mt-2 inline-block font-bold text-turf underline">
+              Get Pro — $4.99
+            </Link>
+          </div>
+        ) : players.isLoading ? (
           <>
             <span className="sr-only" role="status">Loading players…</span>
             <Skeleton className="h-60 w-full" aria-hidden="true" />
