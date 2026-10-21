@@ -155,7 +155,11 @@ function AuthPage() {
             {error}
           </p>
         )}
-        {notice && <p className="text-xs text-muted-foreground">{notice}</p>}
+        {notice && (
+          <p role="status" className="text-xs text-muted-foreground">
+            {notice}
+          </p>
+        )}
 
         <button
           type="button"
