@@ -72,6 +72,7 @@ export function SosSection({ sos }: { sos: TeamSos | null | undefined }) {
               style={{ borderColor: `${color}66`, backgroundColor: `${color}14` }}
               title={`Week ${m.week} ${m.home ? "vs" : "at"} ${m.opponent} — difficulty ${m.difficulty.toFixed(1)}/10`}
             >
+              <span className="sr-only">{`Week ${m.week}, ${m.home ? "home vs" : "away at"} ${m.opponent}, difficulty ${m.difficulty.toFixed(1)} out of 10`}</span>
               <span className="block text-[8px] font-bold uppercase text-muted-foreground">
                 W{m.week}
               </span>
