@@ -67,6 +67,7 @@ function PlayerSearch({
 
   const visible = results?.filter((r) => !exclude.includes(r.id));
   const open = query.trim().length >= 2;
+  const hasResults = open && !!visible && visible.length > 0;
 
   useEffect(() => {
     setActive(0);
@@ -116,8 +117,8 @@ function PlayerSearch({
         }}
         placeholder="Add a player by name…"
         aria-label={`${slotLabel} — add a player`}
-        aria-expanded={open}
-        aria-controls={open ? listId : undefined}
+        aria-expanded={hasResults}
+        aria-controls={hasResults ? listId : undefined}
         aria-activedescendant={activeId}
         className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium outline-none placeholder:text-muted-foreground/70 focus:border-action"
       />
