@@ -392,7 +392,7 @@ function BidForm({
     >
       {hasBudget && (
         <div className="relative w-24">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+          <span aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
             $
           </span>
           <Input
