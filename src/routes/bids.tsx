@@ -206,7 +206,8 @@ function BidsPage() {
                 suggested: suggest(best),
                 at: Date.now(),
               });
-              toast.success(`Planned $${amount} on ${best.name}`);
+              if (total === null) toast.success(`Added ${best.name} to your list`);
+              else toast.success(`Planned $${amount} on ${best.name}`);
             }}
           />
         </section>
@@ -316,7 +317,8 @@ function BidsPage() {
                       suggested: suggest(p),
                       at: Date.now(),
                     });
-                    toast.success(`Planned $${amount} on ${p.name}`);
+                    if (total === null) toast.success(`Added ${p.name} to your list`);
+                    else toast.success(`Planned $${amount} on ${p.name}`);
                   }}
                 />
               </li>
