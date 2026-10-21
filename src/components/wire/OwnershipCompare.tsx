@@ -71,7 +71,7 @@ export function OwnershipCompare({
                 <span className="text-[11px] font-black uppercase tabular-nums text-turf">
                   {league === 0 ? "Free" : `${league}%`}
                 </span>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                <div aria-hidden="true" className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
                   <div
                     className="h-full rounded-full bg-action"
                     style={{
@@ -84,7 +84,7 @@ export function OwnershipCompare({
 
               <div className="w-16 text-right">
                 <span className="text-[11px] font-black tabular-nums">{national}%</span>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                <div aria-hidden="true" className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
                   <div
                     className="h-full rounded-full"
                     style={{
