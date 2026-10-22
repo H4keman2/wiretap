@@ -5,7 +5,18 @@ import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 
 import { SectionLabel } from "./Shell";
-import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { connectLeague, importLeagueRoster } from "@/lib/league.functions";
 import { useEspnConnection, useLeagueProfile, usePro } from "@/lib/league-store";
@@ -136,16 +147,34 @@ export function LeagueConnect() {
                 {summary.faabBudget ? ` · $${summary.faabBudget} FAAB` : ""}
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                clear();
-                toast.success("Back to league-wide numbers");
-              }}
-            >
-              Disconnect
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  Disconnect
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Disconnect your league?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will need to re-enter your league ID and ESPN sign-in values to sync again.
+                    Your league profile settings stay saved.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className={cn(buttonVariants({ variant: "destructive" }))}
+                    onClick={() => {
+                      clear();
+                      toast.success("Back to league-wide numbers");
+                    }}
+                  >
+                    Disconnect
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           <Step n={3} title="Pick your team and sync it" done={connection.teamId !== null}>
