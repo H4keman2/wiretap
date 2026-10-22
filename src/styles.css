@@ -195,3 +195,24 @@
     display: none;
   }
 }
+
+/*
+ * Reduced motion: the live waiver watch spins a refresh icon and pulses a
+ * radio dot while it is on, the SOS panels spin loaders, and the analyzer /
+ * FAQ accordions sweep their chevron open. Honour the OS-level preference —
+ * stop the perpetual loops, and snap the chevron to its end angle instead of
+ * animating the sweep (the open/closed cue itself is kept).
+ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin,
+  .animate-pulse {
+    animation: none;
+  }
+
+  /* Tailwind v4 builds `group-open:rotate-45` / `-rotate-90` as `rotate`
+     utilities that `transition-transform` animates. Drop the transition,
+     keep the rotation. */
+  [class*="group-open:rotate"] {
+    transition: none;
+  }
+}
