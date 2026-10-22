@@ -127,7 +127,7 @@ export function PlayerDetail({
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   {last.passYds > 0 && (
                     <>
-                      <Stat label="Pass yds" value={`${last.passYds}`} />
+                      <Stat label="Pass yds" value={`${last.passYds.toLocaleString()}`} />
                       <Stat label="Pass TD" value={`${last.passTd}`} />
                       <Stat label="INT" value={`${last.interceptions}`} />
                     </>
@@ -135,7 +135,7 @@ export function PlayerDetail({
                   {last.rushAtt > 0 && (
                     <>
                       <Stat label="Carries" value={`${last.rushAtt}`} />
-                      <Stat label="Rush yds" value={`${last.rushYds}`} />
+                      <Stat label="Rush yds" value={`${last.rushYds.toLocaleString()}`} />
                       <Stat label="Rush TD" value={`${last.rushTd}`} />
                     </>
                   )}
@@ -143,7 +143,7 @@ export function PlayerDetail({
                     <>
                       <Stat label="Targets" value={`${last.targets}`} />
                       <Stat label="Rec" value={`${last.receptions}`} />
-                      <Stat label="Rec yds" value={`${last.recYds}`} />
+                      <Stat label="Rec yds" value={`${last.recYds.toLocaleString()}`} />
                     </>
                   )}
                   {last.recTd > 0 && <Stat label="Rec TD" value={`${last.recTd}`} />}
