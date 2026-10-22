@@ -62,6 +62,9 @@ function WatchlistPage() {
   const [posFilter, setPosFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const { entries, loaded, clear } = useWatchlist();
+  // Focus target after "Clear all": the empty-state card, so keyboard focus
+  // doesn't fall to <body> when the dialog's trigger unmounts.
+  const emptyStateRef = useRef<HTMLDivElement>(null);
   const { connection, loaded: connectionLoaded } = useEspnConnection();
   // Once a format is picked in the selector below, that choice wins.
   const [formatChosen, setFormatChosen] = useState(false);
@@ -241,6 +244,7 @@ function WatchlistPage() {
                     onClick={() => {
                       clear();
                       toast.info("Watchlist cleared.");
+                      requestAnimationFrame(() => emptyStateRef.current?.focus());
                     }}
                   >
                     Clear all
@@ -252,7 +256,11 @@ function WatchlistPage() {
         </div>
 
         {loaded && entries.length === 0 && (
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div
+            ref={emptyStateRef}
+            tabIndex={-1}
+            className="rounded-xl border border-border bg-card p-4 outline-none"
+          >
             <p className="text-xs text-muted-foreground">
               Nothing saved yet. Tap the star on any player card to add them here.
             </p>
