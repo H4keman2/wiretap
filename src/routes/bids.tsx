@@ -164,7 +164,7 @@ function BidsPage() {
         )}
       </section>
       {left !== null && left < 0 && (
-        <p className="px-1 text-xs font-bold text-destructive">
+        <p role="status" className="px-1 text-xs font-bold text-destructive">
           You're ${Math.abs(left)} over budget — lower some planned bids before waivers run.
         </p>
       )}
