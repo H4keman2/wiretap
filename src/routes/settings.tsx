@@ -252,8 +252,9 @@ function Stepper({
         <button
           type="button"
           aria-label={`Decrease ${label}`}
+          disabled={value <= 0}
           onClick={() => onChange(value - 1)}
-          className="size-7 rounded-md border border-border text-sm font-black"
+          className="size-7 rounded-md border border-border text-sm font-black disabled:cursor-not-allowed disabled:opacity-40"
         >
           −
         </button>
@@ -263,8 +264,9 @@ function Stepper({
         <button
           type="button"
           aria-label={`Increase ${label}`}
+          disabled={value >= 9}
           onClick={() => onChange(value + 1)}
-          className="size-7 rounded-md border border-border text-sm font-black"
+          className="size-7 rounded-md border border-border text-sm font-black disabled:cursor-not-allowed disabled:opacity-40"
         >
           +
         </button>
