@@ -100,6 +100,14 @@ function BidsPage() {
   const remaining = b?.remaining ?? null;
   const planned = bids.reduce((s, x) => s + x.amount, 0);
   const left = remaining === null ? null : remaining - planned;
+  /**
+   * A successful budget load with no total means the league runs waivers by
+   * priority order, so planned bids carry no dollars. Still-loading, errored and
+   * not-yet-run loads stay treated as FAAB so a transient failure never hides
+   * amounts the user already saved.
+   */
+  const hasFaab = !(budget.isSuccess && total === null);
+
   const list = (players.data ?? []).slice(0, 15);
   const best = list[0];
 
@@ -107,7 +115,9 @@ function BidsPage() {
     total !== null && remaining !== null ? suggestBid(p, total, remaining) : 0;
 
   const copyAll = async () => {
-    const text = bids.map((x) => `${x.name} (${x.position}) — $${x.amount}`).join("\n");
+    const text = bids
+      .map((x) => `${x.name} (${x.position})${hasFaab ? ` — $${x.amount}` : ""}`)
+      .join("\n");
     try {
       await navigator.clipboard.writeText(text);
       toast.success("Bids copied — enter them in ESPN");
@@ -245,7 +255,7 @@ function BidsPage() {
                   {x.name} <span className="font-normal text-muted-foreground">{x.position}</span>
                 </span>
                 <span className="flex items-center gap-3">
-                  <span className="font-display text-lg">${x.amount}</span>
+                  {hasFaab && <span className="font-display text-lg">${x.amount}</span>}
                   <button
                     aria-label={`Remove bid on ${x.name}`}
                     onClick={() => {
