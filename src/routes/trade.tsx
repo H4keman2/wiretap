@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowLeftRight, Plus, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { FormatSelector } from "@/components/wire/Controls";
 import { Page, ProxyNote, SectionLabel } from "@/components/wire/Shell";
@@ -227,7 +228,10 @@ function SidePicker({
             </div>
             <button
               type="button"
-              onClick={() => onChange(players.filter((x) => x.id !== p.id))}
+              onClick={() => {
+                onChange(players.filter((x) => x.id !== p.id));
+                toast.info(`Removed ${p.name} from the trade.`);
+              }}
               aria-label={`Remove ${p.name}`}
               className="shrink-0 rounded-lg border border-border p-1.5 text-muted-foreground"
             >
