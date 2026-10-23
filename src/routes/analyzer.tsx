@@ -789,7 +789,10 @@ function RosterEditor({
                 <button
                   type="button"
                   aria-label={`Remove ${r.name}`}
-                  onClick={() => onChange(roster.filter((x) => x.id !== r.id))}
+                  onClick={() => {
+                    onChange(roster.filter((x) => x.id !== r.id));
+                    toast.info(`Removed ${r.name} from your roster.`);
+                  }}
                   className="text-muted-foreground"
                 >
                   <Trash2 aria-hidden="true" className="size-4" />
