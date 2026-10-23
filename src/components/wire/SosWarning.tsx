@@ -65,7 +65,9 @@ export function SosWarning() {
         </div>
 
         {data.lastError && (
-          <p className="mt-1 font-mono text-[10px] text-muted-foreground">{data.lastError}</p>
+          <p className="mt-1 text-[10px] text-muted-foreground">
+            Last probe hit a feed error — it retries automatically.
+          </p>
         )}
       </div>
     </div>
