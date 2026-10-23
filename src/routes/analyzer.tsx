@@ -271,7 +271,7 @@ function Analyzer() {
                 .slice(0, 2)
                 .map((v) => v.slot)
                 .join(", then ")}{" "}
-              ({result.verdicts[0]?.score})
+              ({result.verdicts[0]?.score}/100)
             </p>
             <p className="text-xs text-depth-foreground/75">{result.verdicts[0]?.reasons[0]}</p>
           </PromoCard>
@@ -355,7 +355,19 @@ function Analyzer() {
           )}
 
           <section className="space-y-3">
-            <SectionLabel>Override position</SectionLabel>
+            <div className="flex items-center justify-between gap-2 pr-1">
+              <SectionLabel>Override position</SectionLabel>
+              {override !== null && (
+                <button
+                  type="button"
+                  onClick={() => setOverride(null)}
+                  aria-label="Stop pinning a position and let Wire Tap detect the weakest one again"
+                  className="shrink-0 text-[10px] font-black uppercase tracking-wide text-turf underline"
+                >
+                  Auto
+                </button>
+              )}
+            </div>
             <PositionSelector
               value={override ?? result.targetSlot}
               onChange={(slot) => setOverride(slot)}
