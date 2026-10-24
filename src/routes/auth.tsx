@@ -140,6 +140,11 @@ function AuthPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            {mode === "signup" && (
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                At least 6 characters
+              </p>
+            )}
           </div>
           <Button
             type="submit"
