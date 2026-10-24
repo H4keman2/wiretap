@@ -39,10 +39,12 @@ export function LeagueConnect() {
   const [espnS2, setEspnS2] = useState("");
   const [swid, setSwid] = useState("");
   const [showCookies, setShowCookies] = useState(false);
+  const [connectFailed, setConnectFailed] = useState(false);
 
   const connect = useMutation({
     mutationFn: connectLeague,
     onSuccess: (summary) => {
+      setConnectFailed(false);
       save({
         leagueId: leagueId.trim() || connection.leagueId,
         espnS2: espnS2.trim() || connection.espnS2,
@@ -54,9 +56,8 @@ export function LeagueConnect() {
       toast.success(`Connected to ${summary.name}`);
     },
     onError: () => {
-      toast.error(
-        "Could not read that league — double-check the league ID and sign-in values.",
-      );
+      toast.error("Could not read that league — double-check the league ID and sign-in values.");
+      setConnectFailed(true);
       setShowCookies(true);
     },
   });
@@ -130,6 +131,7 @@ export function LeagueConnect() {
   const handleLeagueInput = (raw: string) => {
     const fromUrl = raw.match(/leagueId=(\d+)/i)?.[1];
     setLeagueId(fromUrl ?? raw.replace(/[^\d]/g, ""));
+    setConnectFailed(false);
   };
 
   return (
@@ -302,6 +304,14 @@ export function LeagueConnect() {
             >
               {connect.isPending ? "Reading your league…" : "Connect league"}
             </Button>
+            {connectFailed && (
+              <p
+                role="alert"
+                className="mt-2 text-[11px] font-bold leading-relaxed text-destructive"
+              >
+                Could not read that league — double-check the league ID and sign-in values.
+              </p>
+            )}
             <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
               Next you'll pick which team is yours, then pull its roster straight into the analyzer.
             </p>
