@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Copy, Gavel, Trophy, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -440,6 +440,12 @@ function BidForm({
 }) {
   const saved = existing !== null && existing > 0 ? existing : null;
   const [value, setValue] = useState<string>(saved !== null ? String(saved) : "");
+  const [touched, setTouched] = useState(false);
+  // Saved bids arrive a beat after this form mounts (storage read), so catch up
+  // once they land — unless the user has already started typing.
+  useEffect(() => {
+    if (!touched && saved !== null) setValue(String(saved));
+  }, [saved, touched]);
   const amount =
     value === "" ? (saved ?? suggested) : Math.max(0, Math.round(Number(value) || 0));
   /** A typed $0 is not a bid. Only the dollar field can produce one. */
@@ -465,7 +471,10 @@ function BidForm({
             className="pl-6"
             placeholder={String(saved ?? suggested)}
             value={value}
-            onChange={(e) => setValue(e.target.value.replace(/\D/g, ""))}
+            onChange={(e) => {
+              setTouched(true);
+              setValue(e.target.value.replace(/\D/g, ""));
+            }}
           />
         </div>
       )}
