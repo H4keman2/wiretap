@@ -125,6 +125,8 @@ function BidsPage() {
 
   const suggest = (p: RankedPlayer) =>
     total !== null && remaining !== null ? suggestBid(p, total, remaining) : 0;
+  /** What's already planned for this player, so the form shows that instead of the guess. */
+  const savedBid = (id: string) => bids.find((x) => x.id === id)?.amount ?? null;
 
   const copyAll = async () => {
     const text = bids
@@ -219,6 +221,7 @@ function BidsPage() {
           <BidForm
             player={best}
             suggested={suggest(best)}
+            existing={savedBid(best.id)}
             hasBudget={total !== null}
             onSave={(amount) => {
               upsert({
@@ -358,6 +361,7 @@ function BidsPage() {
                 <BidForm
                   player={p}
                   suggested={suggest(p)}
+                  existing={savedBid(p.id)}
                   hasBudget={total !== null}
                   onSave={(amount) => {
                     upsert({
@@ -423,21 +427,29 @@ function Stat({
 function BidForm({
   player,
   suggested,
+  existing,
   hasBudget,
   onSave,
 }: {
   player: RankedPlayer;
   suggested: number;
+  /** Amount already planned for this player, or null when nothing is saved. */
+  existing: number | null;
   hasBudget: boolean;
   onSave: (amount: number) => void;
 }) {
-  const [value, setValue] = useState<string>("");
-  const amount = value === "" ? suggested : Math.max(0, Math.round(Number(value) || 0));
+  const saved = existing !== null && existing > 0 ? existing : null;
+  const [value, setValue] = useState<string>(saved !== null ? String(saved) : "");
+  const amount =
+    value === "" ? (saved ?? suggested) : Math.max(0, Math.round(Number(value) || 0));
+  /** A typed $0 is not a bid. Only the dollar field can produce one. */
+  const tooLow = hasBudget && amount === 0;
   return (
     <form
       className="mt-3 flex items-center gap-2"
       onSubmit={(e) => {
         e.preventDefault();
+        if (tooLow) return;
         onSave(amount);
         setValue("");
       }}
@@ -451,16 +463,26 @@ function BidForm({
             aria-label={`Bid on ${player.name}`}
             inputMode="numeric"
             className="pl-6"
-            placeholder={String(suggested)}
+            placeholder={String(saved ?? suggested)}
             value={value}
             onChange={(e) => setValue(e.target.value.replace(/\D/g, ""))}
           />
         </div>
       )}
-      <Button type="submit" size="sm">
+      <Button type="submit" size="sm" disabled={tooLow}>
         {hasBudget ? "Plan bid" : "Add to list"}
       </Button>
-      {hasBudget && <span className="text-xs text-muted-foreground">Suggested ${suggested}</span>}
+      {hasBudget && tooLow && (
+        <span role="status" className="text-xs font-bold text-destructive">
+          Enter an amount above $0
+        </span>
+      )}
+      {hasBudget && !tooLow && saved !== null && (
+        <span className="text-xs text-muted-foreground">Saved ${saved}</span>
+      )}
+      {hasBudget && !tooLow && saved === null && (
+        <span className="text-xs text-muted-foreground">Suggested ${suggested}</span>
+      )}
     </form>
   );
 }
