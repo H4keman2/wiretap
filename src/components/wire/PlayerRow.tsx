@@ -39,17 +39,7 @@ export function PlayerRow({
   return (
     <>
       <article
-        role="button"
-        tabIndex={0}
-        aria-label={`Open ${player.name} details`}
         onClick={() => setOpen(true)}
-        onKeyDown={(e) => {
-          if (e.target !== e.currentTarget) return;
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setOpen(true);
-          }
-        }}
         className={cn(
           "cursor-pointer rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           isNew && "ring-2 ring-action",
@@ -106,10 +96,20 @@ export function PlayerRow({
               )}
               <span className="ml-auto flex shrink-0 items-center gap-1.5 self-center">
                 <WatchButton player={player} />
-                <ChevronRight
-                  aria-hidden="true"
-                  className="size-4 shrink-0 text-muted-foreground"
-                />
+                <button
+                  type="button"
+                  aria-label={`View ${player.name} details`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpen(true);
+                  }}
+                  className="rounded p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <ChevronRight
+                    aria-hidden="true"
+                    className="size-4 shrink-0 text-muted-foreground"
+                  />
+                </button>
               </span>
             </div>
 
