@@ -222,6 +222,7 @@ function BidsPage() {
             player={best}
             suggested={suggest(best)}
             existing={savedBid(best.id)}
+            left={left}
             hasBudget={total !== null}
             onSave={(amount) => {
               upsert({
@@ -362,6 +363,7 @@ function BidsPage() {
                   player={p}
                   suggested={suggest(p)}
                   existing={savedBid(p.id)}
+                  left={left}
                   hasBudget={total !== null}
                   onSave={(amount) => {
                     upsert({
@@ -428,6 +430,7 @@ function BidForm({
   player,
   suggested,
   existing,
+  left,
   hasBudget,
   onSave,
 }: {
@@ -435,6 +438,8 @@ function BidForm({
   suggested: number;
   /** Amount already planned for this player, or null when nothing is saved. */
   existing: number | null;
+  /** Budget left after all planned bids (null while loading/errored). */
+  left: number | null;
   hasBudget: boolean;
   onSave: (amount: number) => void;
 }) {
@@ -446,10 +451,15 @@ function BidForm({
   useEffect(() => {
     if (!touched && saved !== null) setValue(String(saved));
   }, [saved, touched]);
-  const amount =
-    value === "" ? (saved ?? suggested) : Math.max(0, Math.round(Number(value) || 0));
+  const amount = value === "" ? (saved ?? suggested) : Math.max(0, Math.round(Number(value) || 0));
   /** A typed $0 is not a bid. Only the dollar field can produce one. */
   const tooLow = hasBudget && amount === 0;
+  /**
+   * Headroom for this player: what's left after planned bids, plus this
+   * player's own saved amount (re-planning replaces it, so it isn't spent
+   * twice). Warns at the point of entry; saving is never blocked.
+   */
+  const overBudget = hasBudget && !tooLow && left !== null && amount > left + (saved ?? 0);
   return (
     <form
       className="mt-3 flex items-center gap-2"
@@ -462,7 +472,10 @@ function BidForm({
     >
       {hasBudget && (
         <div className="relative w-24">
-          <span aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+          <span
+            aria-hidden="true"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+          >
             $
           </span>
           <Input
@@ -484,6 +497,11 @@ function BidForm({
       {hasBudget && tooLow && (
         <span role="status" className="text-xs font-bold text-destructive">
           Enter an amount above $0
+        </span>
+      )}
+      {hasBudget && !tooLow && overBudget && (
+        <span role="status" className="text-xs font-bold text-destructive">
+          Over your remaining budget
         </span>
       )}
       {hasBudget && !tooLow && saved !== null && (
