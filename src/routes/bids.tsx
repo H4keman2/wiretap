@@ -4,9 +4,20 @@ import { Copy, Gavel, Trophy, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { PositionSelector } from "@/components/wire/Controls";
 import { Page, SectionLabel } from "@/components/wire/Shell";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { suggestBid, useBids } from "@/lib/bids";
@@ -14,6 +25,7 @@ import { getLeagueBudget } from "@/lib/league.functions";
 import { useEspnConnection, usePro } from "@/lib/league-store";
 import type { RankedPlayer, SlotPosition } from "@/lib/ranking";
 import { teamColor } from "@/lib/team-colors";
+import { cn } from "@/lib/utils";
 import { getRecommendations } from "@/lib/waivers.functions";
 
 export const Route = createFileRoute("/bids")({
@@ -233,16 +245,34 @@ function BidsPage() {
               <Button size="sm" variant="outline" onClick={copyAll}>
                 <Copy aria-hidden="true" className="size-4" /> Copy
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  clear();
-                  toast.info("Planned bids cleared.");
-                }}
-              >
-                Clear
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="sm" variant="ghost">
+                    Clear
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear all planned bids?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This removes all {bids.length} planned bid{bids.length === 1 ? "" : "s"} from
+                      this device. There's no undo — you'd have to re-enter them one by one.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className={cn(buttonVariants({ variant: "destructive" }))}
+                      onClick={() => {
+                        clear();
+                        toast.info("Planned bids cleared.");
+                      }}
+                    >
+                      Clear all
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
           <ul className="space-y-2">
