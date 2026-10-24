@@ -283,7 +283,14 @@ function Analyzer() {
                 <details key={v.slot} className="group px-3 py-2.5">
                   <summary className="flex cursor-pointer items-center gap-3 list-none">
                     <span className="w-12 font-display text-lg uppercase">{v.slot}</span>
-                    <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
+                    <span
+                      role="progressbar"
+                      aria-valuenow={Math.round(v.score)}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={`${v.slot} positional strength`}
+                      className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary"
+                    >
                       <span
                         className={cn(
                           "block h-full rounded-full",
