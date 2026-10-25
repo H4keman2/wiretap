@@ -147,7 +147,11 @@ function PlayerSearch({
             </div>
           )}
           {visible?.length === 0 && (
-            <p className="text-[11px] text-muted-foreground">No player matches that name.</p>
+            <p className="text-[11px] text-muted-foreground">
+              {results && results.length > 0
+                ? "Already on one side of the trade."
+                : "No player matches that name."}
+            </p>
           )}
           {visible && visible.length > 0 && (
             <div role="listbox" id={listId} className="space-y-1">
