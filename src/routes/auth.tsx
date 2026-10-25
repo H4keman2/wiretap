@@ -45,6 +45,7 @@ function AuthPage() {
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
+    const cleanEmail = email.trim();
     setBusy(true);
     setError(null);
     setNotice(null);
