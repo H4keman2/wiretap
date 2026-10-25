@@ -722,7 +722,7 @@ function RosterEditor({
                     role="option"
                     id={`${listId}-option-${i}`}
                     aria-selected={i === Math.min(active, options.length - 1)}
-                    className="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-bold hover:bg-secondary"
+                    className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs font-bold hover:bg-secondary ${i === Math.min(active, options.length - 1) ? "bg-secondary ring-1 ring-inset ring-action" : ""}`}
                     onClick={() =>
                       add({
                         id: o.id,
