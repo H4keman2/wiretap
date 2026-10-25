@@ -471,6 +471,11 @@ function RosterEditor({
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkText, setBulkText] = useState("");
   const [importing, setImporting] = useState(false);
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    setActive(0);
+  }, [query, options]);
 
   useEffect(() => {
     if (query.trim().length < 2) {
@@ -618,8 +623,29 @@ function RosterEditor({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
+                const count = options.length;
+                if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                  if (count === 0) return;
+                  e.preventDefault();
+                  setActive((i) => {
+                    const current = Math.min(i, count - 1);
+                    return e.key === "ArrowDown"
+                      ? Math.min(current + 1, count - 1)
+                      : Math.max(current - 1, 0);
+                  });
+                  return;
+                }
                 if (e.key !== "Enter") return;
                 e.preventDefault();
+                const picked = count > 0 ? options[Math.min(active, count - 1)] : undefined;
+                if (picked) {
+                  add({
+                    id: picked.id,
+                    name: picked.name,
+                    position: picked.position as RealPosition,
+                  });
+                  return;
+                }
                 query.trim() &&
                   add({
                     id: `manual-${query.trim().toLowerCase()}`,
@@ -632,6 +658,11 @@ function RosterEditor({
               inputMode="search"
               aria-expanded={options.length > 0}
               aria-controls={options.length > 0 ? listId : undefined}
+              aria-activedescendant={
+                options.length > 0
+                  ? `${listId}-option-${Math.min(active, options.length - 1)}`
+                  : undefined
+              }
               className="h-9 text-sm"
             />
             <select
@@ -684,12 +715,13 @@ function RosterEditor({
               role="listbox"
               className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border"
             >
-              {options.map((o) => (
+              {options.map((o, i) => (
                 <li key={o.id} role="presentation">
                   <button
                     type="button"
                     role="option"
-                    aria-selected={false}
+                    id={`${listId}-option-${i}`}
+                    aria-selected={i === Math.min(active, options.length - 1)}
                     className="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-bold hover:bg-secondary"
                     onClick={() =>
                       add({
