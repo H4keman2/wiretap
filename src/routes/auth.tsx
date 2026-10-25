@@ -51,7 +51,7 @@ function AuthPage() {
     try {
       if (mode === "signup") {
         const { data, error: err } = await supabase.auth.signUp({
-          email,
+          email: cleanEmail,
           password,
           options: { emailRedirectTo: `${window.location.origin}/` },
         });
@@ -61,7 +61,7 @@ function AuthPage() {
           return;
         }
       } else {
-        const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+        const { error: err } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
         if (err) throw err;
       }
       navigate({ to: "/" });
