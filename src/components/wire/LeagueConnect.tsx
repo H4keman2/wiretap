@@ -40,6 +40,7 @@ export function LeagueConnect() {
   const [swid, setSwid] = useState("");
   const [showCookies, setShowCookies] = useState(false);
   const [connectFailed, setConnectFailed] = useState(false);
+  const [syncFailed, setSyncFailed] = useState(false);
 
   const connect = useMutation({
     mutationFn: connectLeague,
@@ -65,6 +66,7 @@ export function LeagueConnect() {
   const sync = useMutation({
     mutationFn: importLeagueRoster,
     onSuccess: ({ entries, unmatched }) => {
+      setSyncFailed(false);
       update({ roster: entries });
       toast.success(
         unmatched.length
@@ -72,7 +74,10 @@ export function LeagueConnect() {
           : `Synced ${entries.length} players from your team`,
       );
     },
-    onError: (err: Error) => toast.error(err.message || "Couldn't pull that roster."),
+    onError: (err: Error) => {
+      toast.error(err.message || "Couldn't pull that roster.");
+      setSyncFailed(true);
+    },
   });
 
   const summary = connection.summary;
@@ -184,9 +189,10 @@ export function LeagueConnect() {
               id="my-team"
               aria-label="Which team is yours?"
               value={connection.teamId ?? ""}
-              onChange={(e) =>
-                save({ teamId: e.target.value === "" ? null : Number(e.target.value) })
-              }
+              onChange={(e) => {
+                setSyncFailed(false);
+                save({ teamId: e.target.value === "" ? null : Number(e.target.value) });
+              }}
               className="h-9 w-full rounded-md border border-input bg-card px-2 text-sm font-bold"
             >
               <option value="">Choose your team…</option>
@@ -209,6 +215,15 @@ export function LeagueConnect() {
             >
               {sync.isPending ? "Syncing your roster…" : "Sync my roster into Wire Tap"}
             </Button>
+
+            {syncFailed && (
+              <p
+                role="alert"
+                className="mt-2 text-[11px] font-bold leading-relaxed text-destructive"
+              >
+                Couldn't pull that roster — try syncing again.
+              </p>
+            )}
 
             <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
               Waiver targets now show only players nobody in this league has rostered, scored with
