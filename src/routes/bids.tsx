@@ -183,7 +183,7 @@ function BidsPage() {
           <>
             <Stat label="Remaining" value={`$${remaining}`} strong />
             <Stat label="Planned" value={`$${planned}`} />
-            <Stat label="After bids" value={`$${left}`} warn={left !== null && left < 0} />
+            <Stat label="After bids" value={left !== null && left < 0 ? `-$${Math.abs(left)}` : `$${left}`} warn={left !== null && left < 0} />
           </>
         )}
       </section>
