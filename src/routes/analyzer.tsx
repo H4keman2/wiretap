@@ -648,6 +648,11 @@ function RosterEditor({
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
                 const count = options.length;
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  setQuery("");
+                  return;
+                }
                 if (e.key === "ArrowDown" || e.key === "ArrowUp") {
                   if (count === 0) return;
                   e.preventDefault();
