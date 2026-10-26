@@ -189,7 +189,16 @@ function SettingsPage() {
               >
                 License key
               </label>
-              <div className="mt-2 flex gap-2">
+              <form
+                className="mt-2 flex gap-2"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const candidate = license.trim();
+                  if (checking || candidate.length === 0) return;
+                  const ok = await activate(candidate.toUpperCase());
+                  if (ok) toast.success("Pro unlocked");
+                }}
+              >
                 <Input
                   id="license"
                   value={license}
@@ -202,17 +211,14 @@ function SettingsPage() {
                   spellCheck={false}
                 />
                 <Button
+                  type="submit"
                   size="sm"
                   className="h-9"
                   disabled={checking || !license.trim()}
-                  onClick={async () => {
-                    const ok = await activate(license.trim().toUpperCase());
-                    if (ok) toast.success("Pro unlocked");
-                  }}
                 >
                   {checking ? "Checking…" : "Activate"}
                 </Button>
-              </div>
+              </form>
               {error && (
                 <p role="alert" className="mt-2 text-[11px] font-bold text-destructive">
                   {error}
