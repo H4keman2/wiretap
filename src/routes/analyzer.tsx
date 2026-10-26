@@ -671,6 +671,8 @@ function RosterEditor({
               }}
               placeholder="Add player by name"
               aria-label="Add player by name"
+              role="combobox"
+              aria-autocomplete="list"
               inputMode="search"
               aria-expanded={options.length > 0}
               aria-controls={options.length > 0 ? listId : undefined}
