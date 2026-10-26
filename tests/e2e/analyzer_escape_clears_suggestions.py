@@ -154,7 +154,10 @@ async def main():
         check("Escape closes the suggestion list", await listbox.count() == 0)
         body = await page.locator("body").inner_text()
         check("Escape does not add a player", "James Cook" not in body)
-        check("Escape leaves focus in the input", await entry.is_focused())
+        check(
+            "Escape leaves focus in the input",
+            await entry.evaluate("el => el === document.activeElement"),
+        )
 
         # 3. Escape on an already-empty box does nothing harmful.
         await entry.press("Escape")
