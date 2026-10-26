@@ -519,8 +519,8 @@ function RosterEditor({
   // showing, add the highlighted real player so it scores against real data;
   // only fall back to the typed manual entry when there is nothing to match.
   const submitAdd = () => {
-    if (options.length > 0) {
-      const picked = options[Math.min(active, options.length - 1)];
+    const picked = options[Math.min(active, options.length - 1)];
+    if (picked) {
       add({
         id: picked.id,
         name: picked.name,
@@ -528,6 +528,7 @@ function RosterEditor({
       });
       return;
     }
+
     if (query.trim()) {
       add({
         id: `manual-${query.trim().toLowerCase()}`,
