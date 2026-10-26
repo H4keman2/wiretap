@@ -515,7 +515,31 @@ function RosterEditor({
     setOptions([]);
   };
 
+  // Enter and the Plus button must pick the same way: when suggestions are
+  // showing, add the highlighted real player so it scores against real data;
+  // only fall back to the typed manual entry when there is nothing to match.
+  const submitAdd = () => {
+    const picked = options[Math.min(active, options.length - 1)];
+    if (picked) {
+      add({
+        id: picked.id,
+        name: picked.name,
+        position: picked.position as RealPosition,
+      });
+      return;
+    }
+
+    if (query.trim()) {
+      add({
+        id: `manual-${query.trim().toLowerCase()}`,
+        name: query.trim(),
+        position,
+      });
+    }
+  };
+
   const handleImport = async () => {
+
     const lines = Array.from(
       new Set(
         bulkText
@@ -637,21 +661,8 @@ function RosterEditor({
                 }
                 if (e.key !== "Enter") return;
                 e.preventDefault();
-                const picked = count > 0 ? options[Math.min(active, count - 1)] : undefined;
-                if (picked) {
-                  add({
-                    id: picked.id,
-                    name: picked.name,
-                    position: picked.position as RealPosition,
-                  });
-                  return;
-                }
-                query.trim() &&
-                  add({
-                    id: `manual-${query.trim().toLowerCase()}`,
-                    name: query.trim(),
-                    position,
-                  });
+                submitAdd();
+
               }}
               placeholder="Add player by name"
               aria-label="Add player by name"
@@ -681,14 +692,8 @@ function RosterEditor({
               size="sm"
               aria-label="Add player"
               className="h-9 shrink-0"
-              onClick={() =>
-                query.trim() &&
-                add({
-                  id: `manual-${query.trim().toLowerCase()}`,
-                  name: query.trim(),
-                  position,
-                })
-              }
+              onClick={submitAdd}
+
             >
               <Plus aria-hidden="true" className="size-4" />
             </Button>
