@@ -125,7 +125,7 @@ export function LeagueConnect() {
             <Link to="/pro">Get Pro — $4.99</Link>
           </Button>
           <p className="text-[11px] text-muted-foreground">
-            Already bought it? Enter your key in Settings.
+            Already bought it? Enter your key in the Pro access section below.
           </p>
         </div>
       </section>
