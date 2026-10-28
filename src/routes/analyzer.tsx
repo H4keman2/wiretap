@@ -708,6 +708,7 @@ function RosterEditor({
               aria-label="Add player"
               className="h-9 shrink-0"
               onClick={submitAdd}
+              disabled={!query.trim()}
 
             >
               <Plus aria-hidden="true" className="size-4" />
