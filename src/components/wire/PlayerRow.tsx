@@ -139,7 +139,9 @@ export function PlayerRow({
                   <TrendIcon aria-hidden="true" className="size-3" strokeWidth={3} />
                   {player.trendLabel === "stable"
                     ? "Flat"
-                    : `${player.trendDelta > 0 ? "+" : ""}${compact(player.trendDelta)} adds`}
+                    : player.trendLabel === "rising"
+                      ? `+${compact(Math.abs(player.trendDelta))} adds`
+                      : `${compact(Math.abs(player.trendDelta))} drops`}
                 </dd>
               </div>
             </dl>
