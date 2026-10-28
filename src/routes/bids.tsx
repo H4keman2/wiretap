@@ -74,6 +74,7 @@ function BidsPage() {
       }),
     enabled: !!cred,
     staleTime: 1000 * 60,
+    retry: (count, err) => !(err as Error)?.message?.includes("PRO_REQUIRED") && count < 2,
   });
 
   const needsPro =
