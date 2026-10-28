@@ -117,7 +117,9 @@ function PlayerSearch({
           if (picked) select(picked);
         }}
         placeholder="Add a player by name…"
+        role="combobox"
         aria-label={`${slotLabel} — add a player`}
+        aria-autocomplete="list"
         aria-expanded={hasResults}
         aria-controls={hasResults ? listId : undefined}
         aria-activedescendant={activeId}
