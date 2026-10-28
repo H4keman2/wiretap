@@ -710,6 +710,7 @@ function RosterEditor({
               onClick={submitAdd}
               disabled={!query.trim()}
 
+
             >
               <Plus aria-hidden="true" className="size-4" />
             </Button>
