@@ -417,7 +417,7 @@ function TradePage() {
 
       {both && data && !ready && (
         <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-          One of those players has no current data — swap him out to compare.
+          One of those players has no current data — swap that player out to compare.
         </p>
       )}
 
