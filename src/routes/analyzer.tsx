@@ -424,9 +424,17 @@ function Analyzer() {
       {analysis.isError && (
         <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4">
           <p role="alert" className="text-xs text-destructive">
-            {String(analysis.error).includes("PRO_REQUIRED")
-              ? "Your license couldn't be verified. Check your key in League settings."
-              : "Something went wrong running the analysis. Try again in a moment."}
+            {String(analysis.error).includes("PRO_REQUIRED") ? (
+              <>
+                Your license couldn't be verified. Check your key in{" "}
+                <Link to="/settings" className="underline underline-offset-2">
+                  League settings
+                </Link>
+                .
+              </>
+            ) : (
+              "Something went wrong running the analysis. Try again in a moment."
+            )}
           </p>
           <Button
             type="button"
