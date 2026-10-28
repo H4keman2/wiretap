@@ -344,6 +344,10 @@ function BidsPage() {
           </div>
         ) : list.length === 0 ? (
           <p className="text-sm text-muted-foreground">No free agents found at this position.</p>
+        ) : list.length === 1 ? (
+          <p className="text-sm text-muted-foreground">
+            That is the only free agent at this position — it is the best pickup above.
+          </p>
         ) : (
           <ul className="space-y-2">
             {list.slice(1).map((p) => (
