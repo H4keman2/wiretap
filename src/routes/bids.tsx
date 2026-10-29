@@ -180,6 +180,20 @@ function BidsPage() {
             Your league doesn't use a waiver budget — waivers run by priority order. The best pickup
             below still applies.
           </p>
+        ) : remaining === null ? (
+          <div className="col-span-3 rounded-xl border border-destructive/40 p-4 text-sm text-destructive">
+            <p>
+              Couldn't load your league budget — check your connection, or try again in a moment.
+            </p>
+            <Button
+              size="sm"
+              className="mt-2 bg-action font-bold uppercase tracking-tight text-action-foreground"
+              onClick={() => budget.refetch()}
+              disabled={budget.isFetching}
+            >
+              Try again
+            </Button>
+          </div>
         ) : (
           <>
             <Stat label="Remaining" value={`$${remaining}`} strong />
