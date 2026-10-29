@@ -403,7 +403,7 @@ function Analyzer() {
                 )}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="thin-scroll max-h-[640px] space-y-4 overflow-y-auto rounded-xl border border-border bg-card/40 p-3">
                 {result.recommendations.map((p, i) => (
                   <PlayerRow key={p.id} player={p} rank={i + 1} format={profile.format} />
                 ))}
