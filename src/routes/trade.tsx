@@ -415,11 +415,15 @@ function TradePage() {
         </div>
       )}
 
-      {both && data && !ready && (
-        <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-          One of those players has no current data — swap that player out to compare.
-        </p>
-      )}
+      {both && data && !ready && (() => {
+        const missing = [...a, ...b].filter((p) => !data.find((d) => d.id === p.id));
+        const names = missing.map((p) => p.name).join(", ");
+        return (
+          <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
+            No current data for {names} — swap them out to compare.
+          </p>
+        );
+      })()}
 
       {analysis && (
         <>
