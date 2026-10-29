@@ -171,7 +171,7 @@ export function PlayerDetail({
   );
 }
 
-function Stat({ label, value, title }: { label: string; value: string; title?: string }) {
+function Stat({ label, value, title }: { label: string; value: string; title?: string | undefined }) {
   return (
     <div className="rounded-lg border border-border bg-card px-2 py-1.5">
       <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
