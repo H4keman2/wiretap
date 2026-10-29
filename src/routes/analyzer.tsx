@@ -479,6 +479,9 @@ function RosterEditor({
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkText, setBulkText] = useState("");
   const [importing, setImporting] = useState(false);
+  const bulkCount = Array.from(
+    new Set(bulkText.split("\n").map((l) => l.trim()).filter(Boolean)),
+  ).length;
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -644,7 +647,7 @@ function RosterEditor({
               disabled={importing || !bulkText.trim()}
               onClick={handleImport}
             >
-              {importing ? "Matching…" : "Import"}
+              {importing ? "Matching…" : bulkCount > 0 ? `Import ${bulkCount} player${bulkCount === 1 ? "" : "s"}` : "Import"}
             </Button>
           </div>
         </div>
