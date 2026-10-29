@@ -314,6 +314,15 @@ function WatchlistPage() {
                 Clear search
               </button>
             )}
+            {!search && posFilter !== "ALL" && (
+              <button
+                type="button"
+                onClick={() => setPosFilter("ALL")}
+                className="mt-3 block w-full rounded border border-border bg-background py-2 text-center text-sm font-bold uppercase tracking-tight text-foreground"
+              >
+                Show all positions
+              </button>
+            )}
           </div>
         )}
 
