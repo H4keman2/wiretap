@@ -95,7 +95,7 @@ export function PlayerDetail({
             <Stat label="ADP" value={player.adp ? player.adp.toFixed(1) : "—"} />
             <Stat label="Depth" value={player.depthOrder ? `#${player.depthOrder}` : "—"} />
             <Stat label="Pos rank" value={`#${player.posRank}`} />
-            <Stat label="Injury" value={player.injury ?? "None"} />
+            <Stat label="Injury" value={player.injury ?? "None"} title={player.injury ?? undefined} />
           </div>
 
           <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary/50 px-3 py-2">
@@ -171,11 +171,14 @@ export function PlayerDetail({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
     <div className="rounded-lg border border-border bg-card px-2 py-1.5">
       <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-0.5 truncate font-display text-base uppercase leading-none tabular-nums">
+      <p
+        className="mt-0.5 truncate font-display text-base uppercase leading-none tabular-nums"
+        title={title}
+      >
         {value}
       </p>
     </div>
