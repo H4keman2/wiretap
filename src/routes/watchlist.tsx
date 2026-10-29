@@ -147,6 +147,12 @@ function WatchlistPage() {
               inputMode="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape" && search.length > 0) {
+                  e.preventDefault();
+                  setSearch("");
+                }
+              }}
               placeholder="Search saved players by name, team or position…"
               aria-label="Search saved players"
               className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-xs font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-action"
