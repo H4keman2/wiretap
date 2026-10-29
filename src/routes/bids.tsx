@@ -349,8 +349,14 @@ function BidsPage() {
             That is the only free agent at this position — it is the best pickup above.
           </p>
         ) : (
-          <ul className="space-y-2">
-            {list.slice(1).map((p) => (
+          <>
+            {(players.data?.length ?? 0) > 15 && (
+              <p className="text-xs text-muted-foreground">
+                Showing the top 15 free agents at this position.
+              </p>
+            )}
+            <ul className="space-y-2">
+              {list.slice(1).map((p) => (
               <li
                 key={p.id}
                 className="rounded-xl border border-border bg-card p-4"
@@ -387,6 +393,7 @@ function BidsPage() {
               </li>
             ))}
           </ul>
+          </>
         )}
       </section>
     </Page>
