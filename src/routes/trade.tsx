@@ -85,46 +85,58 @@ function PlayerSearch({
 
   return (
     <div className="space-y-2">
-      <input
-        type="search"
-        inputMode="search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => {
-          const count = visible?.length ?? 0;
+      <div className="relative">
+        <input
+          type="search"
+          inputMode="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            const count = visible?.length ?? 0;
 
-          if (e.key === "Escape") {
-            if (query.length === 0) return;
-            e.preventDefault();
-            setQuery("");
-            return;
-          }
+            if (e.key === "Escape") {
+              if (query.length === 0) return;
+              e.preventDefault();
+              setQuery("");
+              return;
+            }
 
-          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-            if (count === 0) return;
-            e.preventDefault();
-            setActive((i) => {
-              const current = Math.min(i, count - 1);
-              return e.key === "ArrowDown"
-                ? Math.min(current + 1, count - 1)
-                : Math.max(current - 1, 0);
-            });
-            return;
-          }
+            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+              if (count === 0) return;
+              e.preventDefault();
+              setActive((i) => {
+                const current = Math.min(i, count - 1);
+                return e.key === "ArrowDown"
+                  ? Math.min(current + 1, count - 1)
+                  : Math.max(current - 1, 0);
+              });
+              return;
+            }
 
-          if (e.key !== "Enter" || query.trim().length === 0) return;
-          const picked = visible?.[Math.min(active, count - 1)];
-          if (picked) select(picked);
-        }}
-        placeholder="Add a player by name…"
-        role="combobox"
-        aria-label={`${slotLabel} — add a player`}
-        aria-autocomplete="list"
-        aria-expanded={hasResults}
-        aria-controls={hasResults ? listId : undefined}
-        aria-activedescendant={activeId}
-        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium outline-none placeholder:text-muted-foreground/70 focus:border-action"
-      />
+            if (e.key !== "Enter" || query.trim().length === 0) return;
+            const picked = visible?.[Math.min(active, count - 1)];
+            if (picked) select(picked);
+          }}
+          placeholder="Add a player by name…"
+          role="combobox"
+          aria-label={`${slotLabel} — add a player`}
+          aria-autocomplete="list"
+          aria-expanded={hasResults}
+          aria-controls={hasResults ? listId : undefined}
+          aria-activedescendant={activeId}
+          className="w-full rounded-lg border border-border bg-background px-3 pr-9 py-2 text-xs font-medium outline-none placeholder:text-muted-foreground/70 focus:border-action"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            aria-label="Clear search"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+          >
+            <X className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
+          </button>
+        )}
+      </div>
       {query.trim().length >= 2 && (
         <div className="space-y-1">
           {isFetching && !results && (
