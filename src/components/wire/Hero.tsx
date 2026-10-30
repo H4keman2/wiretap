@@ -23,11 +23,13 @@ export function Hero({
   poolSize,
   updatedAt,
   connected,
+  isPro,
 }: {
   week: number | null;
   poolSize: number | null;
   updatedAt?: number;
   connected: boolean;
+  isPro: boolean;
 }) {
   const fresh = freshLabel(updatedAt);
 

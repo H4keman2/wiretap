@@ -79,6 +79,7 @@ function WaiverBrowser() {
         poolSize={data?.length ?? null}
         updatedAt={dataUpdatedAt}
         connected={!!cred}
+        isPro={proLoaded && isPro}
       />
 
       <section className="space-y-5" aria-label="Filters">
