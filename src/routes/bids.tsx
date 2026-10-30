@@ -505,7 +505,7 @@ function BidForm({
             $
           </span>
           <Input
-            aria-label={`Bid on ${player.name}`}
+            aria-label={`Bid amount in dollars on ${player.name}`}
             inputMode="numeric"
             className="pl-6"
             placeholder={String(saved ?? suggested)}
