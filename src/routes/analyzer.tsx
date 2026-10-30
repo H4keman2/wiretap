@@ -156,7 +156,7 @@ function Analyzer() {
       if (current.has(id)) continue;
       const name = roster.find((r) => r.id === id)?.name ?? "Your starter";
       toast.success(`${name} is cleared to play`, {
-        description: `No longer listed as ${tag} — he's back in your lineup.`,
+        description: `No longer listed as ${tag} — they're back in your lineup.`,
       });
     }
     // roster is only read for a display name here.

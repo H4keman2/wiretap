@@ -88,7 +88,7 @@ export function PlayerRow({
               {player.handcuffOf && (
                 <span
                   className="shrink-0 rounded bg-chart-4/20 px-1 py-px text-[9px] font-black uppercase tracking-wider text-chart-4"
-                  title={`Direct backup to your ${player.handcuffOf} — insurance if he's hurt or benched`}
+                  title={`Direct backup to your ${player.handcuffOf} — insurance if they're hurt or benched`}
                 >
                   Handcuff
                   <span className="sr-only">, direct backup insurance for your starter</span>

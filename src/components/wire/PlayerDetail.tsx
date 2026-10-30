@@ -159,7 +159,7 @@ export function PlayerDetail({
 
           <section>
             <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Why he is here
+              Why this player is here
             </h4>
             <p className="mt-1 text-xs leading-snug text-muted-foreground">{player.reason}</p>
           </section>
