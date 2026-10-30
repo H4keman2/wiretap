@@ -285,7 +285,7 @@ function Analyzer() {
                     <span className="w-12 font-display text-lg uppercase">{v.slot}</span>
                     <span
                       role="progressbar"
-                      aria-valuenow={Math.round(v.score)}
+                      aria-valuenow={Math.round(Math.max(0, Math.min(100, v.score)))}
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-label={`${v.slot} positional strength`}
@@ -300,7 +300,7 @@ function Analyzer() {
                               ? "bg-chart-4"
                               : "bg-action",
                         )}
-                        style={{ width: `${Math.min(100, v.score)}%` }}
+                        style={{ width: `${Math.max(0, Math.min(100, v.score))}%` }}
                       />
                     </span>
                     <span
