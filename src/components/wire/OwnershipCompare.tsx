@@ -75,7 +75,7 @@ export function OwnershipCompare({
                   <div
                     className="h-full rounded-full bg-action"
                     style={{
-                      width: `${league}%`,
+                      width: `${Math.min(100, league)}%`,
                       backgroundColor: teamColor(player.team),
                     }}
                   />
