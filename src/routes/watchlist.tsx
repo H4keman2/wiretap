@@ -155,7 +155,7 @@ function WatchlistPage() {
               }}
               placeholder="Search saved players by name, team or position…"
               aria-label="Search saved players"
-              className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-xs font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-action"
+              className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-9 text-xs font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-action"
             />
             {search && (
               <button
