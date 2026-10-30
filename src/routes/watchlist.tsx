@@ -320,7 +320,7 @@ function WatchlistPage() {
                 Clear search
               </button>
             )}
-            {!search && posFilter !== "ALL" && (
+            {posFilter !== "ALL" && (
               <button
                 type="button"
                 onClick={() => setPosFilter("ALL")}
