@@ -391,9 +391,17 @@ function TradePage() {
         <SectionLabel>The two sides</SectionLabel>
         <SidePicker slotLabel="You give up" players={a} exclude={ids} onChange={setA} />
         <div className="flex items-center justify-center">
-          <span className="rounded-full border border-border bg-card p-2 text-muted-foreground">
+          <button
+            type="button"
+            aria-label="Swap sides"
+            onClick={() => {
+              setA(b);
+              setB(a);
+            }}
+            className="rounded-full border border-border bg-card p-2 text-muted-foreground"
+          >
             <ArrowLeftRight aria-hidden="true" className="size-4" strokeWidth={3} />
-          </span>
+          </button>
         </div>
         <SidePicker slotLabel="You get back" players={b} exclude={ids} onChange={setB} />
       </section>
