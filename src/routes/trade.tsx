@@ -435,15 +435,27 @@ function TradePage() {
         </div>
       )}
 
-      {both && data && !ready && (() => {
-        const missing = [...a, ...b].filter((p) => !data.find((d) => d.id === p.id));
-        const names = missing.map((p) => p.name).join(", ");
-        return (
-          <p className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
-            No current data for {names} — swap them out to compare.
-          </p>
-        );
-      })()}
+      {both &&
+        data &&
+        !ready &&
+        (() => {
+          const missing = [...a, ...b].filter((p) => !data.find((d) => d.id === p.id));
+          const names = missing.map((p) => p.name).join(", ");
+          return (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs text-muted-foreground">
+                No current data for {names} — swap them out to compare.
+              </p>
+              <button
+                className="mt-2 rounded bg-action px-4 py-2 text-xs font-bold uppercase text-action-foreground disabled:opacity-50"
+                onClick={() => refetch()}
+                disabled={isFetching}
+              >
+                Try again
+              </button>
+            </div>
+          );
+        })()}
 
       {analysis && (
         <>
