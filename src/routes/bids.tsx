@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Copy, Gavel, Trophy, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -56,6 +56,7 @@ function BidsPage() {
   const teamId = connection.teamId;
   const [slot, setSlot] = useState<SlotPosition>("RB");
   const { bids, upsert, remove, clear } = useBids();
+  const availableRef = useRef<HTMLElement>(null);
   const { isPro, key, loaded: proLoaded } = usePro();
 
   const budget = useQuery({
@@ -289,6 +290,7 @@ function BidsPage() {
                       onClick={() => {
                         clear();
                         toast.info("Planned bids cleared.");
+                        requestAnimationFrame(() => availableRef.current?.focus());
                       }}
                     >
                       Clear all
@@ -337,7 +339,7 @@ function BidsPage() {
         </section>
       )}
 
-      <section className="space-y-3">
+      <section ref={availableRef} tabIndex={-1} className="space-y-3 outline-none">
         <SectionLabel>Available in your league</SectionLabel>
         {needsPro ? (
           <div className="rounded-xl border border-action/40 bg-action/5 p-4 text-sm">
