@@ -377,7 +377,7 @@ function Analyzer() {
             </div>
             <PositionSelector
               value={override ?? result.targetSlot}
-              onChange={(slot) => setOverride(slot)}
+              onChange={(slot) => setOverride(slot === result.targetSlot ? null : slot)}
             />
             <OwnershipSlider value={maxOwnership} onChange={setMaxOwnership} />
           </section>
