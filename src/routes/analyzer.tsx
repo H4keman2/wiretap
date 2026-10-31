@@ -831,7 +831,7 @@ function RosterEditor({
 
       {roster.length > 0 && (
         <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
-          {roster.map((r) => {
+          {roster.map((r, idx) => {
             // Typed-and-Add-button entries get a synthetic `manual-*` id
             // instead of a real player id from search, so the scoring engine
             // can't find their actual stats and silently substitutes a
@@ -881,7 +881,12 @@ function RosterEditor({
                   aria-label={`Remove ${r.name}`}
                   onClick={() => {
                     onChange(roster.filter((x) => x.id !== r.id));
-                    toast.info(`Removed ${r.name} from your roster.`);
+                    toast.info(`Removed ${r.name} from your roster.`, {
+                      action: {
+                        label: "Undo",
+                        onClick: () => onChange([...roster.slice(0, idx), r, ...roster.slice(idx)]),
+                      },
+                    });
                   }}
                   className="text-muted-foreground"
                 >
