@@ -828,21 +828,28 @@ function RosterEditor({
               "Running the analysis to score your roster…"
             )}
           </p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-7 shrink-0 text-[11px]"
-            disabled={!suggestedStarterIds}
-            onClick={() => {
-              if (!suggestedStarterIds) return;
-              const set = new Set(suggestedStarterIds);
-              onChange(roster.map((r) => ({ ...r, starter: set.has(r.id) })));
-              toast.success("Lineup set to your highest-projected legal starters.");
-            }}
-          >
-            Auto-set lineup
-          </Button>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 text-[11px]"
+              disabled={!suggestedStarterIds}
+              onClick={() => {
+                if (!suggestedStarterIds) return;
+                const set = new Set(suggestedStarterIds);
+                onChange(roster.map((r) => ({ ...r, starter: set.has(r.id) })));
+                toast.success("Lineup set to your highest-projected legal starters.");
+              }}
+            >
+              Auto-set lineup
+            </Button>
+            {!suggestedStarterIds && (
+              <p className="text-[10px] text-muted-foreground">
+                Available once the analysis scores your starters.
+              </p>
+            )}
+          </div>
         </div>
       )}
 
