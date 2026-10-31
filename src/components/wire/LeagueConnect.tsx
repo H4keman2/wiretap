@@ -270,7 +270,10 @@ export function LeagueConnect() {
                   id="s2"
                   aria-label="espn_s2"
                   value={espnS2}
-                  onChange={(e) => setEspnS2(e.target.value)}
+                  onChange={(e) => {
+                    setEspnS2(e.target.value);
+                    setConnectFailed(false);
+                  }}
                   placeholder="espn_s2 — AEB..."
                   autoComplete="off"
                   autoCorrect="off"
@@ -282,7 +285,10 @@ export function LeagueConnect() {
                   id="swid"
                   aria-label="SWID"
                   value={swid}
-                  onChange={(e) => setSwid(e.target.value)}
+                  onChange={(e) => {
+                    setSwid(e.target.value);
+                    setConnectFailed(false);
+                  }}
                   placeholder="SWID — {XXXXXXXX-XXXX-...}"
                   autoComplete="off"
                   autoCorrect="off"
