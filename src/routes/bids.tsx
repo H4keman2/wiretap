@@ -315,7 +315,12 @@ function BidsPage() {
                     aria-label={`Remove bid on ${x.name}`}
                     onClick={() => {
                       remove(x.id);
-                      toast.info(`Removed bid on ${x.name}.`);
+                      toast.info(`Removed bid on ${x.name}.`, {
+                        action: {
+                          label: "Undo",
+                          onClick: () => upsert(x),
+                        },
+                      });
                     }}
                     className="text-muted-foreground"
                   >
