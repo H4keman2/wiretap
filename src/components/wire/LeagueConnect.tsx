@@ -151,7 +151,7 @@ export function LeagueConnect() {
               <p className="mt-1 text-[11px] text-muted-foreground">
                 {summary.size} teams · {FORMAT_LABEL[summary.format]} · {summary.season} season ·{" "}
                 {summary.rosteredCount} players rostered
-                {summary.faabBudget ? ` · $${summary.faabBudget} FAAB` : ""}
+                {summary.faabBudget ? ` · $${summary.faabBudget.toLocaleString()} FAAB` : ""}
               </p>
             </div>
             <AlertDialog>
