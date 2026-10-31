@@ -308,7 +308,9 @@ function BidsPage() {
                   {x.name} <span className="font-normal text-muted-foreground">{x.position}</span>
                 </span>
                 <span className="flex items-center gap-3">
-                  {hasFaab && <span className="font-display text-lg">${x.amount}</span>}
+                  {hasFaab && (
+                    <span className="font-display text-lg">${x.amount.toLocaleString()}</span>
+                  )}
                   <button
                     aria-label={`Remove bid on ${x.name}`}
                     onClick={() => {
