@@ -208,12 +208,12 @@ function BidsPage() {
       </section>
       {left !== null && left < 0 && (
         <p role="status" className="px-1 text-xs font-bold text-destructive">
-          You're ${Math.abs(left)} over budget — lower some planned bids before waivers run.
+          You're ${Math.abs(left).toLocaleString()} over budget — lower some planned bids before waivers run.
         </p>
       )}
       {b && total !== null && (
         <p className="-mt-5 px-1 text-xs text-muted-foreground">
-          {b.teamName} · spent ${b.spent} of ${total} this season
+          {b.teamName} · spent ${b.spent.toLocaleString()} of ${total.toLocaleString()} this season
         </p>
       )}
 
@@ -535,10 +535,10 @@ function BidForm({
         </span>
       )}
       {hasBudget && !tooLow && saved !== null && (
-        <span className="text-xs text-muted-foreground">Saved ${saved}</span>
+        <span className="text-xs text-muted-foreground">Saved ${saved.toLocaleString()}</span>
       )}
       {hasBudget && !tooLow && saved === null && (
-        <span className="text-xs text-muted-foreground">Suggested ${suggested}</span>
+        <span className="text-xs text-muted-foreground">Suggested ${suggested.toLocaleString()}</span>
       )}
     </form>
   );
