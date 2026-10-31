@@ -634,6 +634,9 @@ function RosterEditor({
             aria-label="Roster names, one per line"
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setBulkText("");
+            }}
             placeholder={"One player per line, e.g.\nBo Nix\nKenneth Walker RB\nAmon-Ra St. Brown"}
             className="min-h-28 text-sm"
           />
@@ -641,14 +644,25 @@ function RosterEditor({
             <p className="text-[11px] text-muted-foreground">
               A trailing position (RB, WR…) helps disambiguate common names.
             </p>
-            <Button
-              size="sm"
-              className="h-9 shrink-0"
-              disabled={importing || !bulkText.trim()}
-              onClick={handleImport}
-            >
-              {importing ? "Matching…" : bulkCount > 0 ? `Import ${bulkCount} player${bulkCount === 1 ? "" : "s"}` : "Import"}
-            </Button>
+            <div className="flex shrink-0 gap-2">
+              {bulkText && (
+                <Button size="sm" variant="ghost" className="h-9" onClick={() => setBulkText("")}>
+                  Clear
+                </Button>
+              )}
+              <Button
+                size="sm"
+                className="h-9"
+                disabled={importing || !bulkText.trim()}
+                onClick={handleImport}
+              >
+                {importing
+                  ? "Matching…"
+                  : bulkCount > 0
+                    ? `Import ${bulkCount} player${bulkCount === 1 ? "" : "s"}`
+                    : "Import"}
+              </Button>
+            </div>
           </div>
         </div>
       ) : (
