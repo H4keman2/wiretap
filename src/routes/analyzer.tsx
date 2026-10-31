@@ -475,6 +475,7 @@ function RosterEditor({
     Array<{ id: string; name: string; team: string | null; position: string }>
   >([]);
   const [searchError, setSearchError] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [searchRetry, setSearchRetry] = useState(0);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkText, setBulkText] = useState("");
@@ -492,21 +493,25 @@ function RosterEditor({
     if (query.trim().length < 2) {
       setOptions([]);
       setSearchError(false);
+      setSearching(false);
       return;
     }
     let cancelled = false;
     setSearchError(false);
+    setSearching(true);
     const t = setTimeout(() => {
       searchPlayers({ data: { query, licenseKey: key ?? "" } })
         .then((rows) => {
           if (cancelled) return;
           setOptions(rows);
           setSearchError(false);
+          setSearching(false);
         })
         .catch(() => {
           if (cancelled) return;
           setOptions([]);
           setSearchError(true);
+          setSearching(false);
         });
     }, 200);
     return () => {
@@ -758,6 +763,18 @@ function RosterEditor({
                 Try again
               </button>
             </div>
+          )}
+
+          {searching && (
+            <p className="mt-2 text-[11px] text-muted-foreground" role="status">
+              Searching players…
+            </p>
+          )}
+
+          {!searching && !searchError && query.trim().length >= 2 && options.length === 0 && (
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              No player matches that name — check the spelling, or add it with the + button.
+            </p>
           )}
 
           {options.length > 0 && (
