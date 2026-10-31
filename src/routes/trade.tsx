@@ -137,6 +137,9 @@ function PlayerSearch({
           </button>
         )}
       </div>
+      {query.trim().length === 1 && (
+        <p className="text-[11px] text-muted-foreground">Type at least 2 characters to search.</p>
+      )}
       {query.trim().length >= 2 && (
         <div className="space-y-1">
           {isFetching && !results && (
@@ -166,7 +169,7 @@ function PlayerSearch({
             <p className="text-[11px] text-muted-foreground">
               {results && results.length > 0
                 ? "Already on one side of the trade."
-                : "No player matches that name."}
+                : "No player matches that name — check the spelling."}
             </p>
           )}
           {visible && visible.length > 0 && (
