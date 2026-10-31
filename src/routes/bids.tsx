@@ -196,9 +196,13 @@ function BidsPage() {
           </div>
         ) : (
           <>
-            <Stat label="Remaining" value={`$${remaining}`} strong />
-            <Stat label="Planned" value={`$${planned}`} />
-            <Stat label="After bids" value={left !== null && left < 0 ? `-$${Math.abs(left)}` : `$${left}`} warn={left !== null && left < 0} />
+            <Stat label="Remaining" value={`$${remaining.toLocaleString()}`} strong />
+            <Stat label="Planned" value={`$${planned.toLocaleString()}`} />
+            <Stat
+              label="After bids"
+              value={left !== null && left < 0 ? `-$${Math.abs(left).toLocaleString()}` : `$${left?.toLocaleString()}`}
+              warn={left !== null && left < 0}
+            />
           </>
         )}
       </section>
