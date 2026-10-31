@@ -358,7 +358,7 @@ function BidsPage() {
           </>
         ) : players.isError ? (
           <div className="rounded-xl border border-border bg-card p-4">
-            <p className="text-sm text-muted-foreground">
+            <p role="alert" className="text-sm text-muted-foreground">
               Player data is unavailable right now. Try again in a moment.
             </p>
             <button
