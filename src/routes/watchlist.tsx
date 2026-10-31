@@ -304,6 +304,23 @@ function WatchlistPage() {
           </div>
         )}
 
+        {entries.length > 0 && !isPending && !isError && (data?.length ?? 0) === 0 && (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-xs text-muted-foreground">
+              Your saved players didn't load — try again.
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="mt-3 rounded bg-action px-4 py-2 text-xs font-bold uppercase text-action-foreground disabled:opacity-50"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
+
         {(data?.length ?? 0) > 0 && visible.length === 0 && (
           <div className="rounded-xl border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground">
