@@ -141,7 +141,9 @@ function PlayerSearch({
         <div className="space-y-1">
           {isFetching && !results && (
             <>
-              <span className="sr-only" role="status">Searching players…</span>
+              <span className="sr-only" role="status">
+                Searching players…
+              </span>
               <Skeleton className="h-8 rounded-lg" aria-hidden="true" />
             </>
           )}
@@ -230,7 +232,7 @@ function SidePicker({
         </p>
       </div>
 
-      {players.map((p) => {
+      {players.map((p, idx) => {
         const color = teamColor(p.team);
         return (
           <div
@@ -248,7 +250,12 @@ function SidePicker({
               type="button"
               onClick={() => {
                 onChange(players.filter((x) => x.id !== p.id));
-                toast.info(`Removed ${p.name} from the trade.`);
+                toast.info(`Removed ${p.name} from the trade.`, {
+                  action: {
+                    label: "Undo",
+                    onClick: () => onChange([...players.slice(0, idx), p, ...players.slice(idx)]),
+                  },
+                });
               }}
               aria-label={`Remove ${p.name}`}
               className="shrink-0 rounded-lg border border-border p-1.5 text-muted-foreground"
@@ -311,7 +318,9 @@ function TradePage() {
   if (!proLoaded) {
     return (
       <Page format={format}>
-        <span className="sr-only" role="status">Loading trade analyzer…</span>
+        <span className="sr-only" role="status">
+          Loading trade analyzer…
+        </span>
         <Skeleton className="h-64 w-full" aria-hidden="true" />
       </Page>
     );
@@ -414,7 +423,9 @@ function TradePage() {
 
       {both && isPending && (
         <div className="space-y-3">
-          <span className="sr-only" role="status">Loading comparison…</span>
+          <span className="sr-only" role="status">
+            Loading comparison…
+          </span>
           <Skeleton className="h-24 rounded-xl" aria-hidden="true" />
           <Skeleton className="h-64 rounded-xl" aria-hidden="true" />
         </div>
