@@ -406,11 +406,12 @@ function TradePage() {
           <button
             type="button"
             aria-label="Swap sides"
+            disabled={a.length === 0 && b.length === 0}
             onClick={() => {
               setA(b);
               setB(a);
             }}
-            className="rounded-full border border-border bg-card p-2 text-muted-foreground"
+            className="rounded-full border border-border bg-card p-2 text-muted-foreground disabled:opacity-40"
           >
             <ArrowLeftRight aria-hidden="true" className="size-4" strokeWidth={3} />
           </button>
