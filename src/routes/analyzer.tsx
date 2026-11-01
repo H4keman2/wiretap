@@ -535,6 +535,12 @@ function RosterEditor({
   }, [query, searchRetry]);
 
   const add = (entry: Omit<RosterEntry, "starter">) => {
+    // The server rejects rosters over 40 players, so refuse the 41st here
+    // with an actionable message instead of a generic analysis error later.
+    if (roster.length >= 40) {
+      toast.error("Rosters are capped at 40 players — remove one to add another.");
+      return;
+    }
     if (roster.some((r) => r.id === entry.id)) {
       toast.error("Already on your roster.");
       return;
@@ -591,9 +597,14 @@ function RosterEditor({
       let added = 0;
       let unmatched = 0;
       let skipped = 0;
+      let capped = 0;
       for (const res of results) {
         if (working.some((r) => r.id === res.id)) {
           skipped += 1;
+          continue;
+        }
+        if (working.length >= 40) {
+          capped += 1;
           continue;
         }
         const pos = res.position ?? position;
@@ -607,11 +618,18 @@ function RosterEditor({
       setBulkOpen(false);
 
       if (added === 0 && unmatched === 0) {
-        toast.error(skipped > 0 ? "Already on your roster." : "Couldn't read any names there.");
+        toast.error(
+          capped > 0
+            ? "Rosters are capped at 40 players — remove one to add another."
+            : skipped > 0
+              ? "Already on your roster."
+              : "Couldn't read any names there.",
+        );
       } else {
         const bits = [`${added} matched`];
         if (unmatched > 0) bits.push(`${unmatched} unmatched — check name/position`);
         if (skipped > 0) bits.push(`${skipped} already on roster`);
+        if (capped > 0) bits.push(`${capped} over the 40-player cap`);
         toast.success(`Imported: ${bits.join(", ")}.`);
       }
     } catch {
@@ -640,7 +658,9 @@ function RosterEditor({
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <SectionLabel>Your roster</SectionLabel>
+        <SectionLabel>
+          Your roster <span className="normal-case tracking-normal">({roster.length}/40)</span>
+        </SectionLabel>
         <button
           type="button"
           aria-pressed={bulkOpen}
