@@ -243,6 +243,7 @@ function Analyzer() {
       <RosterEditor
         roster={roster}
         config={profile.config}
+        analysisError={analysis.isError}
         rosterPoints={result?.rosterPoints}
         suggestedStarterIds={result?.suggestedStarterIds}
         onChange={(next) => update({ roster: next })}
@@ -468,12 +469,14 @@ function Analyzer() {
 function RosterEditor({
   roster,
   config,
+  analysisError,
   rosterPoints,
   suggestedStarterIds,
   onChange,
 }: {
   roster: RosterEntry[];
   config: LeagueConfig;
+  analysisError?: boolean;
   rosterPoints?: RosterPoint[] | undefined;
   suggestedStarterIds?: string[] | undefined;
   onChange: (next: RosterEntry[]) => void;
@@ -862,6 +865,8 @@ function RosterEditor({
                 {teamAverage.unmatchedCount > 0 &&
                   ` — ${teamAverage.unmatchedCount} unmatched, scored at a generic baseline`}
               </>
+            ) : analysisError ? (
+              "Couldn't score your roster — see below and try again."
             ) : (
               "Running the analysis to score your roster…"
             )}
