@@ -266,6 +266,7 @@ function Analyzer() {
             </div>
           )}
           {result.verdicts.length > 0 && (
+          <>
           <PromoCard>
             <div className="mb-1 flex items-center gap-2">
               <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
@@ -334,6 +335,7 @@ function Analyzer() {
               ))}
             </div>
           </section>
+          </>
           )}
 
           <InjuryAlerts
