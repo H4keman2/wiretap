@@ -511,6 +511,7 @@ function RosterEditor({
     }
     let cancelled = false;
     setSearchError(false);
+    setOptions([]);
     setSearching(true);
     const t = setTimeout(() => {
       searchPlayers({ data: { query, licenseKey: key ?? "" } })
@@ -548,6 +549,10 @@ function RosterEditor({
   // showing, add the highlighted real player so it scores against real data;
   // only fall back to the typed manual entry when there is nothing to match.
   const submitAdd = () => {
+    // Ignore Enter/Plus while a search is still running: the suggestion list
+    // is cleared on every keystroke, so adding now would fall through to a
+    // manual entry for a query that may still match a real player.
+    if (searching) return;
     const picked = options[Math.min(active, options.length - 1)];
     if (picked) {
       add({
