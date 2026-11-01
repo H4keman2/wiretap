@@ -311,7 +311,10 @@ function BidsPage() {
                 className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3"
               >
                 <span className="text-sm font-bold">
-                  {x.name} <span className="font-normal text-muted-foreground">{x.position}</span>
+                  {x.name}{" "}
+                  <span className="font-normal text-muted-foreground">
+                    {x.position} · {x.team ?? "FA"}
+                  </span>
                 </span>
                 <span className="flex items-center gap-3">
                   {hasFaab && (
