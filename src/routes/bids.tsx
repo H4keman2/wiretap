@@ -92,14 +92,18 @@ function BidsPage() {
     );
 
   if (!cred || teamId === null) {
+    const noCredential = !cred;
     return (
       <Page format={format}>
         <Header />
         <div className="rounded-2xl border border-border bg-card p-6 text-center">
-          <p className="font-bold">Connect your ESPN league first</p>
+          <p className="font-bold">
+            {noCredential ? "Connect your ESPN league first" : "Pick your team first"}
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Wire Tap reads your budget and your league's free agents from ESPN. Connect your league
-            and pick your team in Settings.
+            {noCredential
+              ? "Wire Tap reads your budget and your league's free agents from ESPN. Connect your league and pick your team in Settings."
+              : "Wire Tap reads your budget and your league's free agents for your team. Pick your team with the team picker in Settings."}
           </p>
           <Button asChild className="mt-4 bg-action text-action-foreground hover:bg-action/90">
             <Link to="/settings">Go to Settings</Link>
