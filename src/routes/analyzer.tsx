@@ -256,6 +256,16 @@ function Analyzer() {
 
       {result && (
         <>
+          {result.verdicts.length === 0 && (
+            <div className="rounded-xl border border-border bg-card p-4 text-xs text-muted-foreground">
+              Set at least one starting slot in{" "}
+              <Link to="/settings" className="font-semibold text-action underline">
+                League settings
+              </Link>{" "}
+              to score your positions.
+            </div>
+          )}
+          {result.verdicts.length > 0 && (
           <PromoCard>
             <div className="mb-1 flex items-center gap-2">
               <span className="rounded bg-action px-1.5 py-0.5 text-[10px] font-black text-action-foreground">
@@ -324,6 +334,7 @@ function Analyzer() {
               ))}
             </div>
           </section>
+          )}
 
           <InjuryAlerts
             alerts={result.injuryAlerts}
