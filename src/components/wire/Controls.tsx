@@ -107,7 +107,7 @@ export function OwnershipSlider({
         <label className="text-xs font-bold uppercase text-muted-foreground">
           Availability threshold
         </label>
-        <span className="text-sm font-black tabular-nums">< {display}% Owned</span>
+        <span className="text-sm font-black tabular-nums">&lt; {display}% Owned</span>
       </div>
       <Slider
         min={10}
