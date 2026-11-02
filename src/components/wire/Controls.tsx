@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { FORMAT_LABEL, SLOT_POSITIONS, type ScoringFormat, type SlotPosition } from "@/lib/ranking";
@@ -69,24 +70,55 @@ export function OwnershipSlider({
   value: number;
   onChange: (v: number) => void;
 }) {
+  // Local display value keeps the thumb/label responsive during a drag; the
+  // parent onChange fires once ~300ms after the last tick so query keys on
+  // the home and analyzer pages don't re-run per 5-point tick.
+  const [display, setDisplay] = useState(value);
+
+  // Stay in sync when the parent state changes from outside (Widen pool
+  // buttons set parent state directly).
+  useEffect(() => {
+    setDisplay(value);
+  }, [value]);
+
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const handleValueChange = ([v]: number[]) => {
+    const next = v ?? 40;
+    setDisplay(next);
+    if (timerRef.current !== null) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null;
+      onChangeRef.current(next);
+    }, 300);
+  };
+
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <div className="mb-4 flex items-center justify-between">
         <label className="text-xs font-bold uppercase text-muted-foreground">
           Availability threshold
         </label>
-        <span className="text-sm font-black tabular-nums">&lt; {value}% Owned</span>
+        <span className="text-sm font-black tabular-nums">&lt; {display}% Owned</span>
       </div>
       <Slider
         min={10}
         max={100}
         step={5}
-        value={[value]}
-        onValueChange={([v]) => onChange(v ?? 40)}
+        value={[display]}
+        onValueChange={handleValueChange}
         aria-label="Availability threshold"
       />
       <p className="mt-4 text-[11px] text-muted-foreground">
-        Show players rostered in fewer than {value}% of leagues.
+        Show players rostered in fewer than {display}% of leagues.
       </p>
     </div>
   );
