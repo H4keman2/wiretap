@@ -284,7 +284,7 @@ function BidsPage() {
                     <AlertDialogTitle>Clear all planned bids?</AlertDialogTitle>
                     <AlertDialogDescription>
                       This removes all {bids.length} planned bid{bids.length === 1 ? "" : "s"} from
-                      this device. There's no undo — you'd have to re-enter them one by one.
+                      this device. You can undo it from the confirmation that follows.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -292,8 +292,17 @@ function BidsPage() {
                     <AlertDialogAction
                       className={cn(buttonVariants({ variant: "destructive" }))}
                       onClick={() => {
+                        const snapshot = bids;
                         clear();
-                        toast.info("Planned bids cleared.");
+                        toast.info("Planned bids cleared.", {
+                          action: {
+                            label: "Undo",
+                            onClick: () => {
+                              // upsert prepends, so restore in reverse to keep the original order.
+                              [...snapshot].reverse().forEach((b) => upsert(b));
+                            },
+                          },
+                        });
                         requestAnimationFrame(() => availableRef.current?.focus());
                       }}
                     >
