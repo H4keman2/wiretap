@@ -532,7 +532,13 @@ function BidForm({
             value={value}
             onChange={(e) => {
               setTouched(true);
-              setValue(e.target.value.replace(/\D/g, ""));
+              const cleaned = e.target.value.replace(/[^0-9.]/g, "");
+              const dot = cleaned.indexOf(".");
+              setValue(
+                dot === -1
+                  ? cleaned
+                  : cleaned.slice(0, dot + 1) + cleaned.slice(dot + 1).replace(/\./g, ""),
+              );
             }}
           />
         </div>
