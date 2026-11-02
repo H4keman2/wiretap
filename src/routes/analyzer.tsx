@@ -599,6 +599,7 @@ function RosterEditor({
       let working = roster;
       let added = 0;
       let unmatched = 0;
+      const unmatchedNames: string[] = [];
       let skipped = 0;
       let capped = 0;
       for (const res of results) {
@@ -614,7 +615,10 @@ function RosterEditor({
         const starter = suggestStarterDefault(working, pos, config);
         working = [...working, { id: res.id, name: res.name, position: pos, starter }];
         if (res.matched) added += 1;
-        else unmatched += 1;
+        else {
+          unmatched += 1;
+          unmatchedNames.push(res.name);
+        }
       }
       onChange(working);
       setBulkText("");
@@ -630,7 +634,11 @@ function RosterEditor({
         );
       } else {
         const bits = [`${added} matched`];
-        if (unmatched > 0) bits.push(`${unmatched} unmatched — check name/position`);
+        if (unmatched > 0) {
+          const shown = unmatchedNames.slice(0, 3).join(", ");
+          const extra = unmatchedNames.length > 3 ? `, and ${unmatchedNames.length - 3} more` : "";
+          bits.push(`${unmatched} unmatched — check name/position: ${shown}${extra}`);
+        }
         if (skipped > 0) bits.push(`${skipped} already on roster`);
         if (capped > 0) bits.push(`${capped} over the 40-player cap`);
         toast.success(`Imported: ${bits.join(", ")}.`);
