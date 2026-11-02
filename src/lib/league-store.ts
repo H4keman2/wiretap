@@ -149,6 +149,8 @@ export function usePro() {
 
   const activate = useCallback((candidate: string) => recheck(candidate), [recheck]);
 
+  const clearError = useCallback(() => setError(null), []);
+
   const deactivate = useCallback(() => {
     try {
       window.localStorage.removeItem(LICENSE_KEY);
@@ -161,7 +163,7 @@ export function usePro() {
   }, []);
 
 
-  return { isPro, key, activate, deactivate, loaded, checking, error };
+  return { isPro, key, activate, deactivate, loaded, checking, error, clearError };
 }
 
 /* ------------------------------------------------------------------ *

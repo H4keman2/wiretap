@@ -52,7 +52,7 @@ const SLOTS: SlotPosition[] = ["QB", "RB", "WR", "TE", "FLEX", "DST", "K"];
 
 function SettingsPage() {
   const { profile, update } = useLeagueProfile();
-  const { isPro, activate, deactivate, checking, error } = usePro();
+  const { isPro, activate, deactivate, checking, error, clearError } = usePro();
   const { theme, setTheme } = useTheme();
   const { enabled: liveUpdates, setEnabled: setLiveUpdates } = useLiveUpdates();
   const [license, setLicense] = useState("");
@@ -202,7 +202,10 @@ function SettingsPage() {
                 <Input
                   id="license"
                   value={license}
-                  onChange={(e) => setLicense(e.target.value)}
+                  onChange={(e) => {
+                    setLicense(e.target.value);
+                    clearError();
+                  }}
                   placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
                   className="h-9 text-sm uppercase"
                   autoComplete="off"
