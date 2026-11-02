@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { FORMAT_LABEL, SLOT_POSITIONS, type ScoringFormat, type SlotPosition } from "@/lib/ranking";
