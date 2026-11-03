@@ -99,6 +99,7 @@ export function Page({
                 key={to}
                 to={to}
                 activeOptions={{ exact: to === "/" }}
+                activeProps={{ "aria-current": "page" }}
                 className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground transition-colors hover:text-foreground"
               >
                 {label}
