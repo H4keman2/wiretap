@@ -241,15 +241,21 @@ function WatchlistPage() {
                   <AlertDialogTitle>Clear your whole watchlist?</AlertDialogTitle>
                   <AlertDialogDescription>
                     This removes all {entries.length} saved player{entries.length === 1 ? "" : "s"}{" "}
-                    from this device. There's no undo — you'd have to re-save them one by one.
+                    from this device.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => {
+                      const snapshot = entries;
                       clear();
-                      toast.info("Watchlist cleared.");
+                      toast.info("Watchlist cleared.", {
+                        action: {
+                          label: "Undo",
+                          onClick: () => restore(snapshot),
+                        },
+                      });
                       requestAnimationFrame(() => emptyStateRef.current?.focus());
                     }}
                   >

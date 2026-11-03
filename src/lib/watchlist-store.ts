@@ -70,5 +70,8 @@ export function useWatchlist() {
 
   const clear = useCallback(() => write([]), []);
 
-  return { entries, loaded, has, add, remove, toggle, clear };
+  /** Writes a previous snapshot as-is, keeping its original order. */
+  const restore = useCallback((snapshot: WatchlistEntry[]) => write(snapshot), []);
+
+  return { entries, loaded, has, add, remove, toggle, clear, restore };
 }
