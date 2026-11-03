@@ -21,6 +21,7 @@ import { useEspnConnection, useLeagueProfile, usePro } from "@/lib/league-store"
 import { useLiveUpdates } from "@/lib/live-updates-store";
 
 import { lineupFill, suggestStarterDefault } from "@/lib/lineup";
+import type { HandcuffSuggestion } from "@/lib/handcuffs";
 import type { RealPosition, SlotPosition } from "@/lib/ranking";
 import { cn } from "@/lib/utils";
 import {
@@ -64,6 +65,29 @@ function Analyzer() {
   const { enabled: live } = useLiveUpdates();
 
   const roster = profile.roster;
+
+  const addHandcuff = (h: HandcuffSuggestion) => {
+    // Same guards as RosterEditor.add: the server rejects rosters over 40.
+    if (roster.length >= 40) {
+      toast.error("Rosters are capped at 40 players — remove one to add another.");
+      return;
+    }
+    if (roster.some((r) => r.id === h.handcuff.id)) {
+      toast.error("Already on your roster.");
+      return;
+    }
+    update({
+      roster: [
+        ...roster,
+        {
+          id: h.handcuff.id,
+          name: h.handcuff.name,
+          position: h.handcuff.position,
+          starter: suggestStarterDefault(roster, h.handcuff.position, profile.config),
+        },
+      ],
+    });
+  };
   const starters = useMemo(() => roster.filter((r) => r.starter), [roster]);
   const fill = useMemo(() => lineupFill(roster, profile.config), [roster, profile.config]);
 
@@ -369,6 +393,16 @@ function Analyzer() {
                     <span className="shrink-0 text-[11px] font-black tabular-nums text-muted-foreground">
                       {Math.round(h.handcuff.ownership)}% owned
                     </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addHandcuff(h)}
+                      aria-label={`Add ${h.handcuff.name} to roster`}
+                      className="shrink-0"
+                    >
+                      <Plus className="size-4" aria-hidden="true" /> Add
+                    </Button>
                   </div>
                 ))}
               </div>
