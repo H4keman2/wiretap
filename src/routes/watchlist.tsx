@@ -61,7 +61,7 @@ function WatchlistPage() {
   const [sort, setSort] = useState<SortKey>("saved");
   const [posFilter, setPosFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
-  const { entries, loaded, clear } = useWatchlist();
+  const { entries, loaded, clear, restore } = useWatchlist();
   // Focus target after "Clear all": the empty-state card, so keyboard focus
   // doesn't fall to <body> when the dialog's trigger unmounts.
   const emptyStateRef = useRef<HTMLDivElement>(null);
