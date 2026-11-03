@@ -232,7 +232,21 @@ export function LeagueConnect() {
           </Step>
         </div>
       ) : (
-        <div className="space-y-4 rounded-xl border border-border bg-card p-4">
+        <form
+          className="space-y-4 rounded-xl border border-border bg-card p-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (connect.isPending || !leagueId.trim()) return;
+            connect.mutate({
+              data: {
+                leagueId: leagueId.trim(),
+                espnS2: espnS2.trim(),
+                swid: swid.trim(),
+                licenseKey: key ?? "",
+              },
+            });
+          }}
+        >
           <GrabBookmark />
           <Step n={1} title="Find your league ID" done={leagueId.trim().length > 0}>
             <Input
@@ -309,20 +323,7 @@ export function LeagueConnect() {
           </Step>
 
           <Step n={3} title="Connect and sync" done={false}>
-            <Button
-              className="h-9 w-full"
-              disabled={connect.isPending || !leagueId.trim()}
-              onClick={() =>
-                connect.mutate({
-                  data: {
-                    leagueId: leagueId.trim(),
-                    espnS2: espnS2.trim(),
-                    swid: swid.trim(),
-                    licenseKey: key ?? "",
-                  },
-                })
-              }
-            >
+            <Button type="submit" className="h-9 w-full" disabled={connect.isPending || !leagueId.trim()}>
               {connect.isPending ? "Reading your league…" : "Connect league"}
             </Button>
             {connectFailed && (
@@ -337,7 +338,7 @@ export function LeagueConnect() {
               Next you'll pick which team is yours, then pull its roster straight into the analyzer.
             </p>
           </Step>
-        </div>
+        </form>
       )}
     </section>
   );
