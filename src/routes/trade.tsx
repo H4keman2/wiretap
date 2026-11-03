@@ -239,11 +239,31 @@ function SidePicker({
         <p className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
           {slotLabel}
         </p>
-        <p className="text-[9px] font-bold uppercase text-muted-foreground">
-          {players.length === 0
-            ? "No players yet"
-            : `${players.length} player${players.length === 1 ? "" : "s"}`}
-        </p>
+        <div className="flex items-center gap-2">
+          {players.length > 1 && (
+            <button
+              type="button"
+              onClick={() => {
+                const snapshot = players;
+                onChange([]);
+                toast.info(`Cleared ${players.length} players from the trade.`, {
+                  action: {
+                    label: "Undo",
+                    onClick: () => onChange(snapshot),
+                  },
+                });
+              }}
+              className="text-[9px] font-black uppercase text-muted-foreground underline"
+            >
+              Clear
+            </button>
+          )}
+          <p className="text-[9px] font-bold uppercase text-muted-foreground">
+            {players.length === 0
+              ? "No players yet"
+              : `${players.length} player${players.length === 1 ? "" : "s"}`}
+          </p>
+        </div>
       </div>
 
       {players.map((p, idx) => {
