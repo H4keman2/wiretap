@@ -50,9 +50,19 @@ function PlayerSearch({
   onAdd: (p: Pick) => void;
 }) {
   const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
   const [active, setActive] = useState(0);
   const listId = useId();
   const { key } = usePro();
+
+  useEffect(() => {
+    if (query.trim().length < 2) {
+      setDebounced("");
+      return;
+    }
+    const t = setTimeout(() => setDebounced(query), 200);
+    return () => clearTimeout(t);
+  }, [query]);
 
   const {
     data: results,
@@ -60,9 +70,10 @@ function PlayerSearch({
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["player-search", query],
-    queryFn: () => searchPlayers({ data: { query, licenseKey: key ?? "" } }),
-    enabled: query.trim().length >= 2,
+    queryKey: ["player-search", debounced],
+    queryFn: () =>
+      searchPlayers({ data: { query: debounced, licenseKey: key ?? "" } }),
+    enabled: debounced.trim().length >= 2,
     staleTime: 1000 * 60 * 5,
   });
 
