@@ -136,7 +136,7 @@ function BidsPage() {
 
   const copyAll = async () => {
     const text = bids
-      .map((x) => `${x.name} (${x.position})${hasFaab ? ` — $${x.amount}` : ""}`)
+      .map((x) => `${x.name} (${x.position} · ${x.team ?? "FA"})${hasFaab ? ` — $${x.amount}` : ""}`)
       .join("\n");
     try {
       await navigator.clipboard.writeText(text);
