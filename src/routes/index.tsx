@@ -191,7 +191,7 @@ function WaiverBrowser() {
                 ? `Every ${slot} is already rostered in your league right now.`
                 : `No ${slot} options under ${maxOwnership}% rostered. Raise the threshold to widen the pool.`}
             </p>
-            {!cred && maxOwnership < 100 && (
+            {maxOwnership < 100 && (
               <button
                 type="button"
                 onClick={() => setMaxOwnership((v) => Math.min(100, v + 20))}
