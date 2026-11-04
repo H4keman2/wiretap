@@ -921,8 +921,14 @@ function RosterEditor({
               onClick={() => {
                 if (!suggestedStarterIds) return;
                 const set = new Set(suggestedStarterIds);
+                const snapshot = [...roster];
                 onChange(roster.map((r) => ({ ...r, starter: set.has(r.id) })));
-                toast.success("Lineup set to your highest-projected legal starters.");
+                toast.success("Lineup set to your highest-projected legal starters.", {
+                  action: {
+                    label: "Undo",
+                    onClick: () => onChange(snapshot),
+                  },
+                });
               }}
             >
               Auto-set lineup
