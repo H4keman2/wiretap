@@ -397,11 +397,22 @@ function Analyzer() {
                       type="button"
                       variant="outline"
                       size="sm"
+                      disabled={roster.some((r) => r.id === h.handcuff.id)}
                       onClick={() => addHandcuff(h)}
-                      aria-label={`Add ${h.handcuff.name} to roster`}
+                      aria-label={
+                        roster.some((r) => r.id === h.handcuff.id)
+                          ? `${h.handcuff.name} is already on your roster`
+                          : `Add ${h.handcuff.name} to roster`
+                      }
                       className="shrink-0"
                     >
-                      <Plus className="size-4" aria-hidden="true" /> Add
+                      {roster.some((r) => r.id === h.handcuff.id) ? (
+                        "On roster"
+                      ) : (
+                        <>
+                          <Plus className="size-4" aria-hidden="true" /> Add
+                        </>
+                      )}
                     </Button>
                   </div>
                 ))}
