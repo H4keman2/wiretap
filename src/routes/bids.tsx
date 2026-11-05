@@ -562,7 +562,7 @@ function BidForm({
       </Button>
       {hasBudget && tooLow && (
         <span role="status" className="text-xs font-bold text-destructive">
-          {left === 0 ? "Your FAAB budget is spent" : "Enter an amount above $0"}
+          {suggested === 0 && value === "" ? "Your FAAB budget is spent" : "Enter an amount above $0"}
         </span>
       )}
       {hasBudget && !tooLow && overBudget && (
