@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { toast } from "sonner";
 
 import { useWatchlist } from "@/lib/watchlist-store";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,13 @@ export function WatchButton({
       title={saved ? "Saved to watchlist" : "Save to watchlist"}
       onClick={(e) => {
         e.stopPropagation();
+        const wasSaved = saved;
         toggle({ id: player.id, name: player.name, team: player.team, position: player.position });
+        if (wasSaved) {
+          toast.info(`Removed ${player.name} from watchlist`);
+        } else {
+          toast.success(`Added ${player.name} to watchlist`);
+        }
       }}
       className={cn(
         "shrink-0 rounded-md border p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
