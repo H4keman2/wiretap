@@ -734,9 +734,6 @@ function RosterEditor({
             aria-label="Roster names, one per line"
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setBulkText("");
-            }}
             placeholder={"One player per line, e.g.\nBo Nix\nKenneth Walker RB\nAmon-Ra St. Brown"}
             className="min-h-28 text-sm"
           />
