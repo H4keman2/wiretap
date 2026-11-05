@@ -191,7 +191,11 @@ export function LeagueConnect() {
               value={connection.teamId ?? ""}
               onChange={(e) => {
                 setSyncFailed(false);
-                save({ teamId: e.target.value === "" ? null : Number(e.target.value) });
+                const nextTeamId = e.target.value === "" ? null : Number(e.target.value);
+                if (nextTeamId !== null && nextTeamId !== connection.teamId) {
+                  toast.info("Team changed — tap Sync my roster to pull the new team's players.");
+                }
+                save({ teamId: nextTeamId });
               }}
               className="h-9 w-full rounded-md border border-input bg-card px-2 text-sm font-bold"
             >
