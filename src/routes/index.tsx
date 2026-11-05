@@ -167,7 +167,7 @@ function WaiverBrowser() {
         )}
 
         {isError && (
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div role="status" className="rounded-xl border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground">
               {cred
                 ? "Couldn't read your league just now — check your league details in Settings, or try again in a moment."
