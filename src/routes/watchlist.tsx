@@ -61,7 +61,7 @@ function WatchlistPage() {
   const [sort, setSort] = useState<SortKey>("saved");
   const [posFilter, setPosFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
-  const { entries, loaded, clear, restore } = useWatchlist();
+  const { entries, loaded, clear, restore, remove } = useWatchlist();
   // Focus target after "Clear all": the empty-state card, so keyboard focus
   // doesn't fall to <body> when the dialog's trigger unmounts.
   const emptyStateRef = useRef<HTMLDivElement>(null);
@@ -94,6 +94,7 @@ function WatchlistPage() {
   });
 
   const q = search.trim().toLowerCase();
+  const missing = entries.filter((e) => !(data ?? []).some((p) => p.id === e.id));
   const positions = Array.from(new Set((data ?? []).map((p) => p.position)));
   const visible = (data ?? [])
     .filter((p) => posFilter === "ALL" || p.position === posFilter)
@@ -360,6 +361,22 @@ function WatchlistPage() {
             <PlayerRow key={player.id} player={player} rank={i + 1} format={format} />
           ))}
         </div>
+
+        {(data?.length ?? 0) > 0 && missing.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card px-4 py-3">
+            <p className="text-xs text-muted-foreground">
+              {missing.length} saved player{missing.length === 1 ? "" : "s"} couldn't be found —
+              they may have left the player pool.
+            </p>
+            <button
+              type="button"
+              onClick={() => missing.forEach((m) => remove(m.id))}
+              className="rounded border border-border bg-background px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              Remove missing
+            </button>
+          </div>
+        )}
 
         {entries.length > 0 && <ProxyNote />}
       </section>
