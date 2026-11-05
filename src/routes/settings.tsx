@@ -122,6 +122,7 @@ function SettingsPage() {
             id="league-name"
             value={profile.name}
             onChange={(e) => update({ name: e.target.value })}
+            onBlur={() => update({ name: profile.name.trim() })}
             className="mt-2 h-9 text-sm"
           />
         </div>
