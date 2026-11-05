@@ -607,6 +607,7 @@ function RosterEditor({
     // is cleared on every keystroke, so adding now would fall through to a
     // manual entry for a query that may still match a real player.
     if (searching) return;
+    if (query.trim().length < 2) return;
     const picked = options[Math.min(active, options.length - 1)];
     if (picked) {
       add({
@@ -836,11 +837,16 @@ function RosterEditor({
               aria-label="Add player"
               className="h-9 shrink-0"
               onClick={submitAdd}
-              disabled={!query.trim() || searching}
+              disabled={query.trim().length < 2 || searching}
             >
               <Plus aria-hidden="true" className="size-4" />
             </Button>
           </div>
+          {query.trim().length === 1 && (
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Type at least 2 characters to search.
+            </p>
+          )}
 
           {searchError && (
             <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-destructive/40 bg-background px-3 py-2">
