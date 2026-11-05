@@ -216,6 +216,11 @@ function BidsPage() {
           You're ${Math.abs(left).toLocaleString()} over budget — lower some planned bids before waivers run.
         </p>
       )}
+      {remaining === 0 && (
+        <p role="status" className="px-1 text-xs text-muted-foreground">
+          Your FAAB budget is fully spent — any new bid will go over budget.
+        </p>
+      )}
       {b && total !== null && (
         <p className="-mt-5 px-1 text-xs text-muted-foreground">
           {b.teamName} · spent ${b.spent.toLocaleString()} of ${total.toLocaleString()} this season
@@ -557,7 +562,7 @@ function BidForm({
       </Button>
       {hasBudget && tooLow && (
         <span role="status" className="text-xs font-bold text-destructive">
-          Enter an amount above $0
+          {left === 0 ? "Your FAAB budget is spent" : "Enter an amount above $0"}
         </span>
       )}
       {hasBudget && !tooLow && overBudget && (
