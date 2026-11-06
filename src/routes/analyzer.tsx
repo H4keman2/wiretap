@@ -272,6 +272,7 @@ function Analyzer() {
         roster={roster}
         config={profile.config}
         analysisError={analysis.isError}
+        analysisComplete={!!result}
         rosterPoints={result?.rosterPoints}
         suggestedStarterIds={result?.suggestedStarterIds}
         onChange={(next) => update({ roster: next })}
@@ -519,6 +520,7 @@ function RosterEditor({
   roster,
   config,
   analysisError,
+  analysisComplete,
   rosterPoints,
   suggestedStarterIds,
   onChange,
@@ -526,6 +528,7 @@ function RosterEditor({
   roster: RosterEntry[];
   config: LeagueConfig;
   analysisError?: boolean;
+  analysisComplete?: boolean;
   rosterPoints?: RosterPoint[] | undefined;
   suggestedStarterIds?: string[] | undefined;
   onChange: (next: RosterEntry[]) => void;
@@ -715,6 +718,10 @@ function RosterEditor({
     const unmatchedCount = starterPoints.filter((rp) => !rp.matched).length;
     return { avg, unmatchedCount, of: starterPoints.length };
   }, [roster, pointsById]);
+
+  // Starters the analysis could not score at all: teamAverage stays null even
+  // though the analysis finished, so the copy below has to say why.
+  const starterCount = roster.filter((r) => r.starter).length;
 
   return (
     <section className="space-y-3">
@@ -925,6 +932,10 @@ function RosterEditor({
               </>
             ) : analysisError ? (
               "Couldn't score your roster — see below and try again."
+            ) : analysisComplete && starterCount > 0 ? (
+              "Your starters couldn't be matched to real players — pick names from the search suggestions for scored projections."
+            ) : analysisComplete ? (
+              "Mark at least one player as a starter to see your projected average."
             ) : (
               "Running the analysis to score your roster…"
             )}
