@@ -203,6 +203,7 @@ function Analyzer() {
   if (!isPro) return <Paywall format={profile.format} />;
 
   const result = analysis.data;
+  const verdictReason = result?.verdicts[0]?.reasons[0];
 
   return (
     <Page format={profile.format}>
@@ -314,7 +315,7 @@ function Analyzer() {
                 .join(", then ")}{" "}
               ({result.verdicts[0]?.score}/100)
             </p>
-            <p className="text-xs text-depth-foreground/75">{result.verdicts[0]?.reasons[0]}</p>
+            {verdictReason && <p className="text-xs text-depth-foreground/75">{verdictReason}</p>}
           </PromoCard>
 
           <section className="space-y-2">
