@@ -719,6 +719,10 @@ function RosterEditor({
     return { avg, unmatchedCount, of: starterPoints.length };
   }, [roster, pointsById]);
 
+  // Starters the analysis could not score at all: teamAverage stays null even
+  // though the analysis finished, so the copy below has to say why.
+  const starterCount = roster.filter((r) => r.starter).length;
+
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
