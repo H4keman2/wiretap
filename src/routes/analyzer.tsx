@@ -627,7 +627,7 @@ function RosterEditor({
 
     if (query.trim()) {
       add({
-        id: `manual-${query.trim().toLowerCase()}`,
+        id: `manual-${query.trim().toLowerCase()}-${Date.now()}`,
         name: query.trim(),
         position,
       });
