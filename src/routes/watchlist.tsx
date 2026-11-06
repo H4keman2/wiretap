@@ -96,6 +96,7 @@ function WatchlistPage() {
   const q = search.trim().toLowerCase();
   const missing = entries.filter((e) => !(data ?? []).some((p) => p.id === e.id));
   const positions = Array.from(new Set((data ?? []).map((p) => p.position)));
+  const addedAt = new Map(entries.map((e) => [e.id, e.addedAt]));
   const visible = (data ?? [])
     .filter((p) => posFilter === "ALL" || p.position === posFilter)
     .filter(
@@ -109,7 +110,7 @@ function WatchlistPage() {
       if (sort === "ownership") return a.ownership - b.ownership;
       if (sort === "score") return b.score - a.score;
       if (sort === "trend") return b.trendDelta - a.trendDelta;
-      return 0;
+      return (addedAt.get(b.id) ?? 0) - (addedAt.get(a.id) ?? 0);
     });
 
   return (
