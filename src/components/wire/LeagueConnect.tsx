@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils";
  */
 export function LeagueConnect() {
   const { connection, cred, save, clear, loaded } = useEspnConnection();
-  const { update } = useLeagueProfile();
+  const { profile, update } = useLeagueProfile();
   const { isPro, key, loaded: proLoaded } = usePro();
 
   const [leagueId, setLeagueId] = useState("");
@@ -67,11 +67,15 @@ export function LeagueConnect() {
     mutationFn: importLeagueRoster,
     onSuccess: ({ entries, unmatched }) => {
       setSyncFailed(false);
+      const before = profile.roster;
       update({ roster: entries });
       toast.success(
         unmatched.length
           ? `Synced ${entries.length} players — ${unmatched.length} need a manual check`
           : `Synced ${entries.length} players from your team`,
+        {
+          action: { label: "Undo", onClick: () => update({ roster: before }) },
+        },
       );
     },
     onError: (err: Error) => {

@@ -130,11 +130,15 @@ function Analyzer() {
       const { entries, unmatched } = await importLeagueRoster({
         data: { ...cred, teamId: connection.teamId, licenseKey: key ?? "" },
       });
+      const before = roster;
       update({ roster: entries });
       toast.success(
         unmatched.length > 0
           ? `Pulled ${entries.length} players — ${unmatched.length} need a name check.`
           : `Pulled all ${entries.length} players from your league team.`,
+        {
+          action: { label: "Undo", onClick: () => update({ roster: before }) },
+        },
       );
     } catch {
       toast.error("Couldn't pull that roster. Check your league details in Settings.");
