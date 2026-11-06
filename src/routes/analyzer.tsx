@@ -649,6 +649,7 @@ function RosterEditor({
     setImporting(true);
     try {
       const results = await matchRosterPlayers({ data: { lines } });
+      const before = roster;
       let working = roster;
       let added = 0;
       let unmatched = 0;
@@ -694,7 +695,12 @@ function RosterEditor({
         }
         if (skipped > 0) bits.push(`${skipped} already on roster`);
         if (capped > 0) bits.push(`${capped} over the 40-player cap`);
-        toast.success(`Imported: ${bits.join(", ")}.`);
+        toast.success(`Imported: ${bits.join(", ")}.`, {
+          action: {
+            label: "Undo",
+            onClick: () => onChange(before),
+          },
+        });
       }
     } catch {
       toast.error("Import failed, try again in a moment.");
