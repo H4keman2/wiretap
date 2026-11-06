@@ -370,7 +370,19 @@ function WatchlistPage() {
             </p>
             <button
               type="button"
-              onClick={() => missing.forEach((m) => remove(m.id))}
+              onClick={() => {
+                const snapshot = entries;
+                missing.forEach((m) => remove(m.id));
+                toast.info(
+                  `Removed ${missing.length} missing player${missing.length === 1 ? "" : "s"}.`,
+                  {
+                    action: {
+                      label: "Undo",
+                      onClick: () => restore(snapshot),
+                    },
+                  },
+                );
+              }}
               className="rounded border border-border bg-background px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
               Remove missing
