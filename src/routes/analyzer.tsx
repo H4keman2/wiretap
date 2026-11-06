@@ -272,6 +272,7 @@ function Analyzer() {
         roster={roster}
         config={profile.config}
         analysisError={analysis.isError}
+        analysisComplete={!!result}
         rosterPoints={result?.rosterPoints}
         suggestedStarterIds={result?.suggestedStarterIds}
         onChange={(next) => update({ roster: next })}
@@ -519,6 +520,7 @@ function RosterEditor({
   roster,
   config,
   analysisError,
+  analysisComplete,
   rosterPoints,
   suggestedStarterIds,
   onChange,
@@ -526,6 +528,7 @@ function RosterEditor({
   roster: RosterEntry[];
   config: LeagueConfig;
   analysisError?: boolean;
+  analysisComplete?: boolean;
   rosterPoints?: RosterPoint[] | undefined;
   suggestedStarterIds?: string[] | undefined;
   onChange: (next: RosterEntry[]) => void;
