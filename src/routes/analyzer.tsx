@@ -932,6 +932,10 @@ function RosterEditor({
               </>
             ) : analysisError ? (
               "Couldn't score your roster — see below and try again."
+            ) : analysisComplete && starterCount > 0 ? (
+              "Your starters couldn't be matched to real players — pick names from the search suggestions for scored projections."
+            ) : analysisComplete ? (
+              "Mark at least one player as a starter to see your projected average."
             ) : (
               "Running the analysis to score your roster…"
             )}
