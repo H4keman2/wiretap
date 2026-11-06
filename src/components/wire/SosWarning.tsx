@@ -27,7 +27,7 @@ export function SosWarning() {
     queryKey: ["sos-health"],
     queryFn: () => getSosHealthStatus(),
     staleTime: 1000 * 30,
-    refetchInterval: 1000 * 15,
+    refetchInterval: (query) => (query.state.data?.degraded ? 15_000 : false),
   });
 
   if (!data?.degraded) return null;
