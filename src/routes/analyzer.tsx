@@ -131,6 +131,10 @@ function Analyzer() {
       const { entries, unmatched } = await importLeagueRoster({
         data: { ...cred, teamId: connection.teamId, licenseKey: key ?? "" },
       });
+      if (entries.length === 0) {
+        toast.info("That team has no players on ESPN right now — your roster is unchanged.");
+        return;
+      }
       const before = roster;
       update({ roster: entries });
       toast.success(

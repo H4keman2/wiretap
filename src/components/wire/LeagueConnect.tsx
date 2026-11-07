@@ -67,6 +67,10 @@ export function LeagueConnect() {
     mutationFn: importLeagueRoster,
     onSuccess: ({ entries, unmatched }) => {
       setSyncFailed(false);
+      if (entries.length === 0) {
+        toast.info("That team has no players on ESPN right now — your roster is unchanged.");
+        return;
+      }
       const before = profile.roster;
       update({ roster: entries });
       toast.success(
