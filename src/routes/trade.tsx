@@ -153,14 +153,12 @@ function PlayerSearch({
       )}
       {query.trim().length >= 2 && (
         <div className="space-y-1">
-          {isFetching && !results && (
-            <>
-              <span className="sr-only" role="status">
-                Searching players…
-              </span>
-              <Skeleton className="h-8 rounded-lg" aria-hidden="true" />
-            </>
+          {isFetching && (
+            <span className="sr-only" role="status">
+              Searching players…
+            </span>
           )}
+          {isFetching && !results && <Skeleton className="h-8 rounded-lg" aria-hidden="true" />}
           {isError && !isFetching && (
             <div className="rounded-xl border border-border bg-card p-4">
               <p className="text-xs text-muted-foreground">
