@@ -408,17 +408,21 @@ function Analyzer() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      disabled={roster.some((r) => r.id === h.handcuff.id)}
+                      disabled={roster.some((r) => r.id === h.handcuff.id) || roster.length >= 40}
                       onClick={() => addHandcuff(h)}
                       aria-label={
                         roster.some((r) => r.id === h.handcuff.id)
                           ? `${h.handcuff.name} is already on your roster`
-                          : `Add ${h.handcuff.name} to roster`
+                          : roster.length >= 40
+                            ? `${h.handcuff.name} can't be added — your roster is full (40 players)`
+                            : `Add ${h.handcuff.name} to roster`
                       }
                       className="shrink-0"
                     >
                       {roster.some((r) => r.id === h.handcuff.id) ? (
                         "On roster"
+                      ) : roster.length >= 40 ? (
+                        "Full"
                       ) : (
                         <>
                           <Plus className="size-4" aria-hidden="true" /> Add
