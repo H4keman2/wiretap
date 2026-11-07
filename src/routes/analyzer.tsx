@@ -121,6 +121,7 @@ function Analyzer() {
     staleTime: live ? 0 : 1000 * 60 * 10,
     refetchInterval: live ? LIVE_REFRESH_MS : false,
     refetchIntervalInBackground: false,
+    retry: (count, err) => !(err as Error)?.message?.includes("PRO_REQUIRED") && count < 2,
   });
 
   const pullLeagueRoster = async () => {

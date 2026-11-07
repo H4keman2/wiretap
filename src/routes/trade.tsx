@@ -339,6 +339,7 @@ function TradePage() {
       getWatchlistPlayers({ data: { ids, format, licenseKey: key ?? "", requirePro: true } }),
     enabled: both && isPro,
     staleTime: 1000 * 60 * 10,
+    retry: (count, err) => !(err as Error)?.message?.includes("PRO_REQUIRED") && count < 2,
   });
 
   const sideA = a.map((p) => data?.find((d) => d.id === p.id)).filter((p) => !!p);
