@@ -45,6 +45,20 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  /** Supabase surfaces raw API strings; map the common ones to plain language. */
+  function friendlyAuthError(err: unknown): string {
+    const message = err instanceof Error ? err.message : "";
+    if (message.includes("Invalid login credentials"))
+      return "That email and password don't match — check them and try again.";
+    if (message.includes("User already registered"))
+      return "An account with that email already exists — sign in instead.";
+    if (message.includes("Email not confirmed"))
+      return "Check your email for the confirmation link, then sign in.";
+    if (message.includes("only request this after") || message.includes("Too many requests"))
+      return "Too many tries — wait a minute and try again.";
+    return "That didn't work — try again.";
+  }
+
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
     const cleanEmail = email.trim();
@@ -69,7 +83,7 @@ function AuthPage() {
       }
       navigate({ to: "/" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "That didn't work — try again.");
+      setError(friendlyAuthError(err));
     } finally {
       setBusy(false);
     }
