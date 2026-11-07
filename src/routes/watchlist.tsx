@@ -287,6 +287,17 @@ function WatchlistPage() {
           </div>
         )}
 
+        {!loaded && (
+          <div className="space-y-3">
+            <span className="sr-only" role="status">
+              Loading your watchlist…
+            </span>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-28 rounded-xl" aria-hidden="true" />
+            ))}
+          </div>
+        )}
+
         {entries.length > 0 && isPending && (
           <div className="space-y-3">
             <span className="sr-only" role="status">Loading your watchlist…</span>
