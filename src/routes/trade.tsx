@@ -70,9 +70,8 @@ function PlayerSearch({
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["player-search", debounced],
-    queryFn: () =>
-      searchPlayers({ data: { query: debounced, licenseKey: key ?? "" } }),
+    queryKey: ["player-search", debounced, key ?? ""],
+    queryFn: () => searchPlayers({ data: { query: debounced, licenseKey: key ?? "" } }),
     enabled: debounced.trim().length >= 2,
     staleTime: 1000 * 60 * 5,
   });
