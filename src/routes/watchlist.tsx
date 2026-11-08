@@ -224,9 +224,11 @@ function WatchlistPage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <SectionLabel>
-            {visible.length === entries.length
-              ? `${entries.length} saved`
-              : `${visible.length} of ${entries.length} saved`}
+            {loaded && (entries.length === 0 || !isPending)
+              ? visible.length === entries.length
+                ? `${entries.length} saved`
+                : `${visible.length} of ${entries.length} saved`
+              : ""}
           </SectionLabel>
           {entries.length > 0 && (
             <AlertDialog>
