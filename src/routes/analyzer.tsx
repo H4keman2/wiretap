@@ -597,7 +597,7 @@ function RosterEditor({
       cancelled = true;
       clearTimeout(t);
     };
-  }, [query, searchRetry]);
+  }, [query, searchRetry, key]);
 
   const add = (entry: Omit<RosterEntry, "starter">) => {
     // The server rejects rosters over 40 players, so refuse the 41st here
