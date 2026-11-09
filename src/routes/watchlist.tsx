@@ -310,7 +310,7 @@ function WatchlistPage() {
         )}
 
         {isError && (
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div role="status" className="rounded-xl border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground">
               Player data is unavailable right now. Try again in a moment.
             </p>
@@ -326,7 +326,7 @@ function WatchlistPage() {
         )}
 
         {entries.length > 0 && !isPending && !isError && (data?.length ?? 0) === 0 && (
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div role="status" className="rounded-xl border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground">
               Your saved players didn't load — try again.
             </p>

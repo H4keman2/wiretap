@@ -465,7 +465,7 @@ function TradePage() {
       )}
 
       {both && isError && (
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div role="status" className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">
             Player data is unavailable right now. Try again in a moment.
           </p>
