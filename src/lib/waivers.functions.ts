@@ -128,7 +128,6 @@ export const getRecommendations = createServerFn({ method: "GET" })
     });
   });
 
-
 export const getWatchlistPlayers = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => watchlistInput.parse(data))
   .handler(async ({ data }): Promise<RankedPlayer[]> => {
@@ -138,9 +137,13 @@ export const getWatchlistPlayers = createServerFn({ method: "GET" })
     const { getPlayerPool } = await import("./players.server");
     const { scorePlayer } = await import("./ranking");
     const pool = await getPlayerPool();
+    // Same live-injury overlay as the home page and team analyzer — without
+    // it a player ruled OUT after the pool build shows no tag (and an
+    // undiscounted projection) here while the home page shows the tag.
+    const { pool: livePool } = await withLiveInjuries(pool);
     const wanted = new Set(data.ids);
     const order = new Map(data.ids.map((id, i) => [id, i]));
-    return pool
+    return livePool
       .filter((p) => wanted.has(p.id))
       .map((p) => scorePlayer(p, data.format))
       .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
@@ -272,7 +275,6 @@ export interface AnalyzeInput {
   league?: LeagueCred | null;
   /** Required. Verified server-side on every call — this is the real paywall. */
   licenseKey: string;
-
 }
 
 /** Projected weekly points for one roster entry, and whether it came from a real matched player record. */
@@ -339,7 +341,6 @@ export const analyzeTeam = createServerFn({ method: "POST" })
       slot: targetSlot,
       maxOwnership: data.league?.leagueId ? 101 : data.maxOwnership,
     }).map((p) => ({ ...p, handcuffOf: handcuffOfById.get(p.id) ?? null }));
-
 
     const injuryAlerts = findInjuredStarters(
       data.roster,
