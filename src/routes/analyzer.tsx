@@ -685,10 +685,10 @@ function RosterEditor({
         }
       }
       onChange(working);
-      setBulkText("");
-      setBulkOpen(false);
 
       if (added === 0 && unmatched === 0) {
+        // Nothing imported — leave the pasted list and the panel open so the
+        // user can fix a typo or free a roster spot and retry.
         toast.error(
           capped > 0
             ? "Rosters are capped at 40 players — remove one to add another."
@@ -697,6 +697,8 @@ function RosterEditor({
               : "Couldn't read any names there.",
         );
       } else {
+        setBulkText("");
+        setBulkOpen(false);
         const bits = [`${added} matched`];
         if (unmatched > 0) {
           const shown = unmatchedNames.slice(0, 3).join(", ");
