@@ -133,7 +133,7 @@ function PlayerSearch({
           aria-autocomplete="list"
           aria-expanded={hasResults}
           aria-controls={hasResults ? listId : undefined}
-          aria-activedescendant={activeId}
+          aria-activedescendant={hasResults ? activeId : undefined}
           className="w-full rounded-lg border border-border bg-background px-3 pr-9 py-2 text-xs font-medium outline-none placeholder:text-muted-foreground/70 focus:border-action"
         />
         {query && (
