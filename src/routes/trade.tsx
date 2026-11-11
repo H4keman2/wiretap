@@ -331,7 +331,7 @@ function TradePage() {
   const both = a.length > 0 && b.length > 0;
 
   const { data, isPending, isError, refetch, isFetching } = useQuery({
-    queryKey: ["trade", format, ids.join(",")],
+    queryKey: ["trade", format, ids.join(","), key ?? ""],
     queryFn: () =>
       getWatchlistPlayers({ data: { ids, format, licenseKey: key ?? "", requirePro: true } }),
     enabled: both && isPro,
