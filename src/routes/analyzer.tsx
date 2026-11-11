@@ -104,6 +104,7 @@ function Analyzer() {
       maxOwnership,
       override ?? "auto",
       cred?.leagueId ?? "national",
+      key ?? "",
     ],
     queryFn: () =>
       analyzeTeam({
