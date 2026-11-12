@@ -208,7 +208,7 @@ function Analyzer() {
 
   if (!isPro) return <Paywall format={profile.format} />;
 
-  const result = analysis.data;
+  const result = roster.length > 0 ? analysis.data : undefined;
   const verdictReason = result?.verdicts[0]?.reasons[0];
 
   return (
@@ -496,7 +496,7 @@ function Analyzer() {
         </>
       )}
 
-      {analysis.isError && (
+      {roster.length > 0 && analysis.isError && (
         <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4">
           <p role="alert" className="text-xs text-destructive">
             {String(analysis.error).includes("PRO_REQUIRED") ? (
