@@ -525,6 +525,10 @@ function BidForm({
       className="mt-3 flex items-center gap-2"
       onSubmit={(e) => {
         e.preventDefault();
+        if (value.includes(".")) {
+          toast.error("Bids are whole dollars — no cents.");
+          return;
+        }
         if (tooLow) return;
         onSave(amount);
         setValue("");
