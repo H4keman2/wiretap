@@ -253,6 +253,7 @@ function BidsPage() {
             existing={savedBid(best.id)}
             left={left}
             hasBudget={total !== null}
+            budgetLoading={!budget.isSuccess && !budget.isError}
             onSave={(amount) => {
               upsert({
                 id: best.id,
@@ -424,6 +425,7 @@ function BidsPage() {
                   existing={savedBid(p.id)}
                   left={left}
                   hasBudget={total !== null}
+                    budgetLoading={!budget.isSuccess && !budget.isError}
                   onSave={(amount) => {
                     upsert({
                       id: p.id,
@@ -492,6 +494,7 @@ function BidForm({
   existing,
   left,
   hasBudget,
+  budgetLoading,
   onSave,
 }: {
   player: RankedPlayer;
@@ -501,6 +504,8 @@ function BidForm({
   /** Budget left after all planned bids (null while loading/errored). */
   left: number | null;
   hasBudget: boolean;
+  /** True while the budget outcome is unknown (loading, or not yet enabled). */
+  budgetLoading: boolean;
   onSave: (amount: number) => void;
 }) {
   const saved = existing !== null && existing > 0 ? existing : null;
@@ -511,6 +516,30 @@ function BidForm({
   useEffect(() => {
     if (!touched && saved !== null) setValue(String(saved));
   }, [saved, touched]);
+  /**
+   * While the budget outcome is unknown, show an inert placeholder instead of
+   * the priority-league form: total is null both while loading and in a
+   * priority league, so the "Add to list" form would flash and then flip to
+   * "Plan bid" — and a tap during the flash would save a $0 bid.
+   */
+  if (budgetLoading) {
+    return (
+      <div className="mt-3 flex items-center gap-2" aria-hidden="true">
+        <div className="relative w-24">
+          <span
+            aria-hidden="true"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+          >
+            $
+          </span>
+          <Input disabled placeholder="—" className="pl-6" />
+        </div>
+        <Button size="sm" disabled>
+          Plan bid
+        </Button>
+      </div>
+    );
+  }
   const amount = value === "" ? (saved ?? suggested) : Math.max(0, Math.round(Number(value) || 0));
   /** A typed $0 is not a bid. Only the dollar field can produce one. */
   const tooLow = hasBudget && amount === 0;
