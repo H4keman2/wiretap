@@ -45,6 +45,7 @@ const KEY = "wiretap.bids.v1";
 /** Bids you plan to enter in ESPN, saved on this device only. */
 export function useBids() {
   const [bids, setBids] = useState<PlannedBid[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     try {
@@ -53,6 +54,7 @@ export function useBids() {
     } catch {
       /* ignore */
     }
+    setLoaded(true);
   }, []);
 
   const persist = useCallback((next: PlannedBid[]) => {
@@ -96,5 +98,5 @@ export function useBids() {
 
   const clear = useCallback(() => persist([]), [persist]);
 
-  return { bids, upsert, remove, clear };
+  return { bids, loaded, upsert, remove, clear };
 }

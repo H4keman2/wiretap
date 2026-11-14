@@ -55,7 +55,7 @@ function BidsPage() {
   const format = connection.summary?.format ?? "ppr";
   const teamId = connection.teamId;
   const [slot, setSlot] = useState<SlotPosition>("RB");
-  const { bids, upsert, remove, clear } = useBids();
+  const { bids, loaded: bidsLoaded, upsert, remove, clear } = useBids();
   const availableRef = useRef<HTMLElement>(null);
   const { isPro, key, loaded: proLoaded } = usePro();
 
@@ -83,10 +83,14 @@ function BidsPage() {
     (budget.isError && (budget.error as Error).message.includes("PRO_REQUIRED")) ||
     (players.isError && (players.error as Error).message.includes("PRO_REQUIRED"));
 
-  if (!loaded)
+  // Wait for saved bids too: until localStorage hydrates, bids is [] and the
+  // Planned stat would paint $0 before flipping to the real total.
+  if (!loaded || !bidsLoaded)
     return (
       <Page format={format}>
-        <span className="sr-only" role="status">Loading your bids…</span>
+        <span className="sr-only" role="status">
+          Loading your bids…
+        </span>
         <Skeleton className="h-40 w-full" aria-hidden="true" />
       </Page>
     );
