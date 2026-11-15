@@ -124,6 +124,10 @@ function PlayerSearch({
             }
 
             if (e.key !== "Enter" || query.trim().length === 0) return;
+            // Don't add from a stale list: while the 200 ms debounce hasn't
+            // caught up (or the fresh search is still in flight), `visible`
+            // still holds the previous query's players.
+            if (debounced.trim() !== query.trim() || isFetching) return;
             const picked = visible?.[Math.min(active, count - 1)];
             if (picked) select(picked);
           }}
