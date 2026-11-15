@@ -42,7 +42,7 @@ function WaiverBrowser() {
   const [slot, setSlot] = useState<SlotPosition>("RB");
   const [maxOwnership, setMaxOwnership] = useState(40);
   const { enabled: live } = useLiveUpdates();
-  const { connection, cred } = useEspnConnection();
+  const { connection, cred, loaded: connectionLoaded } = useEspnConnection();
   const { isPro, key, loaded: proLoaded } = usePro();
 
   // A connected league dictates scoring — its own settings beat a guess.
@@ -62,6 +62,10 @@ function WaiverBrowser() {
       getRecommendations({
         data: { format: activeFormat, slot, maxOwnership, league: cred, licenseKey: key ?? "" },
       }),
+    // Wait for the stored league to load: without this the first fetch runs
+    // in the national PPR fallback and flashes wrong-format targets for a
+    // connected league before the real query fires.
+    enabled: connectionLoaded,
     staleTime: live ? 0 : 1000 * 60 * 10,
     refetchInterval: live ? LIVE_REFRESH_MS : false,
     refetchIntervalInBackground: false,
@@ -77,6 +81,23 @@ function WaiverBrowser() {
   // The schedule week the SOS window currently opens on — the honest answer to
   // "is this current?", read off the data itself rather than a second fetch.
   const week = data?.find((p) => p.sos?.matchups?.length)?.sos?.matchups?.[0]?.week ?? null;
+
+  // Hold the page on skeletons until the stored league is read, so connected
+  // users never see the national pickers and Hero flip to the league banner.
+  if (!connectionLoaded)
+    return (
+      <Page format={activeFormat}>
+        <span className="sr-only" role="status">
+          Loading waiver targets…
+        </span>
+        <Skeleton className="h-40 w-full" aria-hidden="true" />
+        <div className="space-y-4">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-28 rounded-xl" aria-hidden="true" />
+          ))}
+        </div>
+      </Page>
+    );
 
   return (
     <Page format={activeFormat}>
