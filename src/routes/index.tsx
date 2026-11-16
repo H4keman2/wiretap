@@ -157,7 +157,7 @@ function WaiverBrowser() {
           </div>
         )}
 
-        {isError && (
+        {isError && !data && (
           <div role="status" className="rounded-xl border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground">
               {cred
