@@ -625,6 +625,10 @@ function RosterEditor({
     // is cleared on every keystroke, so adding now would fall through to a
     // manual entry for a query that may still match a real player.
     if (searching) return;
+    // Same for a failed search: with no suggestions to pick from, adding now
+    // would create an unscored manual entry for a player the search never
+    // got to check. The "Try again" retry is the way back.
+    if (searchError) return;
     if (query.trim().length < 2) return;
     const picked = options[Math.min(active, options.length - 1)];
     if (picked) {
@@ -864,7 +868,7 @@ function RosterEditor({
               aria-label="Add player"
               className="h-9 shrink-0"
               onClick={submitAdd}
-              disabled={query.trim().length < 2 || searching}
+              disabled={query.trim().length < 2 || searching || searchError}
             >
               <Plus aria-hidden="true" className="size-4" />
             </Button>
