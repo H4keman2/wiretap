@@ -68,7 +68,7 @@ function BidsPage() {
   });
 
   const players = useQuery({
-    queryKey: ["bid-players", cred?.leagueId, format, slot],
+    queryKey: ["bid-players", cred?.leagueId, format, slot, key ?? ""],
     queryFn: () =>
       getRecommendations({
         data: { format, slot, maxOwnership: 101, league: cred, licenseKey: key ?? "" },
