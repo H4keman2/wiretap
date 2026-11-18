@@ -194,6 +194,22 @@ function WaiverBrowser() {
           </div>
         )}
 
+        {isError && data && data.length > 0 && (
+          <div role="status" className="rounded-xl border border-border bg-card p-3">
+            <p className="text-xs text-muted-foreground">
+              Couldn&apos;t refresh just now — showing the last loaded targets.{" "}
+              <button
+                type="button"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="font-bold text-turf underline disabled:opacity-50"
+              >
+                Try again
+              </button>
+            </p>
+          </div>
+        )}
+
         {data && data.length > 0 && (
           <div className="thin-scroll max-h-[640px] space-y-3 overflow-y-auto rounded-xl border border-border bg-card/40 p-3">
             {data.map((player, i) => (
