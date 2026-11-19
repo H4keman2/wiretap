@@ -39,7 +39,17 @@ export function PlayerRow({
   return (
     <>
       <article
+        role="button"
+        tabIndex={0}
+        aria-label={`Open ${player.name} details`}
         onClick={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.target !== e.currentTarget) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
         className={cn(
           "cursor-pointer rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           isNew && "ring-2 ring-action",
