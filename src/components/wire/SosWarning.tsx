@@ -23,12 +23,40 @@ function formatStamp(iso: string | null): string {
 }
 
 export function SosWarning() {
-  const { data, isFetching } = useQuery({
+  const { data, isError, isFetching, refetch } = useQuery({
     queryKey: ["sos-health"],
     queryFn: () => getSosHealthStatus(),
     staleTime: 1000 * 30,
     refetchInterval: (query) => (query.state.data?.degraded ? 15_000 : false),
   });
+
+  if (isError) {
+    return (
+      <div
+        role="status"
+        className="flex items-start gap-2 rounded-xl border border-border bg-card p-3 text-[11px] text-foreground"
+      >
+        <AlertTriangle
+          aria-hidden="true"
+          className="mt-px size-3.5 shrink-0 text-muted-foreground"
+        />
+        <div className="min-w-0">
+          <p className="text-muted-foreground">
+            Couldn&apos;t check schedule data just now — strength-of-schedule grades may be
+            incomplete.
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="mt-2 rounded bg-action px-3 py-1.5 text-[10px] font-bold uppercase text-action-foreground disabled:opacity-50"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!data?.degraded) return null;
 
