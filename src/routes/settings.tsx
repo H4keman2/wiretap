@@ -21,7 +21,7 @@ import { LeagueConnect } from "@/components/wire/LeagueConnect";
 import { Page, SectionLabel } from "@/components/wire/Shell";
 
 import { SosDebugPanel } from "@/components/wire/SosDebugPanel";
-import { useLeagueProfile, usePro } from "@/lib/league-store";
+import { LEAGUE_CONFIG_CAPS, useLeagueProfile, usePro } from "@/lib/league-store";
 import { useLiveUpdates } from "@/lib/live-updates-store";
 import type { SlotPosition } from "@/lib/ranking";
 import { cn } from "@/lib/utils";
@@ -50,6 +50,11 @@ export const Route = createFileRoute("/settings")({
 
 const SLOTS: SlotPosition[] = ["QB", "RB", "WR", "TE", "FLEX", "DST", "K"];
 
+// Stepper ceilings match the server's leagueConfig caps (validation.ts) so
+// a saved profile can never be rejected by analyzeTeam. Bench keeps the
+// old 9-stepper ceiling — the server allows 30, but 9 is plenty here.
+const SLOT_MAXS: Record<keyof LeagueConfig, number> = { ...LEAGUE_CONFIG_CAPS, bench: 9 };
+
 function SettingsPage() {
   const { profile, update } = useLeagueProfile();
   const { isPro, activate, deactivate, checking, error, clearError } = usePro();
@@ -58,7 +63,9 @@ function SettingsPage() {
   const [license, setLicense] = useState("");
 
   const setSlot = (slot: keyof LeagueConfig, value: number) =>
-    update({ config: { ...profile.config, [slot]: Math.max(0, Math.min(9, value)) } });
+    update({
+      config: { ...profile.config, [slot]: Math.max(0, Math.min(SLOT_MAXS[slot], value)) },
+    });
 
   return (
     <Page format={profile.format}>
@@ -133,12 +140,14 @@ function SettingsPage() {
               key={slot}
               label={slot}
               value={profile.config[slot]}
+              max={SLOT_MAXS[slot]}
               onChange={(v) => setSlot(slot, v)}
             />
           ))}
           <Stepper
             label="Bench"
             value={profile.config.bench}
+            max={SLOT_MAXS.bench}
             onChange={(v) => setSlot("bench", v)}
           />
         </div>
@@ -250,10 +259,12 @@ function SettingsPage() {
 function Stepper({
   label,
   value,
+  max,
   onChange,
 }: {
   label: string;
   value: number;
+  max: number;
   onChange: (v: number) => void;
 }) {
   return (
@@ -275,7 +286,7 @@ function Stepper({
         <button
           type="button"
           aria-label={`Increase ${label}`}
-          disabled={value >= 9}
+          disabled={value >= max}
           onClick={() => onChange(value + 1)}
           className="size-7 rounded-md border border-border text-sm font-black disabled:cursor-not-allowed disabled:opacity-40"
         >

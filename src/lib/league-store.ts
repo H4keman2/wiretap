@@ -25,12 +25,37 @@ export const EMPTY_PROFILE: LeagueProfile = {
   roster: [],
 };
 
+/** Server-side caps for leagueConfig (see validation.ts) — analyzeTeam rejects anything above these. */
+export const LEAGUE_CONFIG_CAPS: Record<keyof LeagueConfig, number> = {
+  QB: 4,
+  RB: 6,
+  WR: 6,
+  TE: 4,
+  FLEX: 4,
+  DST: 3,
+  K: 3,
+  bench: 30,
+};
+
 function read(): LeagueProfile {
   if (typeof window === "undefined") return EMPTY_PROFILE;
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return EMPTY_PROFILE;
-    return { ...EMPTY_PROFILE, ...(JSON.parse(raw) as Partial<LeagueProfile>) } as LeagueProfile;
+    const stored = {
+      ...EMPTY_PROFILE,
+      ...(JSON.parse(raw) as Partial<LeagueProfile>),
+    } as LeagueProfile;
+    // Self-heal profiles saved before the steppers knew the caps: clamp
+    // each slot so analyzeTeam's server validation can no longer reject it.
+    const config = { ...(stored.config ?? EMPTY_PROFILE.config) };
+    (Object.keys(LEAGUE_CONFIG_CAPS) as (keyof LeagueConfig)[]).forEach((slot) => {
+      const value = config[slot];
+      if (typeof value === "number") {
+        config[slot] = Math.max(0, Math.min(LEAGUE_CONFIG_CAPS[slot], value));
+      }
+    });
+    return { ...stored, config };
   } catch {
     return EMPTY_PROFILE;
   }
