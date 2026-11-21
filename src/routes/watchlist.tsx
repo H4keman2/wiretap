@@ -309,7 +309,7 @@ function WatchlistPage() {
           </div>
         )}
 
-        {isError && (
+        {isError && !data && (
           <div role="status" className="rounded-xl border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground">
               Player data is unavailable right now. Try again in a moment.
@@ -322,6 +322,22 @@ function WatchlistPage() {
             >
               Try again
             </button>
+          </div>
+        )}
+
+        {isError && data && data.length > 0 && (
+          <div role="status" className="rounded-xl border border-border bg-card p-3">
+            <p className="text-xs text-muted-foreground">
+              Couldn&apos;t refresh just now — showing the last loaded players.{" "}
+              <button
+                type="button"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="font-bold text-turf underline disabled:opacity-50"
+              >
+                Try again
+              </button>
+            </p>
           </div>
         )}
 
