@@ -236,7 +236,10 @@ function BidsPage() {
         <PositionSelector value={slot} onChange={setSlot} />
       </div>
 
-      {best && (
+      {/* Best is drawn from players.data, which survives a failed background
+          refetch — hide the callout while the query is in error so a stale
+          "best pickup" never sits above the "data unavailable" card. */}
+      {best && !players.isError && (
         <section
           className="rounded-xl border-2 bg-card p-5"
           style={{ borderColor: teamColor(best.team) }}
