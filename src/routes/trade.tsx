@@ -488,6 +488,7 @@ function TradePage() {
 
       {both &&
         data &&
+        !isError &&
         !ready &&
         (() => {
           const missing = [...a, ...b].filter((p) => !data.find((d) => d.id === p.id));
@@ -508,7 +509,7 @@ function TradePage() {
           );
         })()}
 
-      {analysis && (
+      {analysis && !isError && (
         <>
           <section
             role="status"
