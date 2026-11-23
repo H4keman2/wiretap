@@ -76,7 +76,10 @@ function PlayerSearch({
     staleTime: 1000 * 60 * 5,
   });
 
-  const visible = results?.filter((r) => !exclude.includes(r.id));
+  // A failed search keeps the previous successful `results` in the cache,
+  // so without this gate the stale listbox (and Enter-to-add) would stay
+  // live under the error card, offering players for the wrong query.
+  const visible = isError ? undefined : results?.filter((r) => !exclude.includes(r.id));
   const open = query.trim().length >= 2;
   const hasResults = open && !!visible && visible.length > 0;
 
