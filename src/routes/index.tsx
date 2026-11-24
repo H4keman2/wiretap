@@ -175,7 +175,7 @@ function WaiverBrowser() {
           </div>
         )}
 
-        {data?.length === 0 && (
+        {!isError && data?.length === 0 && (
           <div className="rounded-xl border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground">
               {cred
@@ -194,7 +194,7 @@ function WaiverBrowser() {
           </div>
         )}
 
-        {isError && data && data.length > 0 && (
+        {isError && data && (
           <div role="status" className="rounded-xl border border-border bg-card p-3">
             <p className="text-xs text-muted-foreground">
               Couldn&apos;t refresh just now — showing the last loaded targets.{" "}
