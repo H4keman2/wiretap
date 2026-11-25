@@ -46,12 +46,17 @@ export function LeagueConnect() {
     mutationFn: connectLeague,
     onSuccess: (summary) => {
       setConnectFailed(false);
+      const nextLeagueId = leagueId.trim() || connection.leagueId;
       save({
-        leagueId: leagueId.trim() || connection.leagueId,
+        leagueId: nextLeagueId,
         espnS2: espnS2.trim() || connection.espnS2,
         swid: swid.trim() || connection.swid,
         summary,
-        teamId: connection.teamId,
+        // Team ids are small integers that collide across leagues, so a team
+        // picked in the old league must not carry over to a different one —
+        // it would silently sync another team's roster. Keep it only when
+        // reconnecting the same league.
+        teamId: nextLeagueId === connection.leagueId ? connection.teamId : null,
       });
       update({ name: summary.name, format: summary.format, config: summary.config });
       toast.success(`Connected to ${summary.name}`);
