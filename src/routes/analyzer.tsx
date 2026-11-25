@@ -291,6 +291,22 @@ function Analyzer() {
         </p>
       )}
 
+      {analysis.isError && result && (
+        <div role="status" className="rounded-xl border border-border bg-card p-3">
+          <p className="text-xs text-muted-foreground">
+            Couldn&apos;t refresh just now — showing the last analysis.{" "}
+            <button
+              type="button"
+              onClick={() => analysis.refetch()}
+              disabled={analysis.isFetching}
+              className="font-bold text-turf underline disabled:opacity-50"
+            >
+              Try again
+            </button>
+          </p>
+        </div>
+      )}
+
       {result && (
         <>
           {result.verdicts.length === 0 && (
