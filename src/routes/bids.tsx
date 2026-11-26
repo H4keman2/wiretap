@@ -260,7 +260,7 @@ function BidsPage() {
             existing={savedBid(best.id)}
             left={left}
             hasBudget={total !== null}
-            budgetLoading={!budget.isSuccess && !budget.isError}
+            budgetLoading={!budget.isSuccess}
             onSave={(amount) => {
               upsert({
                 id: best.id,
@@ -432,7 +432,7 @@ function BidsPage() {
                   existing={savedBid(p.id)}
                   left={left}
                   hasBudget={total !== null}
-                    budgetLoading={!budget.isSuccess && !budget.isError}
+                    budgetLoading={!budget.isSuccess}
                   onSave={(amount) => {
                     upsert({
                       id: p.id,
@@ -527,7 +527,9 @@ function BidForm({
    * While the budget outcome is unknown, show an inert placeholder instead of
    * the priority-league form: total is null both while loading and in a
    * priority league, so the "Add to list" form would flash and then flip to
-   * "Plan bid" — and a tap during the flash would save a $0 bid.
+   * "Plan bid" — and a tap during the flash would save a $0 bid. An errored
+   * load is unknown too (total is null there as well), so without the
+   * placeholder the form would render as "Add to list" and save a $0 bid.
    */
   if (budgetLoading) {
     return (
