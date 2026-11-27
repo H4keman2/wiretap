@@ -392,7 +392,11 @@ function WatchlistPage() {
           ))}
         </div>
 
-        {(data?.length ?? 0) > 0 && missing.length > 0 && (
+        {/* "Remove missing" only runs against a fresh list: on a failed
+            background refetch the data is stale, so "missing" can include
+            players still in the pool — deleting them would be wrong, and the
+            stale-data note above already offers a retry. */}
+        {(data?.length ?? 0) > 0 && missing.length > 0 && !isError && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card px-4 py-3">
             <p className="text-xs text-muted-foreground">
               {missing.length} saved player{missing.length === 1 ? "" : "s"} couldn't be found —
