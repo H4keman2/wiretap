@@ -210,6 +210,12 @@ function Analyzer() {
 
   const result = roster.length > 0 ? analysis.data : undefined;
   const verdictReason = result?.verdicts[0]?.reasons[0];
+  // A failed refresh keeps the last analysis on screen with its own stale
+  // note above it, so the full error card only shows when there is no
+  // result to fall back on — except a lapsed license, which stays visible
+  // because it explains why the refresh failed.
+  const showAnalysisError =
+    analysis.isError && (!result || String(analysis.error).includes("PRO_REQUIRED"));
 
   return (
     <Page format={profile.format}>
@@ -512,7 +518,7 @@ function Analyzer() {
         </>
       )}
 
-      {roster.length > 0 && analysis.isError && (
+      {roster.length > 0 && showAnalysisError && (
         <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4">
           <p role="alert" className="text-xs text-destructive">
             {String(analysis.error).includes("PRO_REQUIRED") ? (
