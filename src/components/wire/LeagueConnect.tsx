@@ -87,8 +87,8 @@ export function LeagueConnect() {
         },
       );
     },
-    onError: (err: Error) => {
-      toast.error(err.message || "Couldn't pull that roster.");
+    onError: () => {
+      toast.error("Couldn't pull that roster — check your league details in Settings.");
       setSyncFailed(true);
     },
   });
